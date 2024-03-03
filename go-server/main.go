@@ -12,8 +12,15 @@ func main() {
 	ginServer.GET("/ping", func(context *gin.Context) {
 		handler.Test(context)
 	})
-	ginServer.POST("/register", func(context *gin.Context) {
+
+	// 路由分组
+	userGroup := ginServer.Group("/user")
+
+	userGroup.POST("/register", func(context *gin.Context) {
 		handler.Register(context)
+	})
+	userGroup.POST("/login", func(context *gin.Context) {
+		handler.Login(context)
 	})
 
 	err := ginServer.Run(":8080")
