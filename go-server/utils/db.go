@@ -6,6 +6,9 @@ import (
 	"log"
 )
 
+/**
+ * @Description: 初始化数据库，表
+ */
 func init() {
 	db, err := sqlx.Connect("sqlite3", DbPath)
 	if err != nil {
@@ -13,7 +16,7 @@ func init() {
 	}
 	log.Println("Check tables...")
 
-	sqlUser := "create table if not exists user(uid text, account text, password text, permission int, register_time text, token text)"
+	sqlUser := "create table if not exists user(uid text, account text, password text, nick_name text, permission int, register_time text, token text)"
 	_, createUserTableErr := db.Exec(sqlUser)
 
 	if createUserTableErr != nil {
