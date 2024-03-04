@@ -108,7 +108,7 @@ func Login(context *gin.Context) {
 	var uid string
 	err = tx.QueryRow("SELECT uid FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid account or password"})
+		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Invalid account or password"})
 		return
 	} else {
 		token, err := utils.GenerateToken(uid)
