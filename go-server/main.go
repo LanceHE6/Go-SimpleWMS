@@ -3,11 +3,14 @@ package main
 import (
 	"Go_simpleWMS/handler"
 	_ "Go_simpleWMS/utils"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	ginServer := gin.Default()
+	// 解决跨域问题
+	ginServer.Use(cors.Default())
 
 	ginServer.GET("/ping", func(context *gin.Context) {
 		handler.Test(context)
