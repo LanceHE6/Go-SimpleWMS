@@ -17,6 +17,11 @@ func Register(context *gin.Context) {
 	permission := context.PostForm("permission")
 	nickName := context.PostForm("nick_name")
 
+	if account == "" || password == "" || permission == "" || nickName == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Account, password, permission and nick_name are required"})
+		return
+	}
+
 	db := utils.GetDbConnection()
 
 	// 开始一个新的事务
@@ -91,6 +96,11 @@ func Login(context *gin.Context) {
 	account := context.PostForm("account")
 	password := context.PostForm("password")
 
+	if account == "" || password == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Account and password are required"})
+		return
+
+	}
 	db := utils.GetDbConnection()
 	// 开始一个新的事务
 	tx, err := db.Begin()
@@ -108,7 +118,7 @@ func Login(context *gin.Context) {
 	var uid string
 	err = tx.QueryRow("SELECT uid FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid)
 	if err != nil {
-		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Invalid account or password"})
+		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
 		token, err := utils.GenerateToken(uid)
@@ -135,4 +145,42 @@ func Login(context *gin.Context) {
 			"token":   token})
 	}
 
+}
+
+func DeleteUser(context *gin.Context) {
+	uid := context.PostForm("uid")
+	if uid == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		return
+	}
+	db := utils.GetDbConnection()
+	// 开始一个新的事务
+	tx, err := db.Begin()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		return
+	}
+	defer func(tx *sql.Tx) {
+		err := tx.Rollback()
+		if err != nil {
+
+		}
+	}(tx) // 如果出错，回滚事务
+
+	// 删除用户
+	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete user"})
+		return
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"message": "User deleted successfully",
+	})
 }
