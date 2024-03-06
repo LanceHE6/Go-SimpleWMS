@@ -2,6 +2,7 @@ package main
 
 import (
 	"Go_simpleWMS/handler"
+	"Go_simpleWMS/utils"
 	_ "Go_simpleWMS/utils"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,10 @@ func main() {
 	})
 	userGroup.POST("/login", func(context *gin.Context) {
 		handler.Login(context)
+	})
+	userGroup.DELETE("/delete", func(context *gin.Context) {
+		userGroup.Use(utils.AuthMiddleware())
+		handler.DeleteUser(context)
 	})
 
 	err := ginServer.Run(":8080")
