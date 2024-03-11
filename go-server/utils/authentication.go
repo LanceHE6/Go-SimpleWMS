@@ -13,7 +13,7 @@ var jwtKey = []byte(SecretKey) // 用于签名的密钥
 
 // GenerateToken 生成一个token
 func GenerateToken(id string) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(72 * time.Hour)
 	claims := &jwt.StandardClaims{
 		Subject:   id,
 		ExpiresAt: expirationTime.Unix(),
