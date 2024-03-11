@@ -51,7 +51,16 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			var ve *jwt.ValidationError
+			if errors.As(err, &ve) {
+				if ve.Errors&jwt.ValidationErrorExpired != 0 {
+					// Token is expired
+					c.JSON(http.StatusUnauthorized, gin.H{"message": "Expired token"})
+				} else {
+					// Other errors
+					c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+				}
+			}
 			c.Abort()
 			return
 		}
