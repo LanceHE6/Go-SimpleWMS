@@ -26,11 +26,12 @@ func main() {
 	userGroup.POST("/login", func(context *gin.Context) {
 		handler.Login(context)
 	})
-	userGroup.DELETE("/delete", func(context *gin.Context) {
-		userGroup.Use(utils.AuthMiddleware())
+	userGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		handler.DeleteUser(context)
 	})
-
+	userGroup.PUT("/update", utils.AuthMiddleware(), func(context *gin.Context) {
+		handler.UpdateUser(context)
+	})
 	err := ginServer.Run(":8080")
 	if err != nil {
 		return
