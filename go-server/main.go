@@ -3,12 +3,13 @@ package main
 import (
 	"Go_simpleWMS/handler"
 	"Go_simpleWMS/utils"
-	_ "Go_simpleWMS/utils"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	utils.InitDB()
+	defer utils.CloseDB()
 	ginServer := gin.Default()
 	// 解决跨域问题
 	ginServer.Use(cors.Default())

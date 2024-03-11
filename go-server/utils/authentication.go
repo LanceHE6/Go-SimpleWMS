@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -85,28 +83,19 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		// 根据token判断permission是否为3
 		token := context.GetHeader("Authorization")
 		bearerToken := strings.Split(token, " ")[1]
-		fmt.Println(bearerToken)
-		db := GetDbConnection()
 
-		// 开始一个新的事务
-		tx, err := db.Begin()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin authorization transaction"})
-			context.Abort()
+		tx, err := GetDbConnection()
+
+		if tx == nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 			return
 		}
-		defer func(tx *sql.Tx) {
-			err := tx.Rollback()
-			if err != nil {
-
-			}
-		}(tx) // 如果出错，回滚事务
 
 		var permission string
 		err = tx.QueryRow("SELECT permission FROM user WHERE token=?", bearerToken).Scan(&permission)
 
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get target user permission"})
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get target user permission" + err.Error()})
 			context.Abort()
 			return
 		}
