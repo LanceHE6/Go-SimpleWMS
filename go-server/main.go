@@ -2,12 +2,17 @@ package main
 
 import (
 	"Go_simpleWMS/handler"
-	_ "Go_simpleWMS/utils"
+	"Go_simpleWMS/utils"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	utils.InitDB()
+	defer utils.CloseDB()
 	ginServer := gin.Default()
+	// 解决跨域问题
+	ginServer.Use(cors.Default())
 
 	ginServer.GET("/ping", func(context *gin.Context) {
 		handler.Test(context)
@@ -22,7 +27,12 @@ func main() {
 	userGroup.POST("/login", func(context *gin.Context) {
 		handler.Login(context)
 	})
-
+	userGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		handler.DeleteUser(context)
+	})
+	userGroup.PUT("/update", utils.AuthMiddleware(), func(context *gin.Context) {
+		handler.UpdateUser(context)
+	})
 	err := ginServer.Run(":8080")
 	if err != nil {
 		return

@@ -17,20 +17,17 @@ func Register(context *gin.Context) {
 	permission := context.PostForm("permission")
 	nickName := context.PostForm("nick_name")
 
-	db := utils.GetDbConnection()
+	if account == "" || password == "" || permission == "" || nickName == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Account, password, permission and nick_name are required"})
+		return
+	}
 
-	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	tx, err := utils.GetDbConnection()
+
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
 
 	// 判断该账户是否已被注册
 	var registered int
@@ -91,24 +88,22 @@ func Login(context *gin.Context) {
 	account := context.PostForm("account")
 	password := context.PostForm("password")
 
-	db := utils.GetDbConnection()
-	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	if account == "" || password == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Account and password are required"})
+		return
+
+	}
+	tx, err := utils.GetDbConnection()
+
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
 
 	var uid string
 	err = tx.QueryRow("SELECT uid FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid account or password"})
+		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
 		token, err := utils.GenerateToken(uid)
@@ -135,4 +130,84 @@ func Login(context *gin.Context) {
 			"token":   token})
 	}
 
+}
+
+func DeleteUser(context *gin.Context) {
+	uid := context.PostForm("uid")
+	if uid == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		return
+	}
+	tx, err := utils.GetDbConnection()
+	// 开始一个新的事务
+	if tx == nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		return
+	}
+	// 删除用户
+	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete user"})
+		return
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"message": "User deleted successfully",
+	})
+}
+
+func UpdateUser(context *gin.Context) {
+	uid := context.PostForm("uid")
+	password := context.PostForm("password")
+	nickName := context.PostForm("nick_name")
+	permission := context.PostForm("permission")
+
+	if uid == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		return
+	}
+
+	tx, err := utils.GetDbConnection()
+
+	if tx == nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		return
+	}
+
+	if password == "" && nickName == "" && permission == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name and permission is required"})
+		return
+	}
+	// 拼接sql语句
+	updateSql := "UPDATE user SET "
+	if password != "" {
+		updateSql += "password='" + password + "',"
+	}
+	if nickName != "" {
+		updateSql += "nick_name='" + nickName + "',"
+	}
+	if permission != "" {
+		updateSql += "permission=" + permission + ","
+	}
+	updateSql = updateSql[:len(updateSql)-1] // 去掉最后一个逗号
+	updateSql += " WHERE uid='" + uid + "'"
+	_, err = tx.Exec(updateSql)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update user"})
+		return
+	}
+	err = tx.Commit()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"message": "User updated successfully",
+	})
 }
