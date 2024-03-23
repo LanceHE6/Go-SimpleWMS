@@ -1,6 +1,5 @@
 <template>
 
-
     <el-container>
 <!--        侧边栏-->
         <el-aside width="10%">
