@@ -39,7 +39,9 @@
         <el-form-item>
           <br>
           <el-checkbox v-model="state.remember" @change="!state.remember">记住密码</el-checkbox>
-          <el-button style="width: 100%" type="primary" @click="submitForm">立即登录</el-button>
+          <el-button style="width: 100%; margin-top: 20px" type="primary" @click="submitForm" :loading="state.loading" round>
+            <el-text style="color: white">立即登录</el-text>
+          </el-button>
         </el-form-item>
 
       </el-form>
@@ -65,6 +67,7 @@ const state = reactive({
     password: ''
   },
   remember: false,
+  loading: false,
   rules: {
     account: [
       { required: 'true', message: '账户不能为空', trigger: 'blur' }
@@ -92,6 +95,7 @@ function initialize(){
 
 
 const submitForm = async () => {
+  state.loading = true
   const data = {
     account: state.ruleForm.account,
     password: state.ruleForm.password
@@ -108,12 +112,19 @@ const submitForm = async () => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    })
+    }).catch( error => {
+          ElMessage.error("网络请求出错了！")
+          console.log(error)
+          state.loading = false
+        }
+    )
   } else {
     ElMessage.error("账号和密码不能为空！")
     console.error('账号或密码为空');
   }
-  console.log(JSON.stringify(result))
+
+  state.loading = false
+
   if (result.status === 200) {
     // 需要将返回的数据存入Store中
     UserStore.token = result.data.token
@@ -170,7 +181,7 @@ const submitForm = async () => {
 }
 .head .title {
   font-size: 28px;
-  color: #1BAEAE;
+  color: #16cbcb;
   font-weight: bold;
 }
 .head .tips {
