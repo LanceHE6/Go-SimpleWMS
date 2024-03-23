@@ -101,12 +101,13 @@ func Login(context *gin.Context) {
 	}
 
 	var uid string
-	err = tx.QueryRow("SELECT uid FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid)
+	var permission int
+	err = tx.QueryRow("SELECT uid, permission FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid, &permission)
 	if err != nil {
 		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
-		token, err := utils.GenerateToken(uid)
+		token, err := utils.GenerateToken(uid, permission)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot generate token"})
 			return
