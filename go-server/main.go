@@ -33,6 +33,17 @@ func main() {
 	userGroup.PUT("/update", utils.AuthMiddleware(), func(context *gin.Context) {
 		handler.UpdateUser(context)
 	})
+
+	warehouseGroup := ginServer.Group("/warehouse")
+
+	warehouseGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		handler.AddWarehouse(context)
+	})
+
+	warehouseGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		handler.DeleteWarehouse(context)
+	})
+
 	err := ginServer.Run(":8080")
 	if err != nil {
 		return
