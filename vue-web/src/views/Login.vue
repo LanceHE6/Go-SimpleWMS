@@ -2,46 +2,68 @@
   <div class="login-body">
     <div class="login-container">
       <div class="head">
-        <img class="logo" src=""  alt="原神，启动！"/>
+        <img class="logo" src="../res/WMS-Logo.png"  alt="原神，启动！"/>
         <div class="name">
           <div class="title">Go-SimpleWMS</div>
           <div class="tips">仓库后台管理系统</div>
         </div>
       </div>
-      <el-form label-position="top" :rules="state.rules" :model="state.ruleForm" ref="loginForm" class="login-form">
+      <el-form label-position="top"
+               :rules="state.rules"
+               :model="state.ruleForm"
+               status-icon
+               label-width="auto"
+               ref="loginForm"
+               class="login-form">
+
         <el-form-item label="账号" prop="account">
-          <el-input class="my-input" type="text" v-model.trim="state.ruleForm.account" autocomplete="off"></el-input>
+          <el-input
+                    type="text"
+                    v-model.trim="state.ruleForm.account"
+                    autocomplete="off"
+                    :prefix-icon="User">
+
+          </el-input>
         </el-form-item>
+
         <el-form-item label="密码" prop="password">
-          <el-input class="my-input" type="password" v-model.trim="state.ruleForm.password" autocomplete="off"></el-input>
+          <el-input
+                    type="password"
+                    v-model.trim="state.ruleForm.password"
+                    autocomplete="off"
+                    :prefix-icon="Lock">
+
+          </el-input>
         </el-form-item>
+
         <el-form-item>
           <br>
-          <el-button style="width: 100%" type="primary" @click="submitForm">立即登录</el-button>
           <el-checkbox v-model="state.remember" @change="!state.remember">记住密码</el-checkbox>
-          <el-checkbox style="margin-left: 120px" v-model="state.autoLogin" @change="!state.autoLogin">自动登录</el-checkbox>
+          <el-button style="width: 100%" type="primary" @click="submitForm">立即登录</el-button>
         </el-form-item>
+
       </el-form>
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref, reactive, inject} from "vue";
+import {ref, reactive, inject, onMounted} from "vue";
 import {UserStore} from "@/store/UserStore";
 import {router} from "@/router/index.js";
 import { ElMessage } from 'element-plus'
 
 const axios = inject("axios")
-const message = inject("message")
 const loginForm = ref(null)
-import md5 from 'js-md5'
+import {Lock, User} from "@element-plus/icons-vue";
+
+onMounted(initialize)
+
 const state = reactive({
   ruleForm: {
     account: '',
     password: ''
   },
-  autoLogin: false,
   remember: false,
   rules: {
     account: [
@@ -54,16 +76,25 @@ const state = reactive({
 })
 
 const user = reactive({
-  account: localStorage.getItem("account") || "",
-  password: localStorage.getItem("password") || "",
-  remember: localStorage.getItem("remember") === '0',
-  autoLogin: localStorage.getItem("autoLogin") === '0',
+  account: localStorage.getItem("account") || '',
+  password: localStorage.getItem("password") || '',
+  remember: localStorage.getItem("remember") || '0',
 })
+
+function initialize(){
+  console.log("user" + JSON.stringify(user))
+  if(user.remember === '1') {
+    state.ruleForm.account = user.account
+    state.ruleForm.password = user.password
+    state.remember = true
+  }
+}
+
 
 const submitForm = async () => {
   const data = {
     account: state.ruleForm.account,
-    password: md5.md5(state.ruleForm.password)
+    password: state.ruleForm.password
   };
 
   const formData = new URLSearchParams();
@@ -73,37 +104,34 @@ const submitForm = async () => {
   }
   let result
   if (state.ruleForm.account && state.ruleForm.password) {
-    result = axios.post('/user/login', formData, {
+    result = await axios.post('/user/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
   } else {
-    ElMessage.error("账号或密码不能为空！")
+    ElMessage.error("账号和密码不能为空！")
     console.error('账号或密码为空');
   }
-
-  if (result.data.code === 200) {
-    console.log("登录成功")
-
+  console.log(JSON.stringify(result))
+  if (result.status === 200) {
     // 需要将返回的数据存入Store中
     UserStore.token = result.data.token
     localStorage.setItem("token", UserStore.token)
 
     // 记住账号密码
-    if (user.remember) {
+    if (state.remember) {
       localStorage.setItem("account", state.ruleForm.account)
       localStorage.setItem("password", state.ruleForm.password)
-      localStorage.setItem("remember", user.remember ? '1' : '0')
-      localStorage.setItem("autoLogin", user.autoLogin ? '1' : '0')
+      localStorage.setItem("remember", state.remember ? '1' : '0')
     } else {
-      localStorage.setItem("account", "")
-      localStorage.setItem("password", "")
-      localStorage.setItem("remember", "")
-      localStorage.setItem("autoLogin", "")
+      localStorage.setItem("account", '')
+      localStorage.setItem("password", '')
+      localStorage.setItem("remember", '0')
     }
 
-    ElMessage.success("登录成功, token:" + UserStore.token)
+    console.log("登录成功")
+    ElMessage.success("登录成功")
     await router.push("/home")
   } else {
     console.log("登录失败")
@@ -124,7 +152,7 @@ const submitForm = async () => {
 }
 .login-container {
   width: 420px;
-  height: 400px;
+  height: 450px;
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 21px 41px 0 rgba(0, 0, 0, 0.2);
@@ -151,9 +179,6 @@ const submitForm = async () => {
 }
 .login-form {
   width: 70%;
-  margin: -20px auto;
-}
-.my-input {
-  border: 100px aqua;
+  margin: 0 auto;
 }
 </style>
