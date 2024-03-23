@@ -3,6 +3,7 @@ import { router } from './router/index'
 import App from './App.vue'
 import ElementUI from 'element-plus'
 import axios from "axios"
+import 'element-plus/dist/index.css'
 
 axios.defaults.baseURL = "http://192.168.8.101:8080"
 
