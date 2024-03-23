@@ -1,39 +1,140 @@
 package utils
 
 import (
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
+	"sync"
 )
 
-/**
- * @Description: 初始化数据库，表
- */
-func init() {
-	db, err := sqlx.Connect("sqlite3", DbPath)
-	if err != nil {
-		log.Fatal("Connect DB error: " + err.Error())
-	}
-	log.Println("Check tables...")
+var (
+	db   *sqlx.DB
+	once sync.Once
+)
 
-	sqlUser := "create table if not exists user(uid text, account text, password text, nick_name text, permission int, register_time text, token text)"
-	_, createUserTableErr := db.Exec(sqlUser)
+// DBConfig 用于映射YAML文件的内容
+type DBConfig struct {
+	DB struct {
+		MySQL struct {
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Account  string `yaml:"account"`
+			Password string `yaml:"password"`
+			Database string `yaml:"database"`
+		} `yaml:"mysql"`
+	} `yaml:"db"`
+}
 
-	if createUserTableErr != nil {
-		log.Fatal("Create table error: " + createUserTableErr.Error())
-		return
-	}
+func InitDB() *sqlx.DB {
+	once.Do(func() {
+		var err error
 
-	log.Println("Check tables complete")
-	closeErr := db.Close()
-	if closeErr != nil {
-		return
+		// 读取YAML文件
+		data, err := ioutil.ReadFile("config.yaml")
+		if err != nil {
+			log.Fatalf("Error reading YAML file: %s\n", err)
+		}
+
+		// 创建一个DBConfig实例
+		var config DBConfig
+
+		// 解析YAML文件
+		err = yaml.Unmarshal(data, &config)
+
+		if err != nil {
+			log.Fatalf("Error parsing YAML file: %s\n", err)
+		}
+
+		// 创建MySQL连接字符串
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=True&loc=Local",
+			config.DB.MySQL.Account,
+			config.DB.MySQL.Password,
+			config.DB.MySQL.Host,
+			config.DB.MySQL.Port,
+		)
+
+		// 格式为：user:password@tcp(localhost:5555)/dbname?charset=utf8&parseTime=True&loc=Local
+		// 先连接到MySQL服务器，不指定数据库
+
+		db, err = sqlx.Connect("mysql", dsn)
+		if err != nil {
+			log.Fatal("Connect DB error: " + err.Error())
+		}
+
+		// 创建数据库
+		_, err = db.Exec("CREATE DATABASE IF NOT EXISTS simple_wms")
+		if err != nil {
+			log.Fatal("Create DB error: " + err.Error())
+		}
+
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+			config.DB.MySQL.Account,
+			config.DB.MySQL.Password,
+			config.DB.MySQL.Host,
+			config.DB.MySQL.Port,
+			config.DB.MySQL.Database,
+		)
+		// 然后连接到新创建的数据库
+		db, err = sqlx.Connect("mysql", dsn)
+		if err != nil {
+			log.Fatal("Connect DB error: " + err.Error())
+		}
+		log.Println("Check tables...")
+
+		// 表创建语句
+		sqlUser := `CREATE TABLE IF NOT EXISTS user (
+			uid VARCHAR(255), 
+			account VARCHAR(255), 
+			password VARCHAR(255), 
+			nick_name VARCHAR(255), 
+			permission INT, 
+			register_time VARCHAR(255), 
+			token VARCHAR(255)
+		)`
+		_, createUserTableErr := db.Exec(sqlUser)
+
+		if createUserTableErr != nil {
+			log.Fatal("Create table error: " + createUserTableErr.Error())
+			return
+		}
+
+		sqlWarehouse := `CREATE TABLE IF NOT EXISTS warehouse (
+			wid VARCHAR(255),
+			name VARCHAR(255),
+			add_time VARCHAR(255),
+			comment VARCHAR(255)
+		)`
+
+		_, createWarehouseTableErr := db.Exec(sqlWarehouse)
+		if createWarehouseTableErr != nil {
+			log.Fatal("Create table error: " + createWarehouseTableErr.Error())
+			return
+		}
+
+		log.Println("Check tables complete")
+	})
+
+	return db
+}
+
+func CloseDB() {
+	if db != nil {
+		if err := db.Close(); err != nil {
+			log.Println("Close DB error: ", err)
+		}
 	}
 }
-func GetDbConnection() *sqlx.DB {
-	db, err := sqlx.Connect("sqlite3", DbPath)
+
+func GetDbConnection() (*sql.Tx, error) {
+	// 开始一个新的事务
+	tx, err := db.Begin()
 	if err != nil {
-		log.Fatal("Connect DB error: " + err.Error())
+		log.Println("error: Cannot begin transaction")
+		return nil, err
 	}
-	return db
+	return tx, nil
 }

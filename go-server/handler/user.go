@@ -22,20 +22,12 @@ func Register(context *gin.Context) {
 		return
 	}
 
-	db := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
-	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
 
 	// 判断该账户是否已被注册
 	var registered int
@@ -101,27 +93,21 @@ func Login(context *gin.Context) {
 		return
 
 	}
-	db := utils.GetDbConnection()
-	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	tx, err := utils.GetDbConnection()
+
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
 
 	var uid string
-	err = tx.QueryRow("SELECT uid FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid)
+	var permission int
+	err = tx.QueryRow("SELECT uid, permission FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid, &permission)
 	if err != nil {
 		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
-		token, err := utils.GenerateToken(uid)
+		token, err := utils.GenerateToken(uid, permission)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot generate token"})
 			return
@@ -153,20 +139,12 @@ func DeleteUser(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
 		return
 	}
-	db := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
-
 	// 删除用户
 	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
 	if err != nil {
@@ -196,19 +174,12 @@ func UpdateUser(context *gin.Context) {
 		return
 	}
 
-	db := utils.GetDbConnection()
-	// 开始一个新的事务
-	tx, err := db.Begin()
-	if err != nil {
+	tx, err := utils.GetDbConnection()
+
+	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 		return
 	}
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-
-		}
-	}(tx) // 如果出错，回滚事务
 
 	if password == "" && nickName == "" && permission == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name and permission is required"})

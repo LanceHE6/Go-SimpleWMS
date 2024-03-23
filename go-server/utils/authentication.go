@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -14,12 +12,22 @@ import (
 
 var jwtKey = []byte(SecretKey) // 用于签名的密钥
 
+// 自定义载荷内容
+type myClaims struct {
+	jwt.StandardClaims
+	Uid        string `json:"uid"`
+	Permission int    `json:"permission"`
+}
+
 // GenerateToken 生成一个token
-func GenerateToken(id string) (string, error) {
+func GenerateToken(id string, permission int) (string, error) {
 	expirationTime := time.Now().Add(72 * time.Hour)
-	claims := &jwt.StandardClaims{
-		Subject:   id,
-		ExpiresAt: expirationTime.Unix(),
+	claims := &myClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+		Uid:        id,
+		Permission: permission,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -49,7 +57,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.ParseWithClaims(bearerToken[1], &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(bearerToken[1], &myClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
 
@@ -68,8 +76,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
-			c.Set("userID", claims.Subject)
+		if _, ok := token.Claims.(*myClaims); ok && token.Valid {
+
 			c.Next()
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
@@ -83,30 +91,29 @@ func AuthMiddleware() gin.HandlerFunc {
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
-		token := context.GetHeader("Authorization")
-		bearerToken := strings.Split(token, " ")[1]
-		fmt.Println(bearerToken)
-		db := GetDbConnection()
+		tokenStr := context.GetHeader("Authorization")
+		bearerToken := strings.Split(tokenStr, " ")[1]
 
-		// 开始一个新的事务
-		tx, err := db.Begin()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin authorization transaction"})
-			context.Abort()
+		// 解析token
+		claims := &myClaims{}
+		_, err := jwt.ParseWithClaims(bearerToken, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+		// 从token中获取载荷数据
+		uid := claims.Uid
+
+		tx, err := GetDbConnection()
+
+		if tx == nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
 			return
 		}
-		defer func(tx *sql.Tx) {
-			err := tx.Rollback()
-			if err != nil {
-
-			}
-		}(tx) // 如果出错，回滚事务
 
 		var permission string
-		err = tx.QueryRow("SELECT permission FROM user WHERE token=?", bearerToken).Scan(&permission)
+		err = tx.QueryRow("SELECT permission FROM user WHERE uid=?", uid).Scan(&permission)
 
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get target user permission"})
+			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
 			context.Abort()
 			return
 		}
