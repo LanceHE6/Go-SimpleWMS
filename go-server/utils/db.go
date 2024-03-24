@@ -87,13 +87,14 @@ func InitDB() *sqlx.DB {
 
 		// 表创建语句
 		sqlUser := `CREATE TABLE IF NOT EXISTS user (
-			uid VARCHAR(255), 
+			uid VARCHAR(255) primary key not null , 
 			account VARCHAR(255), 
 			password VARCHAR(255), 
 			nick_name VARCHAR(255), 
-			permission INT, 
+			permission INT default 1, 
 			register_time VARCHAR(255), 
-			token VARCHAR(255)
+			token VARCHAR(255) default '',
+			phone VARCHAR(255) default ''
 		)`
 		_, createUserTableErr := db.Exec(sqlUser)
 
@@ -103,10 +104,12 @@ func InitDB() *sqlx.DB {
 		}
 
 		sqlWarehouse := `CREATE TABLE IF NOT EXISTS warehouse (
-			wid VARCHAR(255),
+			wid VARCHAR(255) primary key not null,
 			name VARCHAR(255),
 			add_time VARCHAR(255),
-			comment VARCHAR(255)
+			comment VARCHAR(255) default '',
+			manager VARCHAR(255),
+			status INT default 1
 		)`
 
 		_, createWarehouseTableErr := db.Exec(sqlWarehouse)
