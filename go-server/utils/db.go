@@ -85,7 +85,7 @@ func InitDB() *sqlx.DB {
 		}
 		log.Println("Check tables...")
 
-		// 修改为MySQL的表创建语句
+		// 表创建语句
 		sqlUser := `CREATE TABLE IF NOT EXISTS user (
 			uid VARCHAR(255), 
 			account VARCHAR(255), 
@@ -99,6 +99,19 @@ func InitDB() *sqlx.DB {
 
 		if createUserTableErr != nil {
 			log.Fatal("Create table error: " + createUserTableErr.Error())
+			return
+		}
+
+		sqlWarehouse := `CREATE TABLE IF NOT EXISTS warehouse (
+			wid VARCHAR(255),
+			name VARCHAR(255),
+			add_time VARCHAR(255),
+			comment VARCHAR(255)
+		)`
+
+		_, createWarehouseTableErr := db.Exec(sqlWarehouse)
+		if createWarehouseTableErr != nil {
+			log.Fatal("Create table error: " + createWarehouseTableErr.Error())
 			return
 		}
 
