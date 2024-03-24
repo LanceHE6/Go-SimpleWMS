@@ -1,23 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/Login.vue';
 import Main from  '../views/Main.vue'
+import ProductManagement from  '../views/main-views/ProductManagement.vue'
+import EntryAndOut from  '../views/main-views/EntryAndOut.vue'
 
 
 
 
 const routes = [
-    { path: '/', component: Login , name: 'homepage'},
-    { path: '/home', component: Main , name: 'home'},
-    // { path: '/login', component: Login , name: 'login'},
-    // { path: '/signup', component: Signup , name: 'signup'},
-    // { path: '/detail', component: ArticleDetail , name: 'articleDetail'},
-    // { path: '/userInfo', component: UserInfo , name: 'userInfo'},
-    // { path: '/dashboard', component: Dashboard , name: 'dashboard', children: [
-    //         // 二级路由
-    //         { path: '/dashboard/category', component: Category , name: 'category'},
-    //         { path: '/dashboard/article', component: Article , name: 'article'},
-    //     ]},
-
+    { path: '/', component: Login , name: 'login'},
+    { path: '/home', component: Main , name: 'home',
+        children: [
+            // 二级路由
+            { path: '/home/productManagement', component: ProductManagement , name: 'productManagement'},
+            { path: '/home/entryAndOut', component: EntryAndOut , name: 'entryAndOut'},
+        ]
+    },
 ];
 
 const router = createRouter({
