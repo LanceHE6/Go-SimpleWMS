@@ -118,6 +118,19 @@ func InitDB() *sqlx.DB {
 			return
 		}
 
+		sqlGoodsType := `CREATE TABLE IF NOT EXISTS goods_type (
+			gtid VARCHAR(255) primary key not null,
+			name VARCHAR(255),
+			type_code VARCHAR(255) default '',
+			add_time VARCHAR(255)
+		)`
+
+		_, createGoodTypeError := db.Exec(sqlGoodsType)
+		if createWarehouseTableErr != nil {
+			log.Fatal("Create table error: " + createGoodTypeError.Error())
+			return
+		}
+
 		log.Println("Check tables complete")
 	})
 
