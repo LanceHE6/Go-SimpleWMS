@@ -65,6 +65,7 @@ headers:{
 | password   | String   | 是       | 密码         |
 | permission | int | 是 | 权限大小（1为管理员，2为超级管理员） |
 | nick_name  | string | 是 | 昵称 |
+| phone | string | 否 | 电话 |
 
 **返回结果示例**：
 
@@ -199,8 +200,9 @@ headers:{
 | password   | String   | 否       | 用户更改的密码     |
 | nickName   | String   | 否       | 用户更改的昵称     |
 | permission | int      | 否       | 用户更改的权限大小 |
+| phone      | String   | 否       | 用户更改的电话     |
 
-*注:password,nickName,permission3个参数至少需提供一个*
+*注:password,nickName,permission,phone4个可选参数至少需提供一个*
 
 **返回结果示例**：
 
@@ -240,10 +242,12 @@ headers:{
 
 **请求参数**：
 
-| 参数名  | 参数类型 | 是否必填 | 参数说明 |
-| ------- | -------- | -------- | -------- |
-| name    | String   | 是       | 仓库名   |
-| comment | String   | 否       | 仓库备注 |
+| 参数名  | 参数类型 | 是否必填 | 参数说明                     |
+| ------- | -------- | -------- | ---------------------------- |
+| name    | String   | 是       | 仓库名                       |
+| comment | String   | 否       | 仓库备注                     |
+| manager | String   | 是       | 仓库管理员uid                |
+| status  | int      | 否       | 仓库启用状态1为启用0为不启用 |
 
 **返回结果示例**：
 
@@ -322,13 +326,15 @@ headers:{
 
 **请求参数**：
 
-| 参数名  | 参数类型 | 是否必填 | 参数说明       |
-| ------- | -------- | -------- | -------------- |
-| wid     | String   | 是       | 仓库ID         |
-| name    | String   | 否       | 更新的仓库名称 |
-| comment | String   | 否       | 更新的仓库备注 |
+| 参数名  | 参数类型 | 是否必填 | 参数说明                           |
+| ------- | -------- | -------- | ---------------------------------- |
+| wid     | String   | 是       | 仓库ID                             |
+| name    | String   | 否       | 更新的仓库名称                     |
+| comment | String   | 否       | 更新的仓库备注                     |
+| manager | String   | 否       | 更新的仓库管理员uid                |
+| status  | int      | 否       | 更新的仓库启动状态1为启用0为不启用 |
 
-*注:name,comment 3个参数至少需提供一个*
+*注:name,comment,manager,status 4个可选参数至少需提供一个*
 
 **返回结果示例**：
 
@@ -378,28 +384,20 @@ headers:{
     "message": "Get warehouse list successfully",
     "rows": [
         {
-            "add_time": "1711160536",
+            "add_time": "1711267718",
             "comment": "123",
-            "name": "2",
-            "wid": "000003"
-        },
-        {
-            "add_time": "1711160609",
-            "comment": "NULL",
-            "name": "D",
-            "wid": "000004"
-        },
-        {
-            "add_time": "1711160739",
-            "comment": "",
-            "name": "E",
-            "wid": "000005"
-        },
-        {
-            "add_time": "1711160757",
-            "comment": "123",
+            "manager": "00000001",
             "name": "F",
-            "wid": "000006"
+            "status": 1,
+            "wid": "000001"
+        },
+        {
+            "add_time": "1711267858",
+            "comment": "123",
+            "manager": "00000002",
+            "name": "A",
+            "status": 0,
+            "wid": "000002"
         }
     ]
 }
@@ -427,16 +425,16 @@ headers:{
 
 ## user表
 
-| 字段 |     uid      |   account    |   password   |  nick_name   |   permission    | register_time |     token      |
-| :--: | :----------: | :----------: | :----------: | :----------: | :-------------: | :-----------: | :------------: |
-| 类型 | varchar(255) | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255)  |  varchar(255)  |
-| 说明 | 8位唯一索引  |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳   | 登录生成的凭证 |
+| 字段 |     uid      |   account    |   password   |  nick_name   |   permission    | register_time |     token      |    phone     |
+| :--: | :----------: | :----------: | :----------: | :----------: | :-------------: | :-----------: | :------------: | :----------: |
+| 类型 | varchar(255) | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255)  |  varchar(255)  | varchar(255) |
+| 说明 | 8位唯一索引  |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳   | 登录生成的凭证 |     电话     |
 
 ----
 
 ## warehouse表
 
-| 字段 |     wid      |     name     |   add_time   |   comment    |
-| :--: | :----------: | :----------: | :----------: | :----------: |
-| 类型 | varchar(255) | varchar(255) | varchar(255) | varchar(255) |
-| 说明 | 6位唯一索引  |    仓库名    |  添加时间戳  |     备注     |
+| 字段 |     wid      |     name     |   add_time   |   comment    |   manager    |  status  |
+| :--: | :----------: | :----------: | :----------: | :----------: | :----------: | :------: |
+| 类型 | varchar(255) | varchar(255) | varchar(255) | varchar(255) | varchar(255) |   int    |
+| 说明 | 6位唯一索引  |    仓库名    |  添加时间戳  |     备注     |  负责人uid   | 仓库状态 |
