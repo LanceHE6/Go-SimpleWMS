@@ -14,9 +14,15 @@ import (
 func AddWarehouse(context *gin.Context) {
 	warehouseName := context.PostForm("name")
 	comment := context.PostForm("comment")
+	manager := context.PostForm("manager")
+	status := context.PostForm("status")
 
 	if warehouseName == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse name is required"})
+		return
+	}
+	if manager == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse manager is required"})
 		return
 	}
 
@@ -62,9 +68,17 @@ func AddWarehouse(context *gin.Context) {
 	addTime := time.Now().Unix()
 	// 增加仓库
 	if comment == "" {
-		_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time) VALUES(?, ?, ?)", newWid, warehouseName, addTime)
+		if status == "" {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager) VALUES(?, ?, ?, ?)", newWid, warehouseName, addTime, manager)
+		} else {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, status) VALUES(?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, status)
+		}
 	} else {
-		_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, comment) VALUES(?, ?, ?, ?)", newWid, warehouseName, addTime, comment)
+		if status == "" {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, comment) VALUES(?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, comment)
+		} else {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, comment, status) VALUES(?, ?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, comment, status)
+		}
 	}
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the warehouse"})

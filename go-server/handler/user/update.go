@@ -11,6 +11,7 @@ func UpdateUser(context *gin.Context) {
 	password := context.PostForm("password")
 	nickName := context.PostForm("nick_name")
 	permission := context.PostForm("permission")
+	phone := context.PostForm("phone")
 
 	if uid == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
@@ -24,8 +25,8 @@ func UpdateUser(context *gin.Context) {
 		return
 	}
 
-	if password == "" && nickName == "" && permission == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name and permission is required"})
+	if password == "" && nickName == "" && permission == "" && phone == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name, permission and phone is required"})
 		return
 	}
 	// 拼接sql语句
@@ -38,6 +39,9 @@ func UpdateUser(context *gin.Context) {
 	}
 	if permission != "" {
 		updateSql += "permission=" + permission + ","
+	}
+	if phone != "" {
+		updateSql += "phone='" + phone + "',"
 	}
 	updateSql = updateSql[:len(updateSql)-1] // 去掉最后一个逗号
 	updateSql += " WHERE uid='" + uid + "'"

@@ -16,6 +16,7 @@ func Register(context *gin.Context) {
 	password := context.PostForm("password")
 	permission := context.PostForm("permission")
 	nickName := context.PostForm("nick_name")
+	phone := context.PostForm("phone")
 
 	if account == "" || password == "" || permission == "" || nickName == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Account, password, permission and nick_name are required"})
@@ -64,8 +65,8 @@ func Register(context *gin.Context) {
 	registerTime := time.Now().Unix()
 
 	// 插入新用户
-	_, err = tx.Exec("INSERT INTO user (uid, account, password, nick_name, permission, register_time) VALUES (?, ?, ?, ?, ?, ?)",
-		newUid, account, password, nickName, permission, registerTime)
+	_, err = tx.Exec("INSERT INTO user (uid, account, password, nick_name, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		newUid, account, password, nickName, permission, registerTime, phone)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert new user"})
 		return

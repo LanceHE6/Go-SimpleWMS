@@ -15,7 +15,7 @@ func ListWarehouse(context *gin.Context) {
 		return
 	}
 
-	rows, err := tx.Query("SELECT wid, name, add_time, comment FROM warehouse")
+	rows, err := tx.Query("SELECT wid, name, add_time, comment, manager, status FROM warehouse")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the list of warehouses"})
 		return
@@ -29,12 +29,13 @@ func ListWarehouse(context *gin.Context) {
 
 	var warehouses []gin.H
 	for rows.Next() {
-		var wid, name, addTime string
+		var wid, name, addTime, manager string
 
 		//sql.NullString是一个结构体，它有两个字段：String和Valid。如果SQL查询结果中的值为NULL，Valid字段会被设置为false，否则为true
 		var comment sql.NullString
+		var status int
 
-		err = rows.Scan(&wid, &name, &addTime, &comment)
+		err = rows.Scan(&wid, &name, &addTime, &comment, &manager, &status)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot scan the list of warehouses" + err.Error()})
 			return
@@ -51,6 +52,8 @@ func ListWarehouse(context *gin.Context) {
 			"name":     name,
 			"add_time": addTime,
 			"comment":  commentStr,
+			"manager":  manager,
+			"status":   status,
 		}
 		warehouses = append(warehouses, warehouse)
 	}

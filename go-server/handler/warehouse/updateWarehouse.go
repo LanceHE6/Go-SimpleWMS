@@ -2,6 +2,7 @@ package warehouse
 
 import (
 	"Go_simpleWMS/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -10,13 +11,15 @@ func UpdateWarehouse(context *gin.Context) {
 	wid := context.PostForm("wid")
 	warehouseName := context.PostForm("name")
 	comment := context.PostForm("comment")
+	manager := context.PostForm("manager")
+	status := context.PostForm("status")
 
 	if wid == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "wid is required"})
 		return
 	}
-	if warehouseName == "" && comment == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "name or comment is required"})
+	if warehouseName == "" && comment == "" && manager == "" && status == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "One of name, comment, manager and status is required"})
 		return
 	}
 
@@ -56,11 +59,20 @@ func UpdateWarehouse(context *gin.Context) {
 			return
 		}
 
-		if comment == "" {
-			_, err = tx.Exec("UPDATE warehouse SET name=? WHERE wid=?", warehouseName, wid)
-		} else {
-			_, err = tx.Exec("UPDATE warehouse SET name=?, comment=? WHERE wid=?", warehouseName, comment, wid)
+		var updateSql = "Update warehouse Set "
+		if comment != "" {
+			updateSql += "comment= '" + comment + "',"
 		}
+		if manager != "" {
+			updateSql += "manager= '" + manager + "',"
+		}
+		if status != "" {
+			updateSql += "status= " + status + ","
+		}
+		updateSql = updateSql[:len(updateSql)-1] // 去掉最后一个逗号
+		updateSql += " Where wid= '" + wid + "'"
+		fmt.Println(updateSql)
+		_, err = tx.Exec(updateSql)
 	}
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update the warehouse"})

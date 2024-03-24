@@ -34,7 +34,7 @@ func main() {
 	// 路由分组
 	userGroup := ginServer.Group("/user")
 
-	userGroup.POST("/register", func(context *gin.Context) {
+	userGroup.POST("/register", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		user.Register(context)
 	})
 	userGroup.POST("/login", func(context *gin.Context) {
