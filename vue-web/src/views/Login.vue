@@ -143,7 +143,7 @@ const submitForm = async () => {
 
     console.log("登录成功")
     ElMessage.success("登录成功")
-    await router.push("/home")
+    await router.push("/home/productManagement")
   } else {
     console.log("登录失败")
     ElMessage.error("账号或密码错误")
