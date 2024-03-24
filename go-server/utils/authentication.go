@@ -127,3 +127,15 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		}
 	}
 }
+
+// GetUidByToken 获取用户id
+func GetUidByToken(tokenStr string) (string, error) {
+	// 解析token
+	claims := &myClaims{}
+	_, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	// 从token中获取载荷数据
+	uid := claims.Uid
+	return uid, err
+}

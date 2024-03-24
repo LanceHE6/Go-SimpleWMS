@@ -1,6 +1,8 @@
 package main
 
 import (
+	"Go_simpleWMS/handler/auth"
+	"Go_simpleWMS/handler/goodsType"
 	"Go_simpleWMS/handler/test"
 	"Go_simpleWMS/handler/user"
 	"Go_simpleWMS/handler/warehouse"
@@ -30,7 +32,10 @@ func main() {
 	ginServer.GET("/ping", func(context *gin.Context) {
 		test.Ping(context)
 	})
-
+	// 鉴权接口
+	ginServer.GET("/auth", utils.AuthMiddleware(), func(context *gin.Context) {
+		auth.AuthByHeader(context)
+	})
 	// 路由分组
 	userGroup := ginServer.Group("/user")
 
@@ -63,6 +68,16 @@ func main() {
 
 	warehouseGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		warehouse.ListWarehouse(context)
+	})
+
+	goodsTypeGroup := ginServer.Group("/gt")
+
+	goodsTypeGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		goodsType.AddGoodsType(context)
+	})
+
+	goodsTypeGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		goodsType.UpdateGoodsType(context)
 	})
 
 	err := ginServer.Run(":8080")
