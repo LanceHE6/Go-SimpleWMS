@@ -12,6 +12,15 @@ func DeleteUser(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
 		return
 	}
+	targetUid, err := utils.GetUidByContext(context)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+		return
+	}
+	if targetUid == uid {
+		context.JSON(http.StatusForbidden, gin.H{"message": "Invalid target uid"})
+		return
+	}
 	tx, err := utils.GetDbConnection()
 	// 开始一个新的事务
 	if tx == nil {
