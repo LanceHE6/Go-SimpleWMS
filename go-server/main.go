@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
@@ -26,8 +27,26 @@ func main() {
 	utils.InitDB()
 	defer utils.CloseDB()
 	ginServer := gin.Default()
+
 	// 解决跨域问题
-	ginServer.Use(cors.Default())
+	ginServer.Use(cors.New(cors.Config{
+		//准许跨域请求网站,多个使用,分开,限制使用*
+		AllowOrigins: []string{"*"},
+		//准许使用的请求方式
+		AllowMethods: []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
+		//准许使用的请求表头
+		AllowHeaders: []string{"Origin", "Authorization", "Content-Type", "Access-Token"},
+		//显示的请求表头
+		ExposeHeaders: []string{"Content-Type"},
+		//凭证共享,确定共享
+		AllowCredentials: true,
+		//容许跨域的原点网站,可以直接return true就万事大吉了
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+		//超时时间设定
+		MaxAge: 24 * time.Hour,
+	}))
 
 	ginServer.GET("/ping", func(context *gin.Context) {
 		test.Ping(context)
@@ -50,6 +69,9 @@ func main() {
 	})
 	userGroup.PUT("/update", utils.AuthMiddleware(), func(context *gin.Context) {
 		user.UpdateUser(context)
+	})
+	userGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		user.ListUsers(context)
 	})
 
 	warehouseGroup := ginServer.Group("/warehouse")
@@ -78,6 +100,14 @@ func main() {
 
 	goodsTypeGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		goodsType.UpdateGoodsType(context)
+	})
+
+	goodsTypeGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		goodsType.DeleteGoodsType(context)
+	})
+
+	goodsTypeGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		goodsType.ListGoodsType(context)
 	})
 
 	err := ginServer.Run(":8080")
