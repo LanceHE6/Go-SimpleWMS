@@ -4,14 +4,11 @@ import (
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
 )
 
 func AuthByHeader(context *gin.Context) {
-	authHeader := context.GetHeader("Authorization")
-	bearerToken := strings.Split(authHeader, " ")
 
-	uid, err := utils.GetUidByToken(bearerToken[1])
+	uid, err := utils.GetUidByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
 		return

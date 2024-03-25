@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/handler/auth"
 	"Go_simpleWMS/handler/goodsType"
 	"Go_simpleWMS/handler/test"
+	"Go_simpleWMS/handler/upload"
 	"Go_simpleWMS/handler/user"
 	"Go_simpleWMS/handler/warehouse"
 	"Go_simpleWMS/utils"
@@ -54,6 +55,9 @@ func main() {
 	// 鉴权接口
 	ginServer.GET("/auth", utils.AuthMiddleware(), func(context *gin.Context) {
 		auth.AuthByHeader(context)
+	})
+	ginServer.POST("/upload", func(context *gin.Context) {
+		upload.UploadFile(context)
 	})
 	// 路由分组
 	userGroup := ginServer.Group("/user")

@@ -56,6 +56,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		uid, err := GetUidByContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.Abort()
+			return
+		}
 
 		token, err := jwt.ParseWithClaims(bearerToken[1], &myClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
@@ -76,6 +82,21 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// 判断uid是否在数据库中
+		tx, _ := GetDbConnection()
+		var isExist int
+		err = tx.QueryRow("SELECT count(*) from user where uid=?", uid).Scan(&isExist)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of uid for this uid"})
+			c.Abort()
+			return
+		}
+		if isExist <= 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.Abort()
+			return
+		}
+
 		if _, ok := token.Claims.(*myClaims); ok && token.Valid {
 
 			c.Next()
@@ -91,21 +112,18 @@ func AuthMiddleware() gin.HandlerFunc {
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
-		tokenStr := context.GetHeader("Authorization")
-		bearerToken := strings.Split(tokenStr, " ")[1]
-
-		// 解析token
-		claims := &myClaims{}
-		_, err := jwt.ParseWithClaims(bearerToken, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
-		})
-		// 从token中获取载荷数据
-		uid := claims.Uid
+		uid, err := GetUidByContext(context)
+		if err != nil {
+			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			context.Abort()
+			return
+		}
 
 		tx, err := GetDbConnection()
 
 		if tx == nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+			context.Abort()
 			return
 		}
 
@@ -128,11 +146,13 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 	}
 }
 
-// GetUidByToken 获取用户id
-func GetUidByToken(tokenStr string) (string, error) {
+// GetUidByContext 获取用户id
+func GetUidByContext(context *gin.Context) (string, error) {
+	authHeader := context.GetHeader("Authorization")
+	bearerToken := strings.Split(authHeader, " ")
 	// 解析token
 	claims := &myClaims{}
-	_, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(bearerToken[1], claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	// 从token中获取载荷数据
