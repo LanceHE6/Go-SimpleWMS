@@ -33,17 +33,17 @@ func UploadFile(context *gin.Context) {
 				})
 			} else {
 				context.JSON(http.StatusInternalServerError, gin.H{
-					"message": "Upload failed",
+					"error": "Upload failed",
 				})
 			}
 		} else {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Upload failed",
+				"error": "Upload failed",
 			})
 		}
 	} else {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Upload failed",
+			"error": "Upload failed",
 		})
 	}
 }
