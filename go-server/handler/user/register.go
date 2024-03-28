@@ -11,17 +11,25 @@ import (
 	"time"
 )
 
-func Register(context *gin.Context) {
-	account := context.PostForm("account")
-	password := context.PostForm("password")
-	permission := context.PostForm("permission")
-	nickName := context.PostForm("nick_name")
-	phone := context.PostForm("phone")
+type registerRequest struct {
+	Account    string `json:"account" form:"account" binding:"required"`
+	Password   string `json:"password" form:"password" binding:"required"`
+	Permission int    `json:"permission" form:"permission" binding:"required"`
+	NickName   string `json:"nick_name" form:"nick_name" binding:"required"`
+	Phone      string `json:"phone" form:"phone"`
+}
 
-	if account == "" || password == "" || permission == "" || nickName == "" {
+func Register(context *gin.Context) {
+	var data registerRequest
+	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Account, password, permission and nick_name are required"})
 		return
 	}
+	account := data.Account
+	password := data.Password
+	permission := data.Permission
+	nickName := data.NickName
+	phone := data.Phone
 
 	tx, err := utils.GetDbConnection()
 
@@ -59,7 +67,7 @@ func Register(context *gin.Context) {
 		return
 	}
 	nextUid++
-	newUid := fmt.Sprintf("%08d", nextUid) // 转换为 8 位字符串
+	newUid := fmt.Sprintf("u%08d", nextUid) // 转换为 8 位字符串
 
 	// 获取当前时间戳
 	registerTime := time.Now().Unix()

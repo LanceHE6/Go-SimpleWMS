@@ -11,20 +11,23 @@ import (
 	"time"
 )
 
-func AddWarehouse(context *gin.Context) {
-	warehouseName := context.PostForm("name")
-	comment := context.PostForm("comment")
-	manager := context.PostForm("manager")
-	status := context.PostForm("status")
+type addWarehouseRequest struct {
+	Name    string `json:"name" form:"name" binding:"required"`
+	Comment string `json:"comment" form:"comment"`
+	Manager string `json:"manager" form:"manager" binding:"required"`
+	Status  string `json:"status" form:"status"`
+}
 
-	if warehouseName == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse name is required"})
+func AddWarehouse(context *gin.Context) {
+	var data addWarehouseRequest
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse name and manager are required"})
 		return
 	}
-	if manager == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse manager is required"})
-		return
-	}
+	warehouseName := data.Name
+	comment := data.Comment
+	manager := data.Manager
+	status := data.Status
 
 	tx, err := utils.GetDbConnection()
 
@@ -63,7 +66,7 @@ func AddWarehouse(context *gin.Context) {
 		return
 	}
 	nextWid++
-	newWid := fmt.Sprintf("%06d", nextWid) // 转换为 8 位字符串
+	newWid := fmt.Sprintf("wh%06d", nextWid) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库

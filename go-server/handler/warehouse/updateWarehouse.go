@@ -7,17 +7,26 @@ import (
 	"net/http"
 )
 
-func UpdateWarehouse(context *gin.Context) {
-	wid := context.PostForm("wid")
-	warehouseName := context.PostForm("name")
-	comment := context.PostForm("comment")
-	manager := context.PostForm("manager")
-	status := context.PostForm("status")
+type updateWarehouseRequest struct {
+	Wid     string `json:"wid" form:"wid" binding:"required"`
+	Name    string `json:"name" form:"name"`
+	Comment string `json:"comment" form:"comment"`
+	Manager string `json:"manager" form:"manager"`
+	Status  string `json:"status" form:"status"`
+}
 
-	if wid == "" {
+func UpdateWarehouse(context *gin.Context) {
+	var data updateWarehouseRequest
+	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "wid is required"})
 		return
 	}
+	wid := data.Wid
+	warehouseName := data.Name
+	comment := data.Comment
+	manager := data.Manager
+	status := data.Status
+
 	if warehouseName == "" && comment == "" && manager == "" && status == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "One of name, comment, manager and status is required"})
 		return

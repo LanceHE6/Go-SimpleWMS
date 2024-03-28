@@ -6,12 +6,17 @@ import (
 	"net/http"
 )
 
+type deleteWarehouseRequest struct {
+	Wid string `json:"wid" form:"name" binding:"required"`
+}
+
 func DeleteWarehouse(context *gin.Context) {
-	wid := context.PostForm("wid")
-	if wid == "" {
+	var data deleteWarehouseRequest
+	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "wid is required"})
 		return
 	}
+	wid := data.Wid
 
 	tx, _ := utils.GetDbConnection()
 
