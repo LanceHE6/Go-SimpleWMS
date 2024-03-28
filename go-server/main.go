@@ -2,6 +2,7 @@ package main
 
 import (
 	"Go_simpleWMS/handler/auth"
+	"Go_simpleWMS/handler/department"
 	"Go_simpleWMS/handler/goodsType"
 	"Go_simpleWMS/handler/test"
 	"Go_simpleWMS/handler/upload"
@@ -48,6 +49,9 @@ func main() {
 		//超时时间设定
 		MaxAge: 24 * time.Hour,
 	}))
+
+	// 设置静态资源路径
+	ginServer.Static("/res", "./static/res")
 
 	ginServer.GET("/ping", func(context *gin.Context) {
 		test.Ping(context)
@@ -112,6 +116,12 @@ func main() {
 
 	goodsTypeGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		goodsType.ListGoodsType(context)
+	})
+
+	departmentGroup := ginServer.Group("/dept")
+
+	departmentGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		department.AddDepartment(context)
 	})
 
 	err := ginServer.Run(":8080")
