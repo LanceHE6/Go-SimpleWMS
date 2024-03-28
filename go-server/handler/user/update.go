@@ -4,19 +4,28 @@ import (
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
-func UpdateUser(context *gin.Context) {
-	uid := context.PostForm("uid")
-	password := context.PostForm("password")
-	nickName := context.PostForm("nick_name")
-	permission := context.PostForm("permission")
-	phone := context.PostForm("phone")
+type updateRequest struct {
+	Uid        string `json:"uid" form:"uid" binding:"required"`
+	Password   string `json:"password" form:"password"`
+	NickName   string `json:"nick_name" form:"nick_name"`
+	Permission int    `json:"permission" form:"permission"`
+	Phone      string `json:"phone" form:"phone"`
+}
 
-	if uid == "" {
+func UpdateUser(context *gin.Context) {
+	var data updateRequest
+	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
 		return
 	}
+	uid := data.Uid
+	password := data.Password
+	nickName := data.NickName
+	permission := data.Permission
+	phone := data.Phone
 
 	tx, err := utils.GetDbConnection()
 
@@ -25,7 +34,7 @@ func UpdateUser(context *gin.Context) {
 		return
 	}
 
-	if password == "" && nickName == "" && permission == "" && phone == "" {
+	if password == "" && nickName == "" && permission == 0 && phone == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name, permission and phone is required"})
 		return
 	}
@@ -37,8 +46,8 @@ func UpdateUser(context *gin.Context) {
 	if nickName != "" {
 		updateSql += "nick_name='" + nickName + "',"
 	}
-	if permission != "" {
-		updateSql += "permission=" + permission + ","
+	if permission != 0 {
+		updateSql += "permission=" + strconv.Itoa(permission) + ","
 	}
 	if phone != "" {
 		updateSql += "phone='" + phone + "',"

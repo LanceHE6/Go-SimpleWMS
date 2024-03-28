@@ -11,14 +11,19 @@ import (
 	"time"
 )
 
-func AddGoodsType(context *gin.Context) {
-	typeName := context.PostForm("name")
-	typeCode := context.PostForm("type_code")
+type addGoodsTypeRequest struct {
+	Name     string `json:"name" form:"name" binding:"required"`
+	TypeCode string `json:"type_code" form:"type_code"`
+}
 
-	if typeName == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "type name is required"})
+func AddGoodsType(context *gin.Context) {
+	var data addGoodsTypeRequest
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Type name is required"})
 		return
 	}
+	typeName := data.Name
+	typeCode := data.TypeCode
 
 	tx, err := utils.GetDbConnection()
 
@@ -57,7 +62,7 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 	nextGTid++
-	newGTid := fmt.Sprintf("%04d", nextGTid) // 转换为 8 位字符串
+	newGTid := fmt.Sprintf("gt%04d", nextGTid) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库

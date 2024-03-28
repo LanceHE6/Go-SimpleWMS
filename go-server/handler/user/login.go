@@ -6,15 +6,20 @@ import (
 	"net/http"
 )
 
+type loginRequest struct {
+	Account  string `json:"account" form:"account" binding:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
+}
+
 func Login(context *gin.Context) {
-	account := context.PostForm("account")
-	password := context.PostForm("password")
-
-	if account == "" || password == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Account and password are required"})
+	var data loginRequest
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"message": "Account and password are required"}})
 		return
-
 	}
+	account := data.Account
+	password := data.Password
+
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {

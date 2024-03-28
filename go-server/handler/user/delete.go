@@ -6,12 +6,18 @@ import (
 	"net/http"
 )
 
+type deleteRequest struct {
+	Uid string `json:"uid" form:"uid" binding:"required"`
+}
+
 func DeleteUser(context *gin.Context) {
-	uid := context.PostForm("uid")
-	if uid == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+	var data deleteRequest
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"message": "UID is required"}})
 		return
 	}
+	uid := data.Uid
+
 	targetUid, err := utils.GetUidByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})

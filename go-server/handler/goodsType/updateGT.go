@@ -6,15 +6,22 @@ import (
 	"net/http"
 )
 
-func UpdateGoodsType(context *gin.Context) {
-	GTid := context.PostForm("gtid")
-	GTName := context.PostForm("name")
-	typeCode := context.PostForm("type_code")
+type updateGoodsTypeRequest struct {
+	GTid     string `json:"gtid" form:"gtid" binding:"required"`
+	Name     string `json:"name" form:"name"`
+	TypeCode string `json:"type_code" form:"type_code"`
+}
 
-	if GTid == "" {
+func UpdateGoodsType(context *gin.Context) {
+	var data updateGoodsTypeRequest
+	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "GTid is required"})
 		return
 	}
+	GTid := data.GTid
+	GTName := data.Name
+	typeCode := data.TypeCode
+
 	if GTName == "" && typeCode == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "name or type_code is required"})
 		return

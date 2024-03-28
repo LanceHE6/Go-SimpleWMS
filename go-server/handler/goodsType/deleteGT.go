@@ -6,12 +6,17 @@ import (
 	"net/http"
 )
 
+type deleteGoodsTypeRequired struct {
+	GTid string `json:"gtid" form:"gtid" binding:"required"`
+}
+
 func DeleteGoodsType(context *gin.Context) {
-	gtid := context.PostForm("gtid")
-	if gtid == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "gtid is required"})
+	var data deleteGoodsTypeRequired
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "GTid is required"})
 		return
 	}
+	gtid := data.GTid
 
 	tx, _ := utils.GetDbConnection()
 
