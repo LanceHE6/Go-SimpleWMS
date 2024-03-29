@@ -13,7 +13,7 @@ type deleteRequest struct {
 func DeleteUser(context *gin.Context) {
 	var data deleteRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"message": "UID is required"}})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
 		return
 	}
 	uid := data.Uid
