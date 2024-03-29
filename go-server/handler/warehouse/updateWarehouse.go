@@ -38,6 +38,7 @@ func UpdateWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -49,11 +50,15 @@ func UpdateWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of warehouses for this wid",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse does not exist"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The warehouse does not exist",
+			"code":    401,
+		})
 		return
 	}
 
@@ -69,11 +74,15 @@ func UpdateWarehouse(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot get the number of warehouses for this warehouse_name",
 				"detail": err.Error(),
+				"code":   503,
 			})
 			return
 		}
 		if registered >= 1 {
-			context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse name already exists"})
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "The warehouse name already exists",
+				"code":    402,
+			})
 			return
 		}
 
@@ -96,6 +105,7 @@ func UpdateWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update the warehouse",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -104,8 +114,12 @@ func UpdateWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Warehouse updated successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Warehouse updated successfully",
+		"code":    201,
+	})
 }

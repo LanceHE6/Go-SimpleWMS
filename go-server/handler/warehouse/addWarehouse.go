@@ -21,7 +21,10 @@ type addWarehouseRequest struct {
 func AddWarehouse(context *gin.Context) {
 	var data addWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse name and manager are required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Warehouse name and manager are required",
+			"code":    401,
+		})
 		return
 	}
 	warehouseName := data.Name
@@ -35,6 +38,7 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -46,11 +50,15 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of warehouses for this warehouse_name",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse already exists"})
+		context.JSON(http.StatusConflict, gin.H{
+			"message": "The warehouse already exists",
+			"code":    409,
+		})
 		return
 	}
 
@@ -64,6 +72,7 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last wid",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -74,6 +83,7 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert wid to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -99,6 +109,7 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the warehouse",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -107,9 +118,13 @@ func AddWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Warehouse added successfully"})
+	context.JSON(http.StatusCreated, gin.H{
+		"message": "Warehouse added successfully",
+		"code":    201,
+	})
 }

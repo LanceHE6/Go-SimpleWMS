@@ -14,6 +14,7 @@ func ListStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -23,6 +24,7 @@ func ListStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of staffs",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -32,6 +34,7 @@ func ListStaff(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot close the list of staffs",
 				"detail": err.Error(),
+				"code":   503,
 			})
 		}
 	}(rows)
@@ -46,6 +49,7 @@ func ListStaff(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot scan the list of staffs",
 				"detail": err.Error(),
+				"code":   504,
 			})
 			return
 		}
@@ -67,5 +71,6 @@ func ListStaff(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get staffs list successfully",
 		"rows":    staffs,
+		"code":    201,
 	})
 }

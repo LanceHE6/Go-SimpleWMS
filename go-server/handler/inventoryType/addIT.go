@@ -31,6 +31,7 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -42,11 +43,15 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of inventory type for this type name",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The type name already exists"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The type name already exists",
+			"code":    401,
+		})
 		return
 	}
 
@@ -60,6 +65,7 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last ITid",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -70,6 +76,7 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert ITid to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -84,6 +91,7 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the inventory type",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -92,9 +100,13 @@ func AddInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Goods type added successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Goods type added successfully",
+		"code":    201,
+	})
 }

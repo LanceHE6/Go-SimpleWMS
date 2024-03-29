@@ -14,7 +14,10 @@ type loginRequest struct {
 func Login(context *gin.Context) {
 	var data loginRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Account and password are required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Account and password are required",
+			"code":    401,
+		})
 		return
 	}
 	account := data.Account
@@ -26,6 +29,7 @@ func Login(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -41,7 +45,9 @@ func Login(context *gin.Context) {
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot generate token",
-				"detail": err.Error()})
+				"detail": err.Error(),
+				"code":   502,
+			})
 			return
 		}
 
@@ -51,6 +57,7 @@ func Login(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot update token",
 				"detail": err.Error(),
+				"code":   503,
 			})
 			return
 		}
@@ -61,12 +68,15 @@ func Login(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot commit transaction",
 				"detail": err.Error(),
+				"code":   504,
 			})
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{
 			"message": "Login successfully",
-			"token":   token})
+			"token":   token,
+			"code":    201,
+		})
 	}
 
 }

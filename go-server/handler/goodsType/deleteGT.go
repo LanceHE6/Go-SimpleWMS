@@ -13,7 +13,10 @@ type deleteGoodsTypeRequest struct {
 func DeleteGoodsType(context *gin.Context) {
 	var data deleteGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "GTid is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "GTid is required",
+			"code":    401,
+		})
 		return
 	}
 	gtid := data.GTid
@@ -24,6 +27,7 @@ func DeleteGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -34,6 +38,7 @@ func DeleteGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete the Goods type",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -42,8 +47,12 @@ func DeleteGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Goods type deleted successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Goods type deleted successfully",
+		"code":    201,
+	})
 }

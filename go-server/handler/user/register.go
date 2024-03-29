@@ -22,7 +22,10 @@ type registerRequest struct {
 func Register(context *gin.Context) {
 	var data registerRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Account, password, permission and nick_name are required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Account, password, permission and nick_name are required",
+			"code":    401,
+		})
 		return
 	}
 	account := data.Account
@@ -34,7 +37,11 @@ func Register(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   "501",
+		})
 		return
 	}
 
@@ -42,11 +49,18 @@ func Register(context *gin.Context) {
 	var registered int
 	err = tx.QueryRow("SELECT count(account) FROM user WHERE account=?", account).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of users for this account"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of users for this account",
+			"detail": err.Error(),
+			"code":   502,
+		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The account has been registered"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The account has been registered",
+			"code":    402,
+		})
 		return
 	}
 	// 获取最近注册的用户的 uid
@@ -59,6 +73,7 @@ func Register(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last uid",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -69,6 +84,7 @@ func Register(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert uid to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -85,6 +101,7 @@ func Register(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert new user",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -95,6 +112,7 @@ func Register(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
@@ -102,5 +120,6 @@ func Register(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 		"uid":     newUid,
+		"code":    201,
 	})
 }

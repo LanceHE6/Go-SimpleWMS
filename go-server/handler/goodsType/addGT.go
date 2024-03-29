@@ -19,7 +19,10 @@ type addGoodsTypeRequest struct {
 func AddGoodsType(context *gin.Context) {
 	var data addGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Type name is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Type name is required",
+			"code":    401,
+		})
 		return
 	}
 	typeName := data.Name
@@ -31,6 +34,7 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -42,11 +46,15 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of goods type for this type name",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The type name already exists"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The type name already exists",
+			"code":    402,
+		})
 		return
 	}
 
@@ -60,6 +68,7 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last GTid",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -70,6 +79,7 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert GTid to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -84,6 +94,7 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the goods type",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -92,9 +103,13 @@ func AddGoodsType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Goods type added successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Goods type added successfully",
+		"code":    201,
+	})
 }

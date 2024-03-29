@@ -14,6 +14,7 @@ func ListDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -23,6 +24,7 @@ func ListDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of departments",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -32,6 +34,7 @@ func ListDepartment(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot close the list of departments",
 				"detail": err.Error(),
+				"code":   503,
 			})
 		}
 	}(rows)
@@ -45,6 +48,7 @@ func ListDepartment(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot scan the list of department",
 				"detail": err.Error(),
+				"code":   504,
 			})
 			return
 		}
@@ -58,5 +62,6 @@ func ListDepartment(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get departments list successfully",
 		"rows":    departments,
+		"code":    201,
 	})
 }

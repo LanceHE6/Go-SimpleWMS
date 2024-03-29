@@ -14,6 +14,7 @@ func ListWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -23,6 +24,7 @@ func ListWarehouse(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of warehouses",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -32,6 +34,7 @@ func ListWarehouse(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot close the list of warehouses",
 				"detail": err.Error(),
+				"code":   503,
 			})
 		}
 	}(rows)
@@ -49,6 +52,7 @@ func ListWarehouse(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot scan the list of warehouses",
 				"detail": err.Error(),
+				"code":   504,
 			})
 			return
 		}
@@ -72,5 +76,6 @@ func ListWarehouse(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get warehouse list successfully",
 		"rows":    warehouses,
+		"code":    201,
 	})
 }

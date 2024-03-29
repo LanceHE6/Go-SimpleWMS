@@ -18,7 +18,10 @@ type addDepartmentRequest struct {
 func AddDepartment(context *gin.Context) {
 	var data addDepartmentRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Department name is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Department name is required",
+			"code":    401,
+		})
 		return
 	}
 	depName := data.Name
@@ -29,6 +32,7 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -40,11 +44,15 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of department for this department name",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The department name already exists"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The department name already exists",
+			"code":    402,
+		})
 		return
 	}
 
@@ -58,6 +66,7 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last Did",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -67,6 +76,7 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert Did to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -81,6 +91,7 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the department",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -89,9 +100,13 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Department added successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Department added successfully",
+		"code":    201,
+	})
 }

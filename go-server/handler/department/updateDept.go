@@ -14,7 +14,10 @@ type updateDeptRequest struct {
 func UpdateDepartment(context *gin.Context) {
 	var data updateDeptRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "did and department name are required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "did and department name are required",
+			"code":    401,
+		})
 		return
 	}
 	did := data.Did
@@ -26,6 +29,7 @@ func UpdateDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -37,11 +41,15 @@ func UpdateDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of department for this did",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The department does not exist"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The department does not exist",
+			"code":    402,
+		})
 		return
 	}
 
@@ -51,6 +59,7 @@ func UpdateDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update the department",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -59,8 +68,12 @@ func UpdateDepartment(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Department updated successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Department updated successfully",
+		"code":    201,
+	})
 }

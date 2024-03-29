@@ -20,7 +20,10 @@ type addStaffRequest struct {
 func AddStaff(context *gin.Context) {
 	var data addStaffRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Staff name or DeptId is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Staff name or DeptId is required",
+			"code":    401,
+		})
 		return
 	}
 	staffName := data.Name
@@ -41,6 +44,7 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -52,11 +56,15 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of staffs for this staff name",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The staff already exists"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The staff already exists",
+			"code":    402,
+		})
 		return
 	}
 
@@ -70,6 +78,7 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get last Sid",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
@@ -80,6 +89,7 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot convert Sid to integer",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -94,6 +104,7 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the staff",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
@@ -102,9 +113,13 @@ func AddStaff(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   506,
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Staff added successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Staff added successfully",
+		"code":    201,
+	})
 }

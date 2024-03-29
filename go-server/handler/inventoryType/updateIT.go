@@ -15,7 +15,10 @@ type updateInventoryTypeRequest struct {
 func UpdateInventoryType(context *gin.Context) {
 	var data updateInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "itid is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "itid is required",
+			"code":    401,
+		})
 		return
 	}
 	ITid := data.ITid
@@ -23,7 +26,10 @@ func UpdateInventoryType(context *gin.Context) {
 	typeCode := data.TypeCode
 
 	if ITName == "" && typeCode == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Name or type_code is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Name or type_code is required",
+			"code":    402,
+		})
 		return
 	}
 
@@ -33,6 +39,7 @@ func UpdateInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -44,11 +51,15 @@ func UpdateInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of inventory type for this itid",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
 	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The inventory type does not exist"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The inventory type does not exist",
+			"code":    403,
+		})
 		return
 	}
 
@@ -64,11 +75,15 @@ func UpdateInventoryType(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot get the number of inventory type for this type name",
 				"detail": err.Error(),
+				"code":   503,
 			})
 			return
 		}
 		if registered >= 1 {
-			context.JSON(http.StatusForbidden, gin.H{"message": "The type name already exists"})
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "The type name already exists",
+				"code":    404,
+			})
 			return
 		}
 
@@ -82,6 +97,7 @@ func UpdateInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update the inventory type",
 			"detail": err.Error(),
+			"code":   504,
 		})
 		return
 	}
@@ -90,8 +106,12 @@ func UpdateInventoryType(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",
 			"detail": err.Error(),
+			"code":   505,
 		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Inventory type updated successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Inventory type updated successfully",
+		"code":    201,
+	})
 }

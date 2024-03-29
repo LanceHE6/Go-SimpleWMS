@@ -13,18 +13,27 @@ type deleteRequest struct {
 func DeleteUser(context *gin.Context) {
 	var data deleteRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "UID is required",
+			"code":    401,
+		})
 		return
 	}
 	uid := data.Uid
 
 	targetUid, err := utils.GetUidByContext(context)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid token",
+			"code":    101,
+		})
 		return
 	}
 	if targetUid == uid {
-		context.JSON(http.StatusForbidden, gin.H{"message": "Invalid target uid"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Invalid target uid",
+			"code":    402,
+		})
 		return
 	}
 	tx, err := utils.GetDbConnection()
@@ -33,6 +42,7 @@ func DeleteUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
@@ -42,6 +52,7 @@ func DeleteUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete user",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -52,10 +63,12 @@ func DeleteUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit transaction",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "User deleted successfully",
+		"code":    201,
 	})
 }

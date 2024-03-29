@@ -18,7 +18,10 @@ type updateRequest struct {
 func UpdateUser(context *gin.Context) {
 	var data updateRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "UID is required",
+			"code":    401,
+		})
 		return
 	}
 	uid := data.Uid
@@ -33,12 +36,16 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
+			"code":   501,
 		})
 		return
 	}
 
 	if password == "" && nickName == "" && permission == 0 && phone == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name, permission and phone is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "At least one of password, nick_name, permission and phone is required",
+			"code":    402,
+		})
 		return
 	}
 	// 拼接sql语句
@@ -62,6 +69,7 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update user",
 			"detail": err.Error(),
+			"code":   502,
 		})
 		return
 	}
@@ -70,10 +78,12 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit transaction",
 			"detail": err.Error(),
+			"code":   503,
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "User updated successfully",
+		"code":    201,
 	})
 }
