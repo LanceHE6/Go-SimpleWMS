@@ -54,12 +54,12 @@ func Register(context *gin.Context) {
 	err = tx.QueryRow("SELECT uid FROM user ORDER BY register_time DESC LIMIT 1").Scan(&lastUid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastUid = "00000000"
+		lastUid = "u00000000"
 	} else if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last uid"})
 		return
 	}
-
+	lastUid = lastUid[1:]
 	// 增加最近注册的用户的 uid
 	nextUid, err := strconv.Atoi(lastUid)
 	if err != nil {
