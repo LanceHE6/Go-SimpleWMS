@@ -56,14 +56,20 @@ func Register(context *gin.Context) {
 	if errors.Is(err, sql.ErrNoRows) {
 		lastUid = "u00000000"
 	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last uid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get last uid",
+			"detail": err.Error(),
+		})
 		return
 	}
 	lastUid = lastUid[1:]
 	// 增加最近注册的用户的 uid
 	nextUid, err := strconv.Atoi(lastUid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert uid to integer"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot convert uid to integer",
+			"detail": err.Error(),
+		})
 		return
 	}
 	nextUid++
@@ -76,14 +82,20 @@ func Register(context *gin.Context) {
 	_, err = tx.Exec("INSERT INTO user (uid, account, password, nick_name, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		newUid, account, password, nickName, permission, registerTime, phone)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert new user"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot insert new user",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 提交事务
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 

@@ -18,22 +18,31 @@ func DeleteWarehouse(context *gin.Context) {
 	}
 	wid := data.Wid
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 删除仓库
-	_, err := tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
+	_, err = tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete the warehouse"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot delete the warehouse",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Warehouse deleted successfully"})

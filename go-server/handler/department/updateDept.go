@@ -20,18 +20,24 @@ func UpdateDepartment(context *gin.Context) {
 	did := data.Did
 	depName := data.Name
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 判断该部门是否已存在
 	var registered int
-	err := tx.QueryRow("SELECT count(name) FROM department WHERE did=?", did).Scan(&registered)
+	err = tx.QueryRow("SELECT count(name) FROM department WHERE did=?", did).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of department for this did"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of department for this did",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered == 0 {
@@ -42,12 +48,18 @@ func UpdateDepartment(context *gin.Context) {
 	// 更新部门
 	_, err = tx.Exec("UPDATE department SET name=? WHERE did=?", depName, did)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update the department"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update the department",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Department updated successfully"})

@@ -32,7 +32,10 @@ func AddWarehouse(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -40,7 +43,10 @@ func AddWarehouse(context *gin.Context) {
 	var registered int
 	err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE name=?", warehouseName).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this warehouse_name"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of warehouses for this warehouse_name",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered >= 1 {
@@ -55,14 +61,20 @@ func AddWarehouse(context *gin.Context) {
 	if errors.Is(err, sql.ErrNoRows) {
 		lastWid = "wh0000"
 	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last wid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get last wid",
+			"detail": err.Error(),
+		})
 		return
 	}
 	lastWid = lastWid[2:]
 	// 增加最近注册的仓库的 wid
 	nextWid, err := strconv.Atoi(lastWid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert wid to integer"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot convert wid to integer",
+			"detail": err.Error(),
+		})
 		return
 	}
 	nextWid++
@@ -84,12 +96,18 @@ func AddWarehouse(context *gin.Context) {
 		}
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the warehouse" + err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot insert the warehouse",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 

@@ -28,7 +28,10 @@ func AddInventoryType(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -36,7 +39,10 @@ func AddInventoryType(context *gin.Context) {
 	var registered int
 	err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE name=?", typeName).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of inventory type for this type name"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of inventory type for this type name",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered >= 1 {
@@ -51,14 +57,20 @@ func AddInventoryType(context *gin.Context) {
 	if errors.Is(err, sql.ErrNoRows) {
 		lastITid = "it0000"
 	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last ITid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get last ITid",
+			"detail": err.Error(),
+		})
 		return
 	}
 	lastITid = lastITid[2:]
 	// 增加最近注册的用户的 uid
 	nextITid, err := strconv.Atoi(lastITid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert ITid to integer"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot convert ITid to integer",
+			"detail": err.Error(),
+		})
 		return
 	}
 	nextITid++
@@ -69,12 +81,18 @@ func AddInventoryType(context *gin.Context) {
 	_, err = tx.Exec("INSERT INTO inventory_type(itid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newITid, typeName, addTime, typeCode)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the inventory type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot insert the inventory type",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 

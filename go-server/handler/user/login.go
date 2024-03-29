@@ -14,7 +14,7 @@ type loginRequest struct {
 func Login(context *gin.Context) {
 	var data loginRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"message": "Account and password are required"}})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Account and password are required"})
 		return
 	}
 	account := data.Account
@@ -23,7 +23,10 @@ func Login(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -36,21 +39,29 @@ func Login(context *gin.Context) {
 	} else {
 		token, err := utils.GenerateToken(uid, permission)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot generate token"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot generate token",
+				"detail": err.Error()})
 			return
 		}
 
 		// token写入数据库
 		_, err = tx.Exec("UPDATE user set token=? WHERE uid=?", token, uid)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update token"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot update token",
+				"detail": err.Error(),
+			})
 			return
 		}
 
 		// 提交事务
 		err = tx.Commit()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot commit transaction",
+				"detail": err.Error(),
+			})
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{

@@ -87,7 +87,10 @@ func AuthMiddleware() gin.HandlerFunc {
 		var isExist int
 		err = tx.QueryRow("SELECT count(*) from user where uid=?", uid).Scan(&isExist)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of uid for this uid"})
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of uid for this uid",
+				"detail": err.Error(),
+			})
 			c.Abort()
 			return
 		}
@@ -122,7 +125,10 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		tx, err := GetDbConnection()
 
 		if tx == nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot begin transaction",
+				"detail": err.Error(),
+			})
 			context.Abort()
 			return
 		}

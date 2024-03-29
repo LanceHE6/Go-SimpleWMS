@@ -32,18 +32,24 @@ func UpdateWarehouse(context *gin.Context) {
 		return
 	}
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 判断该仓库是否已存在
 	var registered int
-	err := tx.QueryRow("SELECT count(name) FROM warehouse WHERE wid=?", wid).Scan(&registered)
+	err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE wid=?", wid).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this wid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of warehouses for this wid",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered == 0 {
@@ -60,7 +66,10 @@ func UpdateWarehouse(context *gin.Context) {
 		var registered int
 		err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE name=?", warehouseName).Scan(&registered)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this warehouse_name"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of warehouses for this warehouse_name",
+				"detail": err.Error(),
+			})
 			return
 		}
 		if registered >= 1 {
@@ -84,12 +93,18 @@ func UpdateWarehouse(context *gin.Context) {
 		_, err = tx.Exec(updateSql)
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update the warehouse"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update the warehouse",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Warehouse updated successfully"})

@@ -27,18 +27,24 @@ func UpdateGoodsType(context *gin.Context) {
 		return
 	}
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 判断该类型是否已存在
 	var registered int
-	err := tx.QueryRow("SELECT count(name) FROM goods_type WHERE gtid=?", GTid).Scan(&registered)
+	err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE gtid=?", GTid).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of goods type for this gtid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of goods type for this gtid",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered == 0 {
@@ -55,7 +61,10 @@ func UpdateGoodsType(context *gin.Context) {
 		var registered int
 		err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE name=?", GTName).Scan(&registered)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of goods type for this type name"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of goods type for this type name",
+				"detail": err.Error(),
+			})
 			return
 		}
 		if registered >= 1 {
@@ -70,12 +79,18 @@ func UpdateGoodsType(context *gin.Context) {
 		}
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update the goods type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update the goods type",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Goods type updated successfully"})

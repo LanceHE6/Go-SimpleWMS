@@ -27,7 +27,10 @@ func UpdateStaff(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -50,12 +53,18 @@ func UpdateStaff(context *gin.Context) {
 	updateSql += " WHERE sid='" + sid + "'"
 	_, err = tx.Exec(updateSql)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update staff"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update staff",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{

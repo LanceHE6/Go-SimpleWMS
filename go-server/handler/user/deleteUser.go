@@ -30,20 +30,29 @@ func DeleteUser(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 	// 开始一个新的事务
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	// 删除用户
 	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete user"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot delete user",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 提交事务
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{

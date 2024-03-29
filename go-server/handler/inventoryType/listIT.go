@@ -8,22 +8,31 @@ import (
 )
 
 func ListInventoryType(context *gin.Context) {
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	rows, err := tx.Query("SELECT itid, name, type_code, add_time FROM inventory_type")
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the list of inventory type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the list of inventory type",
+			"detail": err.Error(),
+		})
 		return
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot close the list of inventory type"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot close the list of inventory type",
+				"detail": err.Error(),
+			})
 		}
 	}(rows)
 
@@ -34,7 +43,10 @@ func ListInventoryType(context *gin.Context) {
 
 		err = rows.Scan(&itid, &name, &typeCode, &addTime)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot scan the list of inventory type" + err.Error()})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot scan the list of inventory type",
+				"detail": err.Error(),
+			})
 			return
 		}
 		var typeCodeStr string

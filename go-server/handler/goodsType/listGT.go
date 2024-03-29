@@ -8,22 +8,31 @@ import (
 )
 
 func ListGoodsType(context *gin.Context) {
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	rows, err := tx.Query("SELECT gtid, name, type_code, add_time FROM goods_type")
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the list of goods type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the list of goods type",
+			"detail": err.Error(),
+		})
 		return
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot close the list of goods type"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot close the list of goods type",
+				"detail": err.Error(),
+			})
 		}
 	}(rows)
 
@@ -34,7 +43,10 @@ func ListGoodsType(context *gin.Context) {
 
 		err = rows.Scan(&gtid, &name, &typeCode, &addTime)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot scan the list of goods type" + err.Error()})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot scan the list of goods type",
+				"detail": err.Error(),
+			})
 			return
 		}
 		var typeCodeStr string

@@ -18,22 +18,31 @@ func DeleteInventoryType(context *gin.Context) {
 	}
 	itid := data.ITid
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 删除仓库
-	_, err := tx.Exec("DELETE FROM inventory_type WHERE itid=?", itid)
+	_, err = tx.Exec("DELETE FROM inventory_type WHERE itid=?", itid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete the inventory type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot delete the inventory type",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Inventory type deleted successfully"})

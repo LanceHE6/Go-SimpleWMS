@@ -21,20 +21,29 @@ func DeleteDepartment(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 	// 开始一个新的事务
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	// 删除部门
 	_, err = tx.Exec("DELETE FROM department WHERE did=?", did)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete department"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot delete department",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	// 提交事务
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{

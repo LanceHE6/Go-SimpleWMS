@@ -8,22 +8,31 @@ import (
 )
 
 func ListDepartment(context *gin.Context) {
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	rows, err := tx.Query("SELECT * FROM department")
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the list of departments"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the list of departments",
+			"detail": err.Error(),
+		})
 		return
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot close the list of departments"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot close the list of departments",
+				"detail": err.Error(),
+			})
 		}
 	}(rows)
 
@@ -33,7 +42,10 @@ func ListDepartment(context *gin.Context) {
 
 		err = rows.Scan(&did, &name, &addTime)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot scan the list of department" + err.Error()})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot scan the list of department",
+				"detail": err.Error(),
+			})
 			return
 		}
 		department := gin.H{

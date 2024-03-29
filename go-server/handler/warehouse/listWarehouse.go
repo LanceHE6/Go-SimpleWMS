@@ -8,22 +8,31 @@ import (
 )
 
 func ListWarehouse(context *gin.Context) {
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
 	rows, err := tx.Query("SELECT wid, name, add_time, comment, manager, status FROM warehouse")
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the list of warehouses"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the list of warehouses",
+			"detail": err.Error(),
+		})
 		return
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot close the list of warehouses"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot close the list of warehouses",
+				"detail": err.Error(),
+			})
 		}
 	}(rows)
 
@@ -37,7 +46,10 @@ func ListWarehouse(context *gin.Context) {
 
 		err = rows.Scan(&wid, &name, &addTime, &comment, &manager, &status)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot scan the list of warehouses" + err.Error()})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot scan the list of warehouses",
+				"detail": err.Error(),
+			})
 			return
 		}
 		var commentStr string

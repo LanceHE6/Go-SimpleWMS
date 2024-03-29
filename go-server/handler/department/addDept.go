@@ -26,7 +26,10 @@ func AddDepartment(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -34,7 +37,10 @@ func AddDepartment(context *gin.Context) {
 	var registered int
 	err = tx.QueryRow("SELECT count(name) FROM department WHERE name=?", depName).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of department for this department name"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of department for this department name",
+			"detail": err.Error(),
+		})
 		return
 	}
 	if registered >= 1 {
@@ -49,13 +55,19 @@ func AddDepartment(context *gin.Context) {
 	if errors.Is(err, sql.ErrNoRows) {
 		lastDid = "d0000"
 	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last Did"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get last Did",
+			"detail": err.Error(),
+		})
 		return
 	}
 	lastDid = lastDid[1:]
 	nextDid, err := strconv.Atoi(lastDid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert Did to integer"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot convert Did to integer",
+			"detail": err.Error(),
+		})
 		return
 	}
 	nextDid++
@@ -66,12 +78,18 @@ func AddDepartment(context *gin.Context) {
 	_, err = tx.Exec("INSERT INTO department(did, name, add_time) VALUES(?, ?, ?)", newDid, depName, addTime)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the department"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot insert the department",
+			"detail": err.Error(),
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+		})
 		return
 	}
 
