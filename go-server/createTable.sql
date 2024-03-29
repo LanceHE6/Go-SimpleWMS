@@ -36,3 +36,9 @@ CREATE TABLE IF NOT EXISTS warehouse (
                                          status INT default 1,
                                          foreign key (manager) references staff(sid) on delete set null
 );
+CREATE TABLE IF NOT EXISTS inventory_type (
+                                         itid VARCHAR(255) primary key not null,
+                                         name VARCHAR(255),
+                                         type_code VARCHAR(255) default '',
+                                         add_time VARCHAR(255)
+);

@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/handler/auth"
 	"Go_simpleWMS/handler/department"
 	"Go_simpleWMS/handler/goodsType"
+	"Go_simpleWMS/handler/inventoryType"
 	"Go_simpleWMS/handler/staff"
 	"Go_simpleWMS/handler/test"
 	"Go_simpleWMS/handler/upload"
@@ -116,5 +117,23 @@ func Route(ginServer *gin.Engine) {
 
 	staffGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		staff.ListStaff(context)
+	})
+
+	inventoryTypeGroup := ginServer.Group("/it")
+
+	inventoryTypeGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		inventoryType.AddInventoryType(context)
+	})
+
+	inventoryTypeGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		inventoryType.UpdateInventoryType(context)
+	})
+
+	inventoryTypeGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		inventoryType.DeleteInventoryType(context)
+	})
+
+	inventoryTypeGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		inventoryType.ListInventoryType(context)
 	})
 }
