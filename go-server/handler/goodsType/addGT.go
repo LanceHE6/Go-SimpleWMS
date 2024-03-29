@@ -44,17 +44,17 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的仓库的 wid
+	// 获取最近注册的货品类型的 gtid
 	var lastGTid string
 	err = tx.QueryRow("SELECT gtid FROM goods_type ORDER BY add_time DESC LIMIT 1").Scan(&lastGTid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastGTid = "0000"
+		lastGTid = "gt0000"
 	} else if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last GTid"})
 		return
 	}
-
+	lastGTid = lastGTid[2:]
 	// 增加最近注册的用户的 uid
 	nextGTid, err := strconv.Atoi(lastGTid)
 	if err != nil {

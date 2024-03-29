@@ -53,20 +53,20 @@ func AddWarehouse(context *gin.Context) {
 	err = tx.QueryRow("SELECT wid FROM warehouse ORDER BY add_time DESC LIMIT 1").Scan(&lastWid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastWid = "000000"
+		lastWid = "wh0000"
 	} else if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last wid"})
 		return
 	}
-
-	// 增加最近注册的用户的 uid
+	lastWid = lastWid[2:]
+	// 增加最近注册的仓库的 wid
 	nextWid, err := strconv.Atoi(lastWid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert wid to integer"})
 		return
 	}
 	nextWid++
-	newWid := fmt.Sprintf("wh%06d", nextWid) // 转换为 8 位字符串
+	newWid := fmt.Sprintf("wh%04d", nextWid) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库
@@ -84,7 +84,7 @@ func AddWarehouse(context *gin.Context) {
 		}
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the warehouse"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the warehouse" + err.Error()})
 		return
 	}
 	err = tx.Commit()

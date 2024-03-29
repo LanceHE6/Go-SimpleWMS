@@ -42,17 +42,17 @@ func AddDepartment(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的仓库的 did
+	// 获取最近注册的部门的 did
 	var lastDid string
 	err = tx.QueryRow("SELECT did FROM department ORDER BY add_time DESC LIMIT 1").Scan(&lastDid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastDid = "0000"
+		lastDid = "d0000"
 	} else if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last Did"})
 		return
 	}
-
+	lastDid = lastDid[1:]
 	nextDid, err := strconv.Atoi(lastDid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert Did to integer"})
