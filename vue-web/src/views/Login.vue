@@ -101,18 +101,10 @@ const submitForm = async () => {
     password: state.ruleForm.password
   };
 
-  const formData = new URLSearchParams();
-
-  for(let key in data) {
-    formData.append(key, data[key]);
-  }
   let result
   if (state.ruleForm.account && state.ruleForm.password) {
-    result = await axios.post('/user/login', formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).catch( error => {
+    result = await axios.post('/user/login', data)
+        .catch( error => {
           ElMessage.error("网络请求出错了！")
           console.log(error)
           state.loading = false
