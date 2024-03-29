@@ -14,7 +14,7 @@ import Allocate from '../views/main-views/entry-and-out/Allocate.vue'
 
 
 import Setting from  '../views/main-views/Setting.vue'
-
+import UserManagement from '../views/main-views/setting/UserManagement.vue'
 
 
 const routes = [
@@ -29,8 +29,13 @@ const routes = [
                     { path: '/home/entryAndOut/out', component: Out , name: 'out'},
                     { path: '/home/entryAndOut/check', component: Check , name: 'check'},
                     { path: '/home/entryAndOut/allocate', component: Allocate , name: 'allocate'},
-                ]},
-            { path: '/home/setting', component: Setting , name: 'setting'},
+                ]
+            },
+            { path: '/home/setting', component: Setting , name: 'setting',
+                children:[
+                    { path: '/home/setting/userManagement', component: UserManagement , name: 'userManagement'},
+                ]
+            },
         ]
     },
 ];
