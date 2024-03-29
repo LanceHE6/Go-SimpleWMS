@@ -4,6 +4,16 @@
 
 **所有接口需携带Content-Type头**
 
+示例：
+
+```
+headers:{
+	"Content-Type": "application/json"
+}
+```
+
+
+
 ## 鉴权说明
 
 ### 鉴权方式：
@@ -32,24 +42,36 @@ headers:{
 
 ```json
 {
+    "code": 401,
 	"message": "No Authorization header provided"
 }
 ```
 
 ### 鉴权相关返回数据说明
 
-| 参数名  | 参数类型 | 参数说明             |
-| ------- | -------- | -------------------- |
-| error   | string   | 后端服务内部错误消息 |
-| message | string   | 请求返回消息         |
+| 参数名  | 参数类型 |       参数说明       |
+| :-----: | :------: | :------------------: |
+|  code   |   int    |        业务码        |
+|  error  |  string  | 后端服务内部错误消息 |
+| message |  string  |     请求返回消息     |
 
 ### 鉴权相关返回状态码说明
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 401    | StatusUnauthorized  | 鉴权未通过       |
-| 403    | StatusForbidden     | 权限拒绝         |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  401   | StatusUnauthorized  |    鉴权未通过    |
+|  403   |   StatusForbidden   |     权限拒绝     |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+## 业务码 code 说明
+
+| code | 1xx  |   2xx    |   4xx    |   5xx    |
+| :--: | :--: | :------: | :------: | :------: |
+| 说明 | 鉴权 | 处理成功 | 处理失败 | 内部错误 |
+
+
 
 ----
 
@@ -79,6 +101,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "User registered successfully",
     "uid": "00000002"
 }
@@ -86,21 +109,22 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明             |
-| ------- | -------- | -------------------- |
-| message | string   | 返回消息             |
-| uid     | string   | 注册成功返回的用户id |
-| error   | string   | 后端内部错误消息     |
-| detail  | string   | 错误详情             |
+| 参数名  | 参数类型 |       参数说明       |
+| :-----: | :------: | :------------------: |
+|  code   |   int    |        业务码        |
+| message |  string  |       返回消息       |
+|   uid   |  string  | 注册成功返回的用户id |
+|  error  |  string  |   后端内部错误消息   |
+| detail  |  string  |       错误详情       |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 注册成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 403    | Forbidden           | 账号已被注册     |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     注册成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  403   |      Forbidden      |   账号已被注册   |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -117,7 +141,7 @@ headers:{
 **请求参数**：
 
 | 参数名  | 参数类型 | 是否必填 | 参数说明     |
-| --------- | -------- | -------- | ------------ |
+| :-------: | :------: | :------: | :----------: |
 | username  | String   | 是       | 用户名（手机号/邮箱） |
 | password  | String   | 是       | 密码         |
 
@@ -125,6 +149,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Login successfully",
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDk1NTUxMjEsInN1YiI6IjAwMDAwMDAyIn0.hvz-Xp9kfhVNsCy6Q9nhS9wM8-c-DgJJ8PLcME17Fto"
 }
@@ -132,21 +157,22 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明                |
-| ------- | -------- | ----------------------- |
-| message | string   | 返回消息                |
-| token   | string   | 登录成功返回的用户token |
-| error   | string   | 后端内部错误消息        |
-| detail  | string   | 错误详情                |
+| 参数名  | 参数类型 |        参数说明         |
+| :-----: | :------: | :---------------------: |
+|  code   |   int    |         业务码          |
+| message |  string  |        返回消息         |
+|  token  |  string  | 登录成功返回的用户token |
+|  error  |  string  |    后端内部错误消息     |
+| detail  |  string  |        错误详情         |
 
 **返回状态码说明**
 
-| 状态码 | 含义                 | 说明             |
-| ------ | -------------------- | ---------------- |
-| 200    | OK                   | 登录成功         |
-| 203    | NonAuthoritativeInfo | 账号或密码不正确 |
-| 400    | BadRequest           | 请求参数不全     |
-| 500    | InternalServerError  | 后端服务内部错误 |
+| 状态码 |         含义         |       说明       |
+| :----: | :------------------: | :--------------: |
+|  200   |          OK          |     登录成功     |
+|  203   | NonAuthoritativeInfo | 账号或密码不正确 |
+|  400   |      BadRequest      |   请求参数不全   |
+|  500   | InternalServerError  | 后端服务内部错误 |
 
 ----
 
@@ -170,26 +196,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "User deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 登录成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     登录成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -219,26 +247,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "User updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -260,6 +290,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Get user list successfully",
     "rows": [
         {
@@ -308,20 +339,21 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| rows    | array[]  | 用户信息数组     |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   用户信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -352,27 +384,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Warehouse added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 403    | Forbidden           | 仓库已存在       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    仓库已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -394,26 +428,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Warehouse deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -441,27 +477,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Warehouse updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明                        |
-| ------ | ------------------- | --------------------------- |
-| 200    | OK                  | 修改成功                    |
-| 400    | BadRequest          | 请求参数不全                |
-| 401    | Unauthorized        | 鉴权未通过                  |
-| 403    | Forbidden           | 仓库名已经存在/该仓库不存在 |
-| 500    | InternalServerError | 后端服务内部错误            |
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
 
 ----
 
@@ -483,6 +521,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Get warehouse list successfully",
     "rows": [
         {
@@ -507,20 +546,21 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| rows    | array[]  | 仓库信息数组     |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -547,27 +587,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Goods type added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 403    | Forbidden           | 仓库已存在       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    仓库已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -593,27 +635,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Goods type updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明                        |
-| ------ | ------------------- | --------------------------- |
-| 200    | OK                  | 修改成功                    |
-| 400    | BadRequest          | 请求参数不全                |
-| 401    | Unauthorized        | 鉴权未通过                  |
-| 403    | Forbidden           | 仓库名已经存在/该仓库不存在 |
-| 500    | InternalServerError | 后端服务内部错误            |
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
 
 ----
 
@@ -635,26 +679,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Goods type deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -676,6 +722,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Get user list successfully",
     "rows": [
         {
@@ -696,20 +743,21 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| rows    | array[]  | 仓库信息数组     |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -735,27 +783,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Department added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 403    | Forbidden           | 仓库已存在       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    仓库已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -778,27 +828,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Department updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明                        |
-| ------ | ------------------- | --------------------------- |
-| 200    | OK                  | 修改成功                    |
-| 400    | BadRequest          | 请求参数不全                |
-| 401    | Unauthorized        | 鉴权未通过                  |
-| 403    | Forbidden           | 仓库名已经存在/该仓库不存在 |
-| 500    | InternalServerError | 后端服务内部错误            |
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
 
 ----
 
@@ -820,26 +872,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Department deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -861,6 +915,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Get departments list successfully",
     "rows": [
         {
@@ -874,20 +929,21 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| rows    | array[]  | 仓库信息数组     |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -915,27 +971,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Staff added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 403    | Forbidden           | 仓库已存在       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    仓库已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -960,27 +1018,29 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Staff updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明                        |
-| ------ | ------------------- | --------------------------- |
-| 200    | OK                  | 修改成功                    |
-| 400    | BadRequest          | 请求参数不全                |
-| 401    | Unauthorized        | 鉴权未通过                  |
-| 403    | Forbidden           | 仓库名已经存在/该仓库不存在 |
-| 500    | InternalServerError | 后端服务内部错误            |
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
 
 ----
 
@@ -1002,26 +1062,28 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Staff deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 400    | BadRequest          | 请求参数不全     |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -1043,6 +1105,7 @@ headers:{
 
 ```json
 {
+    "code": 201,
     "message": "Get staffs list successfully",
     "rows": [
         {
@@ -1072,20 +1135,21 @@ headers:{
 
 **返回数据说明**
 
-| 参数名  | 参数类型 | 参数说明         |
-| ------- | -------- | ---------------- |
-| message | string   | 返回消息         |
-| rows    | array[]  | 仓库信息数组     |
-| error   | string   | 后端内部错误消息 |
-| detail  | string   | 错误详情         |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
 
 **返回状态码说明**
 
-| 状态码 | 含义                | 说明             |
-| ------ | ------------------- | ---------------- |
-| 200    | OK                  | 修改成功         |
-| 401    | Unauthorized        | 鉴权未通过       |
-| 500    | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -1139,4 +1203,13 @@ headers:{
 | :--: | :---------------: | :----------: | :----------: | :------------------: | :----------: |
 | 类型 |   varchar(255)    | varchar(255) | varchar(255) |     varchar(255)     | varchar(255) |
 | 说明 | 8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  添加时间戳  |
+
+----
+
+## inventory_type表
+
+| 字段 |       itid        |      name      |   type_code    |   add_time   |
+| :--: | :---------------: | :------------: | :------------: | :----------: |
+| 类型 |   varchar(255)    |  varchar(255)  |  varchar(255)  | varchar(255) |
+| 说明 | 4位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  添加时间戳  |
 
