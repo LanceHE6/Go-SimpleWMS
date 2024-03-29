@@ -1,155 +1,63 @@
 <template>
+  <el-container>
+    <el-aside
+        class="side-bar"
+        width="collapse"
+    >
+      <SideBar
+          class="side-menu"
+          :menu-list="sideMenu"
+          @selectMenu="handleSelect"
+      >
+      </SideBar>
+    </el-aside>
 
+    <el-main>
+      <my-tab
+        ref="myTab"
+        :default-tab="defaultTab"
+      >
+      </my-tab>
+    </el-main>
 
-
+  </el-container>
 </template>
 
 
 
 <script setup>
+import SideBar from "@/components/SideBar.vue";
+import {onMounted, ref} from "vue";
+import MyTab from "@/components/MyTab.vue";
 
-import {ElMessage} from "element-plus";
-import axios from "axios";
+onMounted(init)
 
+//侧边菜单内容
+const sideMenu = [
+  {name: "用户管理", index: "/home/setting/userManagement", icon: "User"},
+];
+//初始tab内容
+const defaultTab = {
+    label: '用户管理',
+    path: '/home/setting/userManagement',
+  }
 
-/**
- *接收用户对象的列表
- * */
-let userArray;
-/**
- * 用于用户注册的对象
- * */
-let user={
-    account:'',
-    password:'',
-    permission:'',
-    nick_name:'',
-    phone:''
-}
+let myTab = ref(null);
 
-/**
- * 修改用户时所用到的对象
- * */
-let userNew={
-    account:'',
-    password:'',
-    permission:'',
-    nick_name:'',
-    phone:''
+//初始化函数
+function init() {}
+
+//点击侧边栏菜单
+function handleSelect(menu){
+  myTab.value.addTab(menu.name, menu.key)
 }
 
 
-const token="bearer "+localStorage.getItem("token");
-
-/**
- * userList()
- * 获取用户的信息的请求
- * 打开网页时自动调用一次
- * 结果：userArray中包含一到多个user对象
- * */
-
-const userList=async () => {
-    console.log(token)
-    let array = await axios.get('/user/list', {
-        headers: {
-            'Authorization': token
-
-        }
-    }).catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.log(error.message)
-    })
-
-    if (array && array.data) {
-        userArray = array.data.rows;
-    }
-    console.log(userArray)
-}
-userList()
-/**
- * userDelete()
- * 删除用户的请求，param: uid 类型:String
- * */
-const userDelete=async (uid) => {
-     let result = await axios({
-         method: 'delete',
-         url: '/user/delete',
-         headers: {
-             'Content-Type': 'multipart/form-data',
-             'Authorization': token
-         },
-         data: {
-             "uid":uid
-         }
-     }).catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.log(error.message)
-    })
-    console.log(result)
-}
-
-/**
- * userRegister()
- * 新增用户 param: userNew对象
- * userNew={
- *     account:'',
- *     password:'',
- *     permission:'',
- *     nick_name:'',
- *     phone:''
- * }
- * */
-const userRegister=async (user) => {
-    let result = await axios({
-        method: 'post',
-        url: '/user/register',
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': token
-        },
-        data: user
-    }).then(()=>{
-            userNew.account=''
-            userNew.nick_name=''
-            userNew.password=''
-            userNew.phone=''
-            userNew.permission=''
-        }
-    ).catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.log(error.message)
-    })
-    console.log(result)
-}
-
-/**
- * userUpdate()
- * 修改用户  param: userNew对象
- * userNew={
- *     account:'',
- *     password:'',
- *     permission:'',
- *     nick_name:'',
- *     phone:''
- * */
-const userUpdate=async (userNew) => {
-    let result = await axios({
-        method: 'put',
-        url: '/user/update',
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': token
-        },
-        data: userNew
-    }).catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.log(error.message)
-    })
-    console.log(result)
-}
-userUpdate()
 </script>
 
 <style scoped>
-
+.side-menu {
+  height: 100%;
+  border: 0 !important;
+}
 </style>
