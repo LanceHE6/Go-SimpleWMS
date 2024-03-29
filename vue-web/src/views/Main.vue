@@ -45,7 +45,7 @@
         </el-menu-item>
 
         <el-menu-item
-            index="/home/entryAndOut"
+            index="/home/entryAndOut/entry"
         >
           出入库管理
         </el-menu-item>
@@ -63,13 +63,13 @@
         </el-menu-item>
 
         <el-menu-item
-            index="/"
+            index="/home"
         >
           分析统计
         </el-menu-item>
 
         <el-menu-item
-            index="/home/setting"
+            index="/home/setting/userManagement"
         >
           系统设置
         </el-menu-item>
