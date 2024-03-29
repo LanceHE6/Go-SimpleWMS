@@ -5,9 +5,10 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
+	"strings"
 	"sync"
 )
 
@@ -86,33 +87,24 @@ func InitDB() *sqlx.DB {
 		log.Println("Check tables...")
 
 		// 表创建语句
-		sqlUser := `CREATE TABLE IF NOT EXISTS user (
-			uid VARCHAR(255), 
-			account VARCHAR(255), 
-			password VARCHAR(255), 
-			nick_name VARCHAR(255), 
-			permission INT, 
-			register_time VARCHAR(255), 
-			token VARCHAR(255)
-		)`
-		_, createUserTableErr := db.Exec(sqlUser)
-
-		if createUserTableErr != nil {
-			log.Fatal("Create table error: " + createUserTableErr.Error())
+		sqlFile := "createTable.sql"
+		sqlContent, err := ioutil.ReadFile(sqlFile)
+		if err != nil {
+			log.Fatal("Failed to read SQL file: " + err.Error())
 			return
 		}
 
-		sqlWarehouse := `CREATE TABLE IF NOT EXISTS warehouse (
-			wid VARCHAR(255),
-			name VARCHAR(255),
-			add_time VARCHAR(255),
-			comment VARCHAR(255)
-		)`
+		statements := strings.Split(string(sqlContent), ";")
 
-		_, createWarehouseTableErr := db.Exec(sqlWarehouse)
-		if createWarehouseTableErr != nil {
-			log.Fatal("Create table error: " + createWarehouseTableErr.Error())
-			return
+		for _, statement := range statements {
+			trimmedStatement := strings.TrimSpace(statement)
+			if trimmedStatement != "" {
+				_, err := db.Exec(trimmedStatement)
+				if err != nil {
+					log.Fatal("Failed to execute SQL statement: " + err.Error())
+					return
+				}
+			}
 		}
 
 		log.Println("Check tables complete")

@@ -11,19 +11,35 @@ import (
 	"time"
 )
 
-func AddWarehouse(context *gin.Context) {
-	warehouseName := context.PostForm("name")
-	comment := context.PostForm("comment")
+type addWarehouseRequest struct {
+	Name    string `json:"name" form:"name" binding:"required"`
+	Comment string `json:"comment" form:"comment"`
+	Manager string `json:"manager" form:"manager" binding:"required"`
+	Status  string `json:"status" form:"status"`
+}
 
-	if warehouseName == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Warehouse name is required"})
+func AddWarehouse(context *gin.Context) {
+	var data addWarehouseRequest
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Warehouse name and manager are required",
+			"code":    401,
+		})
 		return
 	}
+	warehouseName := data.Name
+	comment := data.Comment
+	manager := data.Manager
+	status := data.Status
 
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   501,
+		})
 		return
 	}
 
@@ -31,11 +47,18 @@ func AddWarehouse(context *gin.Context) {
 	var registered int
 	err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE name=?", warehouseName).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this warehouse_name"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of warehouses for this warehouse_name",
+			"detail": err.Error(),
+			"code":   502,
+		})
 		return
 	}
 	if registered >= 1 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse already exists"})
+		context.JSON(http.StatusConflict, gin.H{
+			"message": "The warehouse already exists",
+			"code":    409,
+		})
 		return
 	}
 
@@ -44,37 +67,64 @@ func AddWarehouse(context *gin.Context) {
 	err = tx.QueryRow("SELECT wid FROM warehouse ORDER BY add_time DESC LIMIT 1").Scan(&lastWid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastWid = "000000"
+		lastWid = "wh0000"
 	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get last wid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get last wid",
+			"detail": err.Error(),
+			"code":   503,
+		})
 		return
 	}
-
-	// 增加最近注册的用户的 uid
+	lastWid = lastWid[2:]
+	// 增加最近注册的仓库的 wid
 	nextWid, err := strconv.Atoi(lastWid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot convert wid to integer"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot convert wid to integer",
+			"detail": err.Error(),
+			"code":   504,
+		})
 		return
 	}
 	nextWid++
-	newWid := fmt.Sprintf("%06d", nextWid) // 转换为 8 位字符串
+	newWid := fmt.Sprintf("wh%04d", nextWid) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库
 	if comment == "" {
-		_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time) VALUES(?, ?, ?)", newWid, warehouseName, addTime)
+		if status == "" {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager) VALUES(?, ?, ?, ?)", newWid, warehouseName, addTime, manager)
+		} else {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, status) VALUES(?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, status)
+		}
 	} else {
-		_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, comment) VALUES(?, ?, ?, ?)", newWid, warehouseName, addTime, comment)
+		if status == "" {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, comment) VALUES(?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, comment)
+		} else {
+			_, err = tx.Exec("INSERT INTO warehouse(wid, name, add_time, manager, comment, status) VALUES(?, ?, ?, ?, ?, ?)", newWid, warehouseName, addTime, manager, comment, status)
+		}
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot insert the warehouse"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot insert the warehouse",
+			"detail": err.Error(),
+			"code":   505,
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+			"code":   506,
+		})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Warehouse added successfully"})
+	context.JSON(http.StatusCreated, gin.H{
+		"message": "Warehouse added successfully",
+		"code":    201,
+	})
 }

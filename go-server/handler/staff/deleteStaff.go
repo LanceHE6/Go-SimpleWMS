@@ -1,4 +1,4 @@
-package warehouse
+package staff
 
 import (
 	"Go_simpleWMS/utils"
@@ -6,23 +6,23 @@ import (
 	"net/http"
 )
 
-type deleteWarehouseRequest struct {
-	Wid string `json:"wid" form:"name" binding:"required"`
+type deleteStaffRequest struct {
+	Sid string `json:"sid" form:"sid" binding:"required"`
 }
 
-func DeleteWarehouse(context *gin.Context) {
-	var data deleteWarehouseRequest
+func DeleteStaff(context *gin.Context) {
+	var data deleteStaffRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "wid is required",
-			"code":    "401",
+			"message": "SID is required",
+			"code":    401,
 		})
 		return
 	}
-	wid := data.Wid
+	sid := data.Sid
 
 	tx, err := utils.GetDbConnection()
-
+	// 开始一个新的事务
 	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
@@ -31,28 +31,29 @@ func DeleteWarehouse(context *gin.Context) {
 		})
 		return
 	}
-
-	// 删除仓库
-	_, err = tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
+	// 删除用户
+	_, err = tx.Exec("DELETE FROM staff WHERE sid=?", sid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the warehouse",
+			"error":  "Cannot delete staff",
 			"detail": err.Error(),
 			"code":   502,
 		})
 		return
 	}
+
+	// 提交事务
 	err = tx.Commit()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
+			"error":  "Cannot commit transaction",
 			"detail": err.Error(),
 			"code":   503,
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Warehouse deleted successfully",
+		"message": "Staff deleted successfully",
 		"code":    201,
 	})
 }

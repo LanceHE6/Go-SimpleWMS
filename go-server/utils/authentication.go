@@ -45,14 +45,29 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "No Authorization header provided"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "No Authorization header provided",
+				"code":    101,
+			})
 			c.Abort()
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Authorization header format"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid Authorization header format",
+				"code":    102,
+			})
+			c.Abort()
+			return
+		}
+		uid, err := GetUidByContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    103,
+			})
 			c.Abort()
 			return
 		}
@@ -66,46 +81,79 @@ func AuthMiddleware() gin.HandlerFunc {
 			if errors.As(err, &ve) {
 				if ve.Errors&jwt.ValidationErrorExpired != 0 {
 					// Token is expired
-					c.JSON(http.StatusUnauthorized, gin.H{"message": "Expired token"})
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"message": "Expired token",
+						"code":    104,
+					})
 				} else {
 					// Other errors
-					c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"message": "Invalid token",
+						"code":    105,
+					})
 				}
 			}
 			c.Abort()
 			return
 		}
 
-		if _, ok := token.Claims.(*myClaims); ok && token.Valid {
-
-			c.Next()
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+		// 判断uid是否在数据库中
+		tx, _ := GetDbConnection()
+		var isExist int
+		err = tx.QueryRow("SELECT count(*) from user where uid=?", uid).Scan(&isExist)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of uid for this uid",
+				"detail": err.Error(),
+				"code":   501,
+			})
+			c.Abort()
+			return
+		}
+		if isExist <= 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    106,
+			})
 			c.Abort()
 			return
 		}
 
+		if _, ok := token.Claims.(*myClaims); ok && token.Valid {
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    107,
+			})
+			c.Abort()
+			return
+		}
 	}
 }
 
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
-		tokenStr := context.GetHeader("Authorization")
-		bearerToken := strings.Split(tokenStr, " ")[1]
-
-		// 解析token
-		claims := &myClaims{}
-		_, err := jwt.ParseWithClaims(bearerToken, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
-		})
-		// 从token中获取载荷数据
-		uid := claims.Uid
+		uid, err := GetUidByContext(context)
+		if err != nil {
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    108,
+			})
+			context.Abort()
+			return
+		}
 
 		tx, err := GetDbConnection()
 
 		if tx == nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot begin transaction",
+				"detail": err.Error(),
+				"code":   502,
+			})
+			context.Abort()
 			return
 		}
 
@@ -113,17 +161,36 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		err = tx.QueryRow("SELECT permission FROM user WHERE uid=?", uid).Scan(&permission)
 
 		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    109,
+			})
 			context.Abort()
 			return
 		}
 		if permission == "3" {
 			context.Next()
-
 		} else {
-			context.JSON(http.StatusForbidden, gin.H{"message": "Permission denied"})
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "Permission denied",
+				"code":    110,
+			})
 			context.Abort()
 			return
 		}
 	}
+}
+
+// GetUidByContext 获取用户id
+func GetUidByContext(context *gin.Context) (string, error) {
+	authHeader := context.GetHeader("Authorization")
+	bearerToken := strings.Split(authHeader, " ")
+	// 解析token
+	claims := &myClaims{}
+	_, err := jwt.ParseWithClaims(bearerToken[1], claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	// 从token中获取载荷数据
+	uid := claims.Uid
+	return uid, err
 }
