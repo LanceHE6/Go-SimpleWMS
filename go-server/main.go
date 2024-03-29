@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/handler/auth"
 	"Go_simpleWMS/handler/department"
 	"Go_simpleWMS/handler/goodsType"
+	"Go_simpleWMS/handler/staff"
 	"Go_simpleWMS/handler/test"
 	"Go_simpleWMS/handler/upload"
 	"Go_simpleWMS/handler/user"
@@ -122,6 +123,36 @@ func main() {
 
 	departmentGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		department.AddDepartment(context)
+	})
+
+	departmentGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		department.UpdateDepartment(context)
+	})
+
+	departmentGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		department.DeleteDepartment(context)
+	})
+
+	departmentGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		department.ListDepartment(context)
+	})
+
+	staffGroup := ginServer.Group("/staff")
+
+	staffGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		staff.AddStaff(context)
+	})
+
+	staffGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		staff.UpdateStaff(context)
+	})
+
+	staffGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		staff.DeleteStaff(context)
+	})
+
+	staffGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		staff.ListStaff(context)
 	})
 
 	err := ginServer.Run(":8080")
