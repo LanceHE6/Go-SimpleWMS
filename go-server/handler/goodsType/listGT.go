@@ -53,7 +53,7 @@ func ListGoodsType(context *gin.Context) {
 		gts = append(gts, user)
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get user list successfully",
+		"message": "Get goods type list successfully",
 		"rows":    gts,
 	})
 }
