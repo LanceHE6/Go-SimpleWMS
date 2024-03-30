@@ -14,7 +14,9 @@
 
     </el-aside>
 
-    <el-main>
+    <el-main
+      class="main-container"
+    >
       <my-tab
           ref="myTab"
           :default-tab="defaultTab"
@@ -39,7 +41,7 @@ const sideMenu = [
   {name: "盘点单", index: "/home/entryAndOut/check", icon: "FolderChecked"},
   {name: "调拨单", index: "/home/entryAndOut/allocate", icon: "Folder"},
 ];
-
+//初始tab内容
 const defaultTab = {
     label: '入库单',
     path: '/home/entryAndOut/entry',
@@ -60,5 +62,8 @@ function handleSelect(menu){
 .side-menu {
   height: 100%;
   border: 0 !important;
+}
+.main-container{
+  padding: 5px;
 }
 </style>
