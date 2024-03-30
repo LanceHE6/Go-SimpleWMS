@@ -119,7 +119,7 @@ func Route(ginServer *gin.Engine) {
 		staff.ListStaff(context)
 	})
 
-	inventoryTypeGroup := ginServer.Group("/it")
+	inventoryTypeGroup := ginServer.Group("/invt")
 
 	inventoryTypeGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		inventoryType.AddInventoryType(context)
