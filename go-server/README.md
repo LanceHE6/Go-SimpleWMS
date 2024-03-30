@@ -94,7 +94,7 @@ headers:{
 | account    | String   | 是       | 用户名（手机号/邮箱） |
 | password   | String   | 是       | 密码         |
 | permission | int | 是 | 权限大小（1为管理员，2为超级管理员） |
-| nick_name  | string | 是 | 昵称 |
+| nickname  | string | 是 | 昵称 |
 | phone | string | 否 | 电话 |
 
 **返回结果示例**：

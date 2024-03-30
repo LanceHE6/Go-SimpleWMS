@@ -15,7 +15,7 @@ type registerRequest struct {
 	Account    string `json:"account" form:"account" binding:"required"`
 	Password   string `json:"password" form:"password" binding:"required"`
 	Permission int    `json:"permission" form:"permission" binding:"required"`
-	NickName   string `json:"nick_name" form:"nick_name" binding:"required"`
+	NickName   string `json:"nickname" form:"nickname" binding:"required"`
 	Phone      string `json:"phone" form:"phone"`
 }
 

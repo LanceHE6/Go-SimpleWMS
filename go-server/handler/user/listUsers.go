@@ -67,7 +67,7 @@ func ListUsers(context *gin.Context) {
 			"permission":    permission,
 			"register_time": registerTime,
 			"phone":         phoneStr,
-			"nickName":      nickName,
+			"nickname":      nickName,
 		}
 		users = append(users, user)
 	}
