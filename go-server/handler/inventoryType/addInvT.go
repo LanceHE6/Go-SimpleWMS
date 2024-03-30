@@ -19,7 +19,10 @@ type addInventoryTypeRequest struct {
 func AddInventoryType(context *gin.Context) {
 	var data addInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Type name is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Type name is required",
+			"code":    401,
+		})
 		return
 	}
 	typeName := data.Name
