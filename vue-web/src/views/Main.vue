@@ -7,7 +7,6 @@
     <el-header class="head-container">
       <el-menu
           :router="true"
-          :default-active="state.nowMenuActive"
           :ellipsis="false"
           class="head-menu"
           mode="horizontal"
