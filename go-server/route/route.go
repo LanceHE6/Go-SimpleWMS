@@ -7,6 +7,7 @@ import (
 	"Go_simpleWMS/handler/inventoryType"
 	"Go_simpleWMS/handler/staff"
 	"Go_simpleWMS/handler/test"
+	"Go_simpleWMS/handler/unit"
 	"Go_simpleWMS/handler/upload"
 	"Go_simpleWMS/handler/user"
 	"Go_simpleWMS/handler/warehouse"
@@ -48,92 +49,83 @@ func Route(ginServer *gin.Engine) {
 	})
 
 	warehouseGroup := ginServer.Group("/warehouse")
-
 	warehouseGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		warehouse.AddWarehouse(context)
 	})
-
 	warehouseGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		warehouse.DeleteWarehouse(context)
 	})
-
 	warehouseGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		warehouse.UpdateWarehouse(context)
 	})
-
 	warehouseGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		warehouse.ListWarehouse(context)
 	})
 
 	goodsTypeGroup := ginServer.Group("/gt")
-
 	goodsTypeGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		goodsType.AddGoodsType(context)
 	})
-
 	goodsTypeGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		goodsType.UpdateGoodsType(context)
 	})
-
 	goodsTypeGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		goodsType.DeleteGoodsType(context)
 	})
-
 	goodsTypeGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		goodsType.ListGoodsType(context)
 	})
 
 	departmentGroup := ginServer.Group("/dept")
-
 	departmentGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		department.AddDepartment(context)
 	})
-
 	departmentGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		department.UpdateDepartment(context)
 	})
-
 	departmentGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		department.DeleteDepartment(context)
 	})
-
 	departmentGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		department.ListDepartment(context)
 	})
 
 	staffGroup := ginServer.Group("/staff")
-
 	staffGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		staff.AddStaff(context)
 	})
-
 	staffGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		staff.UpdateStaff(context)
 	})
-
 	staffGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		staff.DeleteStaff(context)
 	})
-
 	staffGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		staff.ListStaff(context)
 	})
 
 	inventoryTypeGroup := ginServer.Group("/invt")
-
 	inventoryTypeGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		inventoryType.AddInventoryType(context)
 	})
-
 	inventoryTypeGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		inventoryType.UpdateInventoryType(context)
 	})
-
 	inventoryTypeGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		inventoryType.DeleteInventoryType(context)
 	})
-
 	inventoryTypeGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
 		inventoryType.ListInventoryType(context)
+	})
+
+	unitGroup := ginServer.Group("/unit")
+	unitGroup.POST("/add", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		unit.AddUnit(context)
+	})
+	unitGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		unit.DeleteUnit(context)
+	})
+	unitGroup.GET("/list", utils.AuthMiddleware(), func(context *gin.Context) {
+		unit.ListUnit(context)
 	})
 }
