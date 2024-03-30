@@ -15,19 +15,21 @@ var jwtKey = []byte(SecretKey) // 用于签名的密钥
 // 自定义载荷内容
 type myClaims struct {
 	jwt.StandardClaims
-	Uid        string `json:"uid"`
-	Permission int    `json:"permission"`
+	Uid          string `json:"uid"`
+	Permission   int    `json:"permission"`
+	RegisterTime string `json:"register_time"`
 }
 
 // GenerateToken 生成一个token
-func GenerateToken(id string, permission int) (string, error) {
+func GenerateToken(id string, permission int, registerTime string) (string, error) {
 	expirationTime := time.Now().Add(72 * time.Hour)
 	claims := &myClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
-		Uid:        id,
-		Permission: permission,
+		Uid:          id,
+		Permission:   permission,
+		RegisterTime: registerTime,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -62,7 +64,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		uid, err := GetUidByContext(c)
+		uid, _, registerTime, err := GetUserInfoByContext(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
@@ -97,10 +99,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// 判断uid是否在数据库中
+		// 判断是否在数据库中
 		tx, _ := GetDbConnection()
 		var isExist int
-		err = tx.QueryRow("SELECT count(*) from user where uid=?", uid).Scan(&isExist)
+		err = tx.QueryRow("SELECT count(*) from user where uid=? and register_time=?", uid, registerTime).Scan(&isExist)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot get the number of uid for this uid",
@@ -135,7 +137,7 @@ func AuthMiddleware() gin.HandlerFunc {
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
-		uid, err := GetUidByContext(context)
+		_, permission, _, err := GetUserInfoByContext(context)
 		if err != nil {
 			context.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
@@ -157,18 +159,7 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		var permission string
-		err = tx.QueryRow("SELECT permission FROM user WHERE uid=?", uid).Scan(&permission)
-
-		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid token",
-				"code":    109,
-			})
-			context.Abort()
-			return
-		}
-		if permission == "3" {
+		if permission == 3 {
 			context.Next()
 		} else {
 			context.JSON(http.StatusForbidden, gin.H{
@@ -181,8 +172,8 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 	}
 }
 
-// GetUidByContext 获取用户id
-func GetUidByContext(context *gin.Context) (string, error) {
+// GetUserInfoByContext 通过context获取用户信息
+func GetUserInfoByContext(context *gin.Context) (string, int, string, error) {
 	authHeader := context.GetHeader("Authorization")
 	bearerToken := strings.Split(authHeader, " ")
 	// 解析token
@@ -192,5 +183,7 @@ func GetUidByContext(context *gin.Context) (string, error) {
 	})
 	// 从token中获取载荷数据
 	uid := claims.Uid
-	return uid, err
+	permission := claims.Permission
+	registerTime := claims.RegisterTime
+	return uid, permission, registerTime, err
 }
