@@ -21,7 +21,7 @@ func DeleteUser(context *gin.Context) {
 	}
 	uid := data.Uid
 
-	targetUid, err := utils.GetUidByContext(context)
+	targetUid, _, _, err := utils.GetUserInfoByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Invalid token",
