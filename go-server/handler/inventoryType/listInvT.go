@@ -60,13 +60,13 @@ func ListInventoryType(context *gin.Context) {
 			typeCodeStr = ""
 		}
 
-		user := gin.H{
+		gt := gin.H{
 			"gtid":      itid,
 			"name":      name,
 			"type_code": typeCodeStr,
 			"addTime":   addTime,
 		}
-		gts = append(gts, user)
+		gts = append(gts, gt)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get inventory type list successfully",
