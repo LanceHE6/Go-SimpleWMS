@@ -23,7 +23,7 @@ func Register(context *gin.Context) {
 	var data registerRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Account, password, permission and nick_name are required",
+			"message": "Account, password, permission and nickname are required",
 			"code":    401,
 		})
 		return
@@ -95,7 +95,7 @@ func Register(context *gin.Context) {
 	registerTime := time.Now().Unix()
 
 	// 插入新用户
-	_, err = tx.Exec("INSERT INTO user (uid, account, password, nick_name, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
+	_, err = tx.Exec("INSERT INTO user (uid, account, password, nickname, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		newUid, account, password, nickName, permission, registerTime, phone)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{

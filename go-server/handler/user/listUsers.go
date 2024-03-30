@@ -19,7 +19,7 @@ func ListUsers(context *gin.Context) {
 		return
 	}
 
-	rows, err := tx.Query("SELECT uid, account, permission, register_time, phone, nick_name FROM user")
+	rows, err := tx.Query("SELECT uid, account, permission, register_time, phone, nickname FROM user")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of users",

@@ -237,11 +237,11 @@ headers:{
 | ---------- | -------- | -------- | ------------------ |
 | uid        | String   | 是       | 用户ID             |
 | password   | String   | 否       | 用户更改的密码     |
-| nickName   | String   | 否       | 用户更改的昵称     |
+| nickname   | String   | 否       | 用户更改的昵称     |
 | permission | int      | 否       | 用户更改的权限大小 |
 | phone      | String   | 否       | 用户更改的电话     |
 
-*注:password,nickName,permission,phone4个可选参数至少需提供一个*
+*注:password,nickname,permission,phone4个可选参数至少需提供一个*
 
 **返回结果示例**：
 
@@ -295,7 +295,7 @@ headers:{
     "rows": [
         {
             "account": "admin",
-            "nickName": "admin",
+            "nickname": "admin",
             "permission": 3,
             "phone": "1924658487",
             "register_time": "123456",
@@ -303,7 +303,7 @@ headers:{
         },
         {
             "account": "123",
-            "nickName": "admin",
+            "nickname": "admin",
             "permission": 3,
             "phone": "",
             "register_time": "1711266620",
@@ -319,7 +319,7 @@ headers:{
         },
         {
             "account": "1235",
-            "nickName": "admin",
+            "nickname": "admin",
             "permission": 3,
             "phone": "",
             "register_time": "1711267524",
@@ -327,7 +327,7 @@ headers:{
         },
         {
             "account": "1236",
-            "nickName": "admin",
+            "nickname": "admin",
             "permission": 3,
             "phone": "123456789",
             "register_time": "1711267576",

@@ -10,7 +10,7 @@ import (
 type updateRequest struct {
 	Uid        string `json:"uid" form:"uid" binding:"required"`
 	Password   string `json:"password" form:"password"`
-	NickName   string `json:"nick_name" form:"nick_name"`
+	Nickname   string `json:"nickname" form:"nickname"`
 	Permission int    `json:"permission" form:"permission"`
 	Phone      string `json:"phone" form:"phone"`
 }
@@ -26,7 +26,7 @@ func UpdateUser(context *gin.Context) {
 	}
 	uid := data.Uid
 	password := data.Password
-	nickName := data.NickName
+	nickName := data.Nickname
 	permission := data.Permission
 	phone := data.Phone
 
@@ -43,7 +43,7 @@ func UpdateUser(context *gin.Context) {
 
 	if password == "" && nickName == "" && permission == 0 && phone == "" {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "At least one of password, nick_name, permission and phone is required",
+			"message": "At least one of password, nickname, permission and phone is required",
 			"code":    402,
 		})
 		return
@@ -54,7 +54,7 @@ func UpdateUser(context *gin.Context) {
 		updateSql += "password='" + password + "',"
 	}
 	if nickName != "" {
-		updateSql += "nick_name='" + nickName + "',"
+		updateSql += "nickname='" + nickName + "',"
 	}
 	if permission != 0 {
 		updateSql += "permission=" + strconv.Itoa(permission) + ","

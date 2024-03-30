@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS user (
                                     uid VARCHAR(255) primary key not null ,
                                     account VARCHAR(255),
                                     password VARCHAR(255),
-                                    nick_name VARCHAR(255),
+                                    nickname VARCHAR(255),
                                     permission INT default 1,
                                     register_time VARCHAR(255),
                                     token VARCHAR(255) default '',
