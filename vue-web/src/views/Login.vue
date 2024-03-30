@@ -39,7 +39,7 @@
         <el-form-item>
           <br>
           <el-checkbox v-model="state.remember" @change="!state.remember">记住密码</el-checkbox>
-          <el-button style="width: 100%; margin-top: 20px" type="primary" @click="submitForm" :loading="state.loading" round>
+          <el-button style="width: 100%; margin-top: 20px" type="primary" @click="submitForm(loginForm)" :loading="state.loading" round>
             <el-text style="color: white">立即登录</el-text>
           </el-button>
         </el-form-item>
@@ -60,7 +60,6 @@ const loginForm = ref(null)
 import {Lock, User} from "@element-plus/icons-vue";
 
 onMounted(initialize)
-
 const state = reactive({
   ruleForm: {
     account: '',
@@ -85,7 +84,6 @@ const user = reactive({
 })
 
 function initialize(){
-  console.log("user" + JSON.stringify(user))
   if(user.remember === '1') {
     state.ruleForm.account = user.account
     state.ruleForm.password = user.password
@@ -94,52 +92,54 @@ function initialize(){
 }
 
 
-const submitForm = async () => {
-  state.loading = true
-  const data = {
-    account: state.ruleForm.account,
-    password: state.ruleForm.password
-  };
+const submitForm = async (form) => {
+  form.validate(async (valid) => {
+    if (valid) {
+      state.loading = true
+      const data = {
+        account: state.ruleForm.account,
+        password: state.ruleForm.password
+      };
 
-  let result
-  if (state.ruleForm.account && state.ruleForm.password) {
-    result = await axios.post('/user/login', data)
-        .catch( error => {
-          ElMessage.error("网络请求出错了！")
-          console.log(error)
-          state.loading = false
-        }
-    )
-  } else {
-    ElMessage.error("账号和密码不能为空！")
-    console.error('账号或密码为空');
-  }
+      if (state.ruleForm.account && state.ruleForm.password) {
+        await axios.post('/user/login', data)
+            .then(async result => {
+              if (result.status === 200) {
+                // 需要将返回的数据存入Store中
+                UserStore.token = result.data.token
+                localStorage.setItem("token", UserStore.token)
+                console.log(localStorage.getItem("token"))
 
-  state.loading = false
+                // 记住账号密码
+                if (state.remember) {
+                  localStorage.setItem("account", state.ruleForm.account)
+                  localStorage.setItem("password", state.ruleForm.password)
+                  localStorage.setItem("remember", state.remember ? '1' : '0')
+                } else {
+                  localStorage.setItem("account", '')
+                  localStorage.setItem("password", '')
+                  localStorage.setItem("remember", '0')
+                }
 
-  if (result.status === 200) {
-    // 需要将返回的数据存入Store中
-    UserStore.token = result.data.token
-    localStorage.setItem("token", UserStore.token)
-
-    // 记住账号密码
-    if (state.remember) {
-      localStorage.setItem("account", state.ruleForm.account)
-      localStorage.setItem("password", state.ruleForm.password)
-      localStorage.setItem("remember", state.remember ? '1' : '0')
-    } else {
-      localStorage.setItem("account", '')
-      localStorage.setItem("password", '')
-      localStorage.setItem("remember", '0')
+                ElMessage.success("登录成功")
+                await router.push("/home/productManagement")
+              } else {
+                ElMessage.error("账号或密码错误")
+              }
+              console.log(result)
+            })
+            .catch(error => {
+                  ElMessage.error("网络请求出错了！")
+                  console.error(error)
+                  state.loading = false
+                }
+            )
+      } else {
+        ElMessage.error("账号和密码不能为空！")
+      }
+      state.loading = false
     }
-
-    console.log("登录成功")
-    ElMessage.success("登录成功")
-    await router.push("/home/productManagement")
-  } else {
-    console.log("登录失败")
-    ElMessage.error("账号或密码错误")
-  }
+  })
 }
 </script>
 
