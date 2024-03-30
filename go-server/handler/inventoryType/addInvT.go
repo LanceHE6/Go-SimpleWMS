@@ -106,7 +106,7 @@ func AddInventoryType(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods type added successfully",
+		"message": "Inventory type added successfully",
 		"code":    201,
 	})
 }
