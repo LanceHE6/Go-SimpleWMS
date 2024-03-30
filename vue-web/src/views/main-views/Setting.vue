@@ -12,7 +12,9 @@
       </SideBar>
     </el-aside>
 
-    <el-main>
+    <el-main
+      class="main-container"
+    >
       <my-tab
         ref="myTab"
         :default-tab="defaultTab"
@@ -52,12 +54,14 @@ function handleSelect(menu){
   myTab.value.addTab(menu.name, menu.key)
 }
 
-
 </script>
 
 <style scoped>
 .side-menu {
   height: 100%;
   border: 0 !important;
+}
+.main-container{
+  padding: 5px;
 }
 </style>
