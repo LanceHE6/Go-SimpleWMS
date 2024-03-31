@@ -19,8 +19,9 @@ func AddUnit(context *gin.Context) {
 	var data addUnitRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Unit name is required " + err.Error(),
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

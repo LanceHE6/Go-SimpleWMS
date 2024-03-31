@@ -15,8 +15,9 @@ func Login(context *gin.Context) {
 	var data loginRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Account and password are required",
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

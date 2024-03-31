@@ -22,8 +22,9 @@ func AddWarehouse(context *gin.Context) {
 	var data addWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Warehouse name and manager are required",
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

@@ -14,8 +14,9 @@ func DeleteWarehouse(context *gin.Context) {
 	var data deleteWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "wid is required",
-			"code":    "401",
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

@@ -18,7 +18,11 @@ type updateWarehouseRequest struct {
 func UpdateWarehouse(context *gin.Context) {
 	var data updateWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "wid is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
+		})
 		return
 	}
 	wid := data.Wid

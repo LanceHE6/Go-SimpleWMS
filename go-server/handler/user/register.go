@@ -23,8 +23,9 @@ func Register(context *gin.Context) {
 	var data registerRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Account, password, permission and nickname are required",
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

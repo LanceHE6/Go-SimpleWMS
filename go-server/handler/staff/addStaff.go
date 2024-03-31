@@ -21,8 +21,9 @@ func AddStaff(context *gin.Context) {
 	var data addStaffRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Staff name or DeptId is required",
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}

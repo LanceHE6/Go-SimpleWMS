@@ -14,8 +14,9 @@ func DeleteGoodsType(context *gin.Context) {
 	var data deleteGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "GTid is required",
+			"message": "Missing parameters or incorrect format",
 			"code":    401,
+			"detail":  err.Error(),
 		})
 		return
 	}
