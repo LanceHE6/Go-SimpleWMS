@@ -35,6 +35,9 @@ func Route(ginServer *gin.Engine) {
 	userGroup.POST("/register", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
 		user.Register(context)
 	})
+	userGroup.POST("/register-batch", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(context *gin.Context) {
+		user.RegisterBatch(context)
+	})
 	userGroup.POST("/login", func(context *gin.Context) {
 		user.Login(context)
 	})
