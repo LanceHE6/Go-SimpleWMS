@@ -118,6 +118,8 @@
 import {onMounted, reactive} from 'vue'
 import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
+import axios from "axios";
+import {ElMessage} from "element-plus";
 
 onMounted(initialize)
 
@@ -133,12 +135,27 @@ const handleSelect = (key) => {
 
 //初始化
 async function initialize(){
-  if((localStorage.getItem("token") || '') === ''){
-    await router.push("/")
-  }
-  else{
-
-  }
+  const token="bearer "+localStorage.getItem("token");
+  await axios.get('/auth', {
+    headers: {
+      'Authorization': token
+    }
+  })
+      .then(result => {
+        console.log("auth:", result)
+        if(result.status === 200){
+          //ignore
+        }
+        else{
+          ElMessage.error("操作失败，请先登录！")
+          router.push('/')
+        }
+      })
+      .catch(error => {
+        ElMessage.error("操作失败，请先登录！")
+        console.error("auth:", error.message)
+        router.push('/')
+      })
 }
 </script>
 
