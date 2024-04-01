@@ -124,6 +124,7 @@ const submitForm = async (form) => {
                 ElMessage.success("登录成功")
                 await router.push("/home/productManagement")
               } else {
+                localStorage.setItem("token", "")
                 ElMessage.error("账号或密码错误")
               }
               console.log(result)
