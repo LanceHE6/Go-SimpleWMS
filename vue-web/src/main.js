@@ -21,3 +21,21 @@ app.use(ElementUI)
     .use(router)
 
 app.mount('#app')
+
+// router.beforeEach((to, from, next) => {
+//     console.log("from:", from.name)
+//     console.log("to:", to.name)
+//     //如果需要鉴权
+//     if(to.meta.requiresAuth){
+//         if(to.meta.beforeName !== from.name){
+//             ElMessage.error("操作失败，请先登录！")
+//             next('/')
+//         }
+//         else{
+//             next()
+//         }
+//     }
+//     else{
+//         next()
+//     }
+// });
