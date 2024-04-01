@@ -23,19 +23,19 @@ import InventoryTypeManagement from '../views/main-views/setting/InventoryTypeMa
 
 const routes = [
     { path: '/', component: Login , name: 'login'},
-    { path: '/home', component: Main , name: 'home', meta: { requiresAuth: true, beforeName:'login' },
+    { path: '/home', component: Main , name: 'home', meta: { requiresAuth: true },
         children: [
-            { path: '/home/homePage', component: HomePage , name: 'homePage', meta: { beforeName:'main' }},
-            { path: '/home/productManagement', component: ProductManagement , name: 'productManagement', meta: { beforeName:'main' }},
-            { path: '/home/entryAndOut', component: EntryAndOut , name: 'entryAndOut', meta: { beforeName:'main' },
+            { path: '/home/homePage', component: HomePage , name: 'homePage'},
+            { path: '/home/productManagement', component: ProductManagement , name: 'productManagement'},
+            { path: '/home/entryAndOut', component: EntryAndOut , name: 'entryAndOut',
                 children:[
-                    { path: '/home/entryAndOut/entry', component: Entry , name: 'entry', meta: { beforeName:'entryAndOut' }},
+                    { path: '/home/entryAndOut/entry', component: Entry , name: 'entry'},
                     { path: '/home/entryAndOut/out', component: Out , name: 'out'},
                     { path: '/home/entryAndOut/check', component: Check , name: 'check'},
                     { path: '/home/entryAndOut/allocate', component: Allocate , name: 'allocate'},
                 ]
             },
-            { path: '/home/setting', component: Setting , name: 'setting', meta: { beforeName:'main' },
+            { path: '/home/setting', component: Setting , name: 'setting',
                 children:[
                     { path: '/home/setting/userManagement', component: UserManagement , name: 'userManagement'},
                     { path: '/home/setting/warehouseManagement', component: WarehouseManagement , name: 'warehouseManagement'},
