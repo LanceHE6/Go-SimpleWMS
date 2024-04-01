@@ -128,5 +128,13 @@ func GetDbConnection() (*sql.Tx, error) {
 		log.Println("error: Cannot begin transaction")
 		return nil, err
 	}
+	defer func() {
+		if err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return
+			}
+		}
+	}()
 	return tx, nil
 }

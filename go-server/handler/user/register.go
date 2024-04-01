@@ -44,6 +44,14 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	phone := userData.Phone
 
 	tx, err := utils.GetDbConnection()
+	defer func() {
+		if err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return
+			}
+		}
+	}()
 
 	if tx == nil {
 		return http.StatusInternalServerError, gin.H{

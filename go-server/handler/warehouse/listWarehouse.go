@@ -41,10 +41,10 @@ func ListWarehouse(context *gin.Context) {
 
 	var warehouses []gin.H
 	for rows.Next() {
-		var wid, name, addTime, manager string
+		var wid, name, addTime string
 
 		//sql.NullString是一个结构体，它有两个字段：String和Valid。如果SQL查询结果中的值为NULL，Valid字段会被设置为false，否则为true
-		var comment sql.NullString
+		var comment, manager sql.NullString
 		var status int
 
 		err = rows.Scan(&wid, &name, &addTime, &comment, &manager, &status)
@@ -55,6 +55,12 @@ func ListWarehouse(context *gin.Context) {
 				"code":   504,
 			})
 			return
+		}
+		var managerStr string
+		if manager.Valid {
+			managerStr = manager.String
+		} else {
+			managerStr = ""
 		}
 		var commentStr string
 		if comment.Valid {
@@ -68,7 +74,7 @@ func ListWarehouse(context *gin.Context) {
 			"name":     name,
 			"add_time": addTime,
 			"comment":  commentStr,
-			"manager":  manager,
+			"manager":  managerStr,
 			"status":   status,
 		}
 		warehouses = append(warehouses, warehouse)
