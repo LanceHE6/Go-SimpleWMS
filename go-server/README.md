@@ -159,6 +159,32 @@ headers:{
     "code": 201,
     "message": "User registered successfully"
 }
+
+{
+    "code": 403,
+    "detail": [
+        {
+            "code": 402,
+            "message": "The account '87' has been registered"
+        }
+    ],
+    "message": "Some users failed to register; 1/2"
+}
+
+{
+    "code": 402,
+    "detail": [
+        {
+            "code": 402,
+            "message": "The account '87' has been registered"
+        },
+        {
+            "code": 402,
+            "message": "The account '81' has been registered"
+        }
+    ],
+    "message": "All users failed to register"
+}
 ```
 
 **返回数据说明**
@@ -169,16 +195,16 @@ headers:{
 | message |  string  |       返回消息       |
 |   uid   |  string  | 注册成功返回的用户id |
 |  error  |  string  |   后端内部错误消息   |
-| detail  |  string  |       错误详情       |
+| detail  |  string  |   每个错误注册详情   |
 
 **返回状态码说明**
 
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     注册成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  403   |      Forbidden      |   账号已被注册   |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 状态码 |        含义         |             说明             |
+| :----: | :-----------------: | :--------------------------: |
+|  200   |         OK          |           注册成功           |
+|  217   |   PartialContent    |        注册不完全成功        |
+|  400   |     BadRequest      | 请求参数不全获取注册全部失败 |
+|  500   | InternalServerError |       后端服务内部错误       |
 
 ----
 
