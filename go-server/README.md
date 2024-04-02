@@ -128,9 +128,9 @@ headers:{
 
 ----
 
-### 批量注册
+### 批量注册（上传用户）
 
-**请求路径**：/user/register-batch
+**请求路径**：/user/upload
 
 **请求方法**：POST
 

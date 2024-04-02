@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-type registerBatchRequest struct {
+type uploadUsersRequest struct {
 	UserList []registerRequest `json:"user_list" form:"user_list" binding:"required"`
 }
 
-func RegisterBatch(context *gin.Context) {
-	var data registerBatchRequest
+func UploadUsers(context *gin.Context) {
+	var data uploadUsersRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "Missing parameters or incorrect format",
