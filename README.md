@@ -20,7 +20,7 @@
 ## 平台简介
 
 * 前端技术栈 [Vue3](https://v3.cn.vuejs.org) + [Element Plus](https://element-plus.org/zh-CN) + [Vite](https://cn.vitejs.dev) 。
-* 后端[gin]([Gin Web Framework (gin-gonic.com)](https://gin-gonic.com/zh-cn/))。
+* 后端[gin](https://gin-gonic.com/zh-cn/))。
 * 数据库[mysql]([MySQL](https://www.mysql.com/cn/))。
 
 ## 前端运行
