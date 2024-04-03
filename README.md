@@ -53,13 +53,13 @@ npm run dev
 
 ## 预期效果
 
-![](F:\Code\Go\Go_SimpleWMS\imgs\homepage.png)
+![](.\imgs\homepage.png)
 
-![ruku](F:\Code\Go\Go_SimpleWMS\imgs\ruku.png)
+![ruku](.\imgs\ruku.png)
 
-![setting](F:\Code\Go\Go_SimpleWMS\imgs\setting.png)
+![setting](.\imgs\setting.png)
 
-![](imgs\goods.png)
+![](.\imgs\goods.png)
 
 
 
