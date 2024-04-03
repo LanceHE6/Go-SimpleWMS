@@ -1,4 +1,4 @@
-package goodsType
+package unit
 
 import (
 	"Go_simpleWMS/utils"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func ListGoodsType(context *gin.Context) {
+func ListUnit(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
@@ -19,10 +19,10 @@ func ListGoodsType(context *gin.Context) {
 		return
 	}
 
-	rows, err := tx.Query("SELECT gtid, name, type_code, add_time FROM goods_type")
+	rows, err := tx.Query("SELECT unid, name FROM unit")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of goods type",
+			"error":  "Cannot get the list of unit",
 			"detail": err.Error(),
 			"code":   502,
 		})
@@ -32,45 +32,36 @@ func ListGoodsType(context *gin.Context) {
 		err := rows.Close()
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of goods type",
+				"error":  "Cannot close the list of unit",
 				"detail": err.Error(),
 				"code":   503,
 			})
 		}
 	}(rows)
 
-	var gts []gin.H
+	var unitArray []gin.H
 	for rows.Next() {
-		var gtid, name, addTime string
-		var typeCode sql.NullString
+		var unid, name string
 
-		err = rows.Scan(&gtid, &name, &typeCode, &addTime)
+		err = rows.Scan(&unid, &name)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of goods type",
+				"error":  "Cannot scan the list of unit",
 				"detail": err.Error(),
 				"code":   504,
 			})
 			return
 		}
-		var typeCodeStr string
-		if typeCode.Valid {
-			typeCodeStr = typeCode.String
-		} else {
-			typeCodeStr = ""
-		}
 
-		user := gin.H{
-			"gtid":      gtid,
-			"name":      name,
-			"type_code": typeCodeStr,
-			"addTime":   addTime,
+		unit := gin.H{
+			"unid": unid,
+			"name": name,
 		}
-		gts = append(gts, user)
+		unitArray = append(unitArray, unit)
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get goods type list successfully",
-		"rows":    gts,
+		"message": "Get inventory type list successfully",
+		"rows":    unitArray,
 		"code":    201,
 	})
 }

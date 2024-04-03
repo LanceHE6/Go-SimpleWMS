@@ -14,7 +14,11 @@ type loginRequest struct {
 func Login(context *gin.Context) {
 	var data loginRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"message": "Account and password are required"}})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
+		})
 		return
 	}
 	account := data.Account
@@ -23,39 +27,58 @@ func Login(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   501,
+		})
 		return
 	}
 
 	var uid string
 	var permission int
-	err = tx.QueryRow("SELECT uid, permission FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid, &permission)
+	var registerTime string
+	err = tx.QueryRow("SELECT uid, permission, register_time FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid, &permission, &registerTime)
 	if err != nil {
 		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
-		token, err := utils.GenerateToken(uid, permission)
+		token, err := utils.GenerateToken(uid, permission, registerTime)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot generate token"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot generate token",
+				"detail": err.Error(),
+				"code":   502,
+			})
 			return
 		}
 
 		// token写入数据库
 		_, err = tx.Exec("UPDATE user set token=? WHERE uid=?", token, uid)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update token"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot update token",
+				"detail": err.Error(),
+				"code":   503,
+			})
 			return
 		}
 
 		// 提交事务
 		err = tx.Commit()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot commit transaction",
+				"detail": err.Error(),
+				"code":   504,
+			})
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{
 			"message": "Login successfully",
-			"token":   token})
+			"token":   token,
+			"code":    201,
+		})
 	}
 
 }

@@ -15,19 +15,21 @@ var jwtKey = []byte(SecretKey) // 用于签名的密钥
 // 自定义载荷内容
 type myClaims struct {
 	jwt.StandardClaims
-	Uid        string `json:"uid"`
-	Permission int    `json:"permission"`
+	Uid          string `json:"uid"`
+	Permission   int    `json:"permission"`
+	RegisterTime string `json:"register_time"`
 }
 
 // GenerateToken 生成一个token
-func GenerateToken(id string, permission int) (string, error) {
+func GenerateToken(id string, permission int, registerTime string) (string, error) {
 	expirationTime := time.Now().Add(72 * time.Hour)
 	claims := &myClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
-		Uid:        id,
-		Permission: permission,
+		Uid:          id,
+		Permission:   permission,
+		RegisterTime: registerTime,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -45,20 +47,29 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "No Authorization header provided"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "No Authorization header provided",
+				"code":    101,
+			})
 			c.Abort()
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Authorization header format"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid Authorization header format",
+				"code":    102,
+			})
 			c.Abort()
 			return
 		}
-		uid, err := GetUidByContext(c)
+		uid, _, registerTime, err := GetUserInfoByContext(c)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    103,
+			})
 			c.Abort()
 			return
 		}
@@ -72,49 +83,66 @@ func AuthMiddleware() gin.HandlerFunc {
 			if errors.As(err, &ve) {
 				if ve.Errors&jwt.ValidationErrorExpired != 0 {
 					// Token is expired
-					c.JSON(http.StatusUnauthorized, gin.H{"message": "Expired token"})
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"message": "Expired token",
+						"code":    104,
+					})
 				} else {
 					// Other errors
-					c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"message": "Invalid token",
+						"code":    105,
+					})
 				}
 			}
 			c.Abort()
 			return
 		}
 
-		// 判断uid是否在数据库中
+		// 判断是否在数据库中
 		tx, _ := GetDbConnection()
 		var isExist int
-		err = tx.QueryRow("SELECT count(*) from user where uid=?", uid).Scan(&isExist)
+		err = tx.QueryRow("SELECT count(*) from user where uid=? and register_time=?", uid, registerTime).Scan(&isExist)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of uid for this uid"})
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of uid for this uid",
+				"detail": err.Error(),
+				"code":   501,
+			})
 			c.Abort()
 			return
 		}
 		if isExist <= 0 {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    106,
+			})
 			c.Abort()
 			return
 		}
 
 		if _, ok := token.Claims.(*myClaims); ok && token.Valid {
-
 			c.Next()
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    107,
+			})
 			c.Abort()
 			return
 		}
-
 	}
 }
 
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
-		uid, err := GetUidByContext(context)
+		_, permission, _, err := GetUserInfoByContext(context)
 		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    108,
+			})
 			context.Abort()
 			return
 		}
@@ -122,32 +150,30 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		tx, err := GetDbConnection()
 
 		if tx == nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot begin transaction",
+				"detail": err.Error(),
+				"code":   502,
+			})
 			context.Abort()
 			return
 		}
 
-		var permission string
-		err = tx.QueryRow("SELECT permission FROM user WHERE uid=?", uid).Scan(&permission)
-
-		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
-			context.Abort()
-			return
-		}
-		if permission == "3" {
+		if permission == 3 {
 			context.Next()
-
 		} else {
-			context.JSON(http.StatusForbidden, gin.H{"message": "Permission denied"})
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "Permission denied",
+				"code":    110,
+			})
 			context.Abort()
 			return
 		}
 	}
 }
 
-// GetUidByContext 获取用户id
-func GetUidByContext(context *gin.Context) (string, error) {
+// GetUserInfoByContext 通过context获取用户信息
+func GetUserInfoByContext(context *gin.Context) (string, int, string, error) {
 	authHeader := context.GetHeader("Authorization")
 	bearerToken := strings.Split(authHeader, " ")
 	// 解析token
@@ -157,5 +183,7 @@ func GetUidByContext(context *gin.Context) (string, error) {
 	})
 	// 从token中获取载荷数据
 	uid := claims.Uid
-	return uid, err
+	permission := claims.Permission
+	registerTime := claims.RegisterTime
+	return uid, permission, registerTime, err
 }

@@ -1,4 +1,4 @@
-package goodsType
+package inventoryType
 
 import (
 	"Go_simpleWMS/utils"
@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-type addGoodsTypeRequest struct {
+type addInventoryTypeRequest struct {
 	Name     string `json:"name" form:"name" binding:"required"`
 	TypeCode string `json:"type_code" form:"type_code"`
 }
 
-func AddGoodsType(context *gin.Context) {
-	var data addGoodsTypeRequest
+func AddInventoryType(context *gin.Context) {
+	var data addInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "Missing parameters or incorrect format",
@@ -40,12 +40,12 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 
-	// 判断该仓库是否已存在
+	// 判断该类型是否已存在
 	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE name=?", typeName).Scan(&registered)
+	err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE name=?", typeName).Scan(&registered)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of goods type for this type name",
+			"error":  "Cannot get the number of inventory type for this type name",
 			"detail": err.Error(),
 			"code":   502,
 		})
@@ -54,46 +54,46 @@ func AddGoodsType(context *gin.Context) {
 	if registered >= 1 {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The type name already exists",
-			"code":    402,
+			"code":    401,
 		})
 		return
 	}
 
 	// 获取最近注册的货品类型的 gtid
-	var lastGTid string
-	err = tx.QueryRow("SELECT gtid FROM goods_type ORDER BY add_time DESC LIMIT 1").Scan(&lastGTid)
+	var lastITid string
+	err = tx.QueryRow("SELECT itid FROM inventory_type ORDER BY add_time DESC LIMIT 1").Scan(&lastITid)
 	// 如果没有用户，就从 1 开始
 	if errors.Is(err, sql.ErrNoRows) {
-		lastGTid = "gt0000"
+		lastITid = "it0000"
 	} else if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last GTid",
+			"error":  "Cannot get last ITid",
 			"detail": err.Error(),
 			"code":   503,
 		})
 		return
 	}
-	lastGTid = lastGTid[2:]
+	lastITid = lastITid[2:]
 	// 增加最近注册的用户的 uid
-	nextGTid, err := strconv.Atoi(lastGTid)
+	nextITid, err := strconv.Atoi(lastITid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert GTid to integer",
+			"error":  "Cannot convert ITid to integer",
 			"detail": err.Error(),
 			"code":   504,
 		})
 		return
 	}
-	nextGTid++
-	newGTid := fmt.Sprintf("gt%04d", nextGTid) // 转换为 8 位字符串
+	nextITid++
+	newITid := fmt.Sprintf("it%04d", nextITid) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库
-	_, err = tx.Exec("INSERT INTO goods_type(gtid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newGTid, typeName, addTime, typeCode)
+	_, err = tx.Exec("INSERT INTO inventory_type(itid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newITid, typeName, addTime, typeCode)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the goods type",
+			"error":  "Cannot insert the inventory type",
 			"detail": err.Error(),
 			"code":   505,
 		})
@@ -110,7 +110,7 @@ func AddGoodsType(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods type added successfully",
+		"message": "Inventory type added successfully",
 		"code":    201,
 	})
 }

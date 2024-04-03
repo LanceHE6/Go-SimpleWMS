@@ -1,4 +1,4 @@
-package goodsType
+package inventoryType
 
 import (
 	"Go_simpleWMS/utils"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func ListGoodsType(context *gin.Context) {
+func ListInventoryType(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
@@ -19,10 +19,10 @@ func ListGoodsType(context *gin.Context) {
 		return
 	}
 
-	rows, err := tx.Query("SELECT gtid, name, type_code, add_time FROM goods_type")
+	rows, err := tx.Query("SELECT itid, name, type_code, add_time FROM inventory_type")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of goods type",
+			"error":  "Cannot get the list of inventory type",
 			"detail": err.Error(),
 			"code":   502,
 		})
@@ -32,7 +32,7 @@ func ListGoodsType(context *gin.Context) {
 		err := rows.Close()
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of goods type",
+				"error":  "Cannot close the list of inventory type",
 				"detail": err.Error(),
 				"code":   503,
 			})
@@ -41,13 +41,13 @@ func ListGoodsType(context *gin.Context) {
 
 	var gts []gin.H
 	for rows.Next() {
-		var gtid, name, addTime string
+		var itid, name, addTime string
 		var typeCode sql.NullString
 
-		err = rows.Scan(&gtid, &name, &typeCode, &addTime)
+		err = rows.Scan(&itid, &name, &typeCode, &addTime)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of goods type",
+				"error":  "Cannot scan the list of inventory type",
 				"detail": err.Error(),
 				"code":   504,
 			})
@@ -60,16 +60,16 @@ func ListGoodsType(context *gin.Context) {
 			typeCodeStr = ""
 		}
 
-		user := gin.H{
-			"gtid":      gtid,
+		gt := gin.H{
+			"gtid":      itid,
 			"name":      name,
 			"type_code": typeCodeStr,
 			"addTime":   addTime,
 		}
-		gts = append(gts, user)
+		gts = append(gts, gt)
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get goods type list successfully",
+		"message": "Get inventory type list successfully",
 		"rows":    gts,
 		"code":    201,
 	})

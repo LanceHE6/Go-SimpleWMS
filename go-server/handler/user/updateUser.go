@@ -10,7 +10,7 @@ import (
 type updateRequest struct {
 	Uid        string `json:"uid" form:"uid" binding:"required"`
 	Password   string `json:"password" form:"password"`
-	NickName   string `json:"nick_name" form:"nick_name"`
+	Nickname   string `json:"nickname" form:"nickname"`
 	Permission int    `json:"permission" form:"permission"`
 	Phone      string `json:"phone" form:"phone"`
 }
@@ -18,24 +18,35 @@ type updateRequest struct {
 func UpdateUser(context *gin.Context) {
 	var data updateRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "UID is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
+		})
 		return
 	}
 	uid := data.Uid
 	password := data.Password
-	nickName := data.NickName
+	nickName := data.Nickname
 	permission := data.Permission
 	phone := data.Phone
 
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   501,
+		})
 		return
 	}
 
 	if password == "" && nickName == "" && permission == 0 && phone == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "At least one of password, nick_name, permission and phone is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "At least one of password, nickname, permission and phone is required",
+			"code":    402,
+		})
 		return
 	}
 	// 拼接sql语句
@@ -44,7 +55,7 @@ func UpdateUser(context *gin.Context) {
 		updateSql += "password='" + password + "',"
 	}
 	if nickName != "" {
-		updateSql += "nick_name='" + nickName + "',"
+		updateSql += "nickname='" + nickName + "',"
 	}
 	if permission != 0 {
 		updateSql += "permission=" + strconv.Itoa(permission) + ","
@@ -56,15 +67,24 @@ func UpdateUser(context *gin.Context) {
 	updateSql += " WHERE uid='" + uid + "'"
 	_, err = tx.Exec(updateSql)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update user"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update user",
+			"detail": err.Error(),
+			"code":   502,
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit transaction",
+			"detail": err.Error(),
+			"code":   503,
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "User updated successfully",
+		"code":    201,
 	})
 }

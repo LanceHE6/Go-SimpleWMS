@@ -18,7 +18,11 @@ type updateWarehouseRequest struct {
 func UpdateWarehouse(context *gin.Context) {
 	var data updateWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "wid is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
+		})
 		return
 	}
 	wid := data.Wid
@@ -32,22 +36,33 @@ func UpdateWarehouse(context *gin.Context) {
 		return
 	}
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   501,
+		})
 		return
 	}
 
 	// 判断该仓库是否已存在
 	var registered int
-	err := tx.QueryRow("SELECT count(name) FROM warehouse WHERE wid=?", wid).Scan(&registered)
+	err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE wid=?", wid).Scan(&registered)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this wid"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot get the number of warehouses for this wid",
+			"detail": err.Error(),
+			"code":   502,
+		})
 		return
 	}
 	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse does not exist"})
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The warehouse does not exist",
+			"code":    401,
+		})
 		return
 	}
 
@@ -60,11 +75,18 @@ func UpdateWarehouse(context *gin.Context) {
 		var registered int
 		err = tx.QueryRow("SELECT count(name) FROM warehouse WHERE name=?", warehouseName).Scan(&registered)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get the number of warehouses for this warehouse_name"})
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot get the number of warehouses for this warehouse_name",
+				"detail": err.Error(),
+				"code":   503,
+			})
 			return
 		}
 		if registered >= 1 {
-			context.JSON(http.StatusForbidden, gin.H{"message": "The warehouse name already exists"})
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "The warehouse name already exists",
+				"code":    402,
+			})
 			return
 		}
 
@@ -84,13 +106,24 @@ func UpdateWarehouse(context *gin.Context) {
 		_, err = tx.Exec(updateSql)
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot update the warehouse"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot update the warehouse",
+			"detail": err.Error(),
+			"code":   504,
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+			"code":   505,
+		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Warehouse updated successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Warehouse updated successfully",
+		"code":    201,
+	})
 }

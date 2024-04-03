@@ -1,4 +1,4 @@
-package goodsType
+package department
 
 import (
 	"Go_simpleWMS/utils"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func ListGoodsType(context *gin.Context) {
+func ListDepartment(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
@@ -19,10 +19,10 @@ func ListGoodsType(context *gin.Context) {
 		return
 	}
 
-	rows, err := tx.Query("SELECT gtid, name, type_code, add_time FROM goods_type")
+	rows, err := tx.Query("SELECT * FROM department")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of goods type",
+			"error":  "Cannot get the list of departments",
 			"detail": err.Error(),
 			"code":   502,
 		})
@@ -32,45 +32,36 @@ func ListGoodsType(context *gin.Context) {
 		err := rows.Close()
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of goods type",
+				"error":  "Cannot close the list of departments",
 				"detail": err.Error(),
 				"code":   503,
 			})
 		}
 	}(rows)
 
-	var gts []gin.H
+	var departments []gin.H
 	for rows.Next() {
-		var gtid, name, addTime string
-		var typeCode sql.NullString
+		var did, name, addTime string
 
-		err = rows.Scan(&gtid, &name, &typeCode, &addTime)
+		err = rows.Scan(&did, &name, &addTime)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of goods type",
+				"error":  "Cannot scan the list of department",
 				"detail": err.Error(),
 				"code":   504,
 			})
 			return
 		}
-		var typeCodeStr string
-		if typeCode.Valid {
-			typeCodeStr = typeCode.String
-		} else {
-			typeCodeStr = ""
+		department := gin.H{
+			"did":      did,
+			"name":     name,
+			"add_time": addTime,
 		}
-
-		user := gin.H{
-			"gtid":      gtid,
-			"name":      name,
-			"type_code": typeCodeStr,
-			"addTime":   addTime,
-		}
-		gts = append(gts, user)
+		departments = append(departments, department)
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get goods type list successfully",
-		"rows":    gts,
+		"message": "Get departments list successfully",
+		"rows":    departments,
 		"code":    201,
 	})
 }

@@ -1,4 +1,4 @@
-package user
+package staff
 
 import (
 	"Go_simpleWMS/utils"
@@ -7,24 +7,24 @@ import (
 	"net/http"
 )
 
-func ListUsers(context *gin.Context) {
+func ListStaff(context *gin.Context) {
 	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
-			"code":   "501",
+			"code":   501,
 		})
 		return
 	}
 
-	rows, err := tx.Query("SELECT uid, account, permission, register_time, phone, nickname FROM user")
+	rows, err := tx.Query("SELECT * FROM staff")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of users",
+			"error":  "Cannot get the list of staffs",
 			"detail": err.Error(),
-			"code":   "502",
+			"code":   502,
 		})
 		return
 	}
@@ -32,25 +32,24 @@ func ListUsers(context *gin.Context) {
 		err := rows.Close()
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of users",
+				"error":  "Cannot close the list of staffs",
 				"detail": err.Error(),
-				"code":   "503",
+				"code":   503,
 			})
 		}
 	}(rows)
 
-	var users []gin.H
+	var staffs []gin.H
 	for rows.Next() {
-		var uid, account, registerTime, nickName string
-		var permission int
+		var sid, name, addTime, deptId string
 		var phone sql.NullString
 
-		err = rows.Scan(&uid, &account, &permission, &registerTime, &phone, &nickName)
+		err = rows.Scan(&sid, &name, &phone, &deptId, &addTime)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of users",
+				"error":  "Cannot scan the list of staffs",
 				"detail": err.Error(),
-				"code":   "504",
+				"code":   504,
 			})
 			return
 		}
@@ -60,20 +59,18 @@ func ListUsers(context *gin.Context) {
 		} else {
 			phoneStr = ""
 		}
-
-		user := gin.H{
-			"uid":           uid,
-			"account":       account,
-			"permission":    permission,
-			"register_time": registerTime,
-			"phone":         phoneStr,
-			"nickname":      nickName,
+		department := gin.H{
+			"sid":        sid,
+			"name":       name,
+			"add_time":   addTime,
+			"department": deptId,
+			"phone":      phoneStr,
 		}
-		users = append(users, user)
+		staffs = append(staffs, department)
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get user list successfully",
-		"rows":    users,
+		"message": "Get staffs list successfully",
+		"rows":    staffs,
 		"code":    201,
 	})
 }

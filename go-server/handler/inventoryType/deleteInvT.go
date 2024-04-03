@@ -1,4 +1,4 @@
-package warehouse
+package inventoryType
 
 import (
 	"Go_simpleWMS/utils"
@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-type deleteWarehouseRequest struct {
-	Wid string `json:"wid" form:"name" binding:"required"`
+type deleteInventoryTypeRequest struct {
+	ITid string `json:"itid" form:"itid" binding:"required"`
 }
 
-func DeleteWarehouse(context *gin.Context) {
-	var data deleteWarehouseRequest
+func DeleteInventoryType(context *gin.Context) {
+	var data deleteInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "Missing parameters or incorrect format",
@@ -20,7 +20,7 @@ func DeleteWarehouse(context *gin.Context) {
 		})
 		return
 	}
-	wid := data.Wid
+	itid := data.ITid
 
 	tx, err := utils.GetDbConnection()
 
@@ -34,10 +34,10 @@ func DeleteWarehouse(context *gin.Context) {
 	}
 
 	// 删除仓库
-	_, err = tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
+	_, err = tx.Exec("DELETE FROM inventory_type WHERE itid=?", itid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the warehouse",
+			"error":  "Cannot delete the inventory type",
 			"detail": err.Error(),
 			"code":   502,
 		})
@@ -53,7 +53,7 @@ func DeleteWarehouse(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Warehouse deleted successfully",
+		"message": "Inventory type deleted successfully",
 		"code":    201,
 	})
 }

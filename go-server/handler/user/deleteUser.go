@@ -1,4 +1,4 @@
-package warehouse
+package user
 
 import (
 	"Go_simpleWMS/utils"
@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-type deleteWarehouseRequest struct {
-	Wid string `json:"wid" form:"name" binding:"required"`
+type deleteRequest struct {
+	Uid string `json:"uid" form:"uid" binding:"required"`
 }
 
-func DeleteWarehouse(context *gin.Context) {
-	var data deleteWarehouseRequest
+func DeleteUser(context *gin.Context) {
+	var data deleteRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "Missing parameters or incorrect format",
@@ -20,10 +20,25 @@ func DeleteWarehouse(context *gin.Context) {
 		})
 		return
 	}
-	wid := data.Wid
+	uid := data.Uid
 
+	targetUid, _, _, err := utils.GetUserInfoByContext(context)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid token",
+			"code":    101,
+		})
+		return
+	}
+	if targetUid == uid {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Invalid target uid",
+			"code":    402,
+		})
+		return
+	}
 	tx, err := utils.GetDbConnection()
-
+	// 开始一个新的事务
 	if tx == nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
@@ -32,28 +47,29 @@ func DeleteWarehouse(context *gin.Context) {
 		})
 		return
 	}
-
-	// 删除仓库
-	_, err = tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
+	// 删除用户
+	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the warehouse",
+			"error":  "Cannot delete user",
 			"detail": err.Error(),
 			"code":   502,
 		})
 		return
 	}
+
+	// 提交事务
 	err = tx.Commit()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
+			"error":  "Cannot commit transaction",
 			"detail": err.Error(),
 			"code":   503,
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Warehouse deleted successfully",
+		"message": "User deleted successfully",
 		"code":    201,
 	})
 }

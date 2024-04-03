@@ -6,35 +6,54 @@ import (
 	"net/http"
 )
 
-type deleteGoodsTypeRequired struct {
+type deleteGoodsTypeRequest struct {
 	GTid string `json:"gtid" form:"gtid" binding:"required"`
 }
 
 func DeleteGoodsType(context *gin.Context) {
-	var data deleteGoodsTypeRequired
+	var data deleteGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "GTid is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Missing parameters or incorrect format",
+			"code":    401,
+			"detail":  err.Error(),
+		})
 		return
 	}
 	gtid := data.GTid
 
-	tx, _ := utils.GetDbConnection()
+	tx, err := utils.GetDbConnection()
 
 	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot begin transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot begin transaction",
+			"detail": err.Error(),
+			"code":   501,
+		})
 		return
 	}
 
 	// 删除仓库
-	_, err := tx.Exec("DELETE FROM goods_type WHERE gtid=?", gtid)
+	_, err = tx.Exec("DELETE FROM goods_type WHERE gtid=?", gtid)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot delete the Goods type"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot delete the Goods type",
+			"detail": err.Error(),
+			"code":   502,
+		})
 		return
 	}
 	err = tx.Commit()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot commit the transaction"})
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot commit the transaction",
+			"detail": err.Error(),
+			"code":   503,
+		})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Goods type deleted successfully"})
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Goods type deleted successfully",
+		"code":    201,
+	})
 }
