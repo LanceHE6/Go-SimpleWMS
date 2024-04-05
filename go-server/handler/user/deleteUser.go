@@ -1,6 +1,8 @@
 package user
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -37,37 +39,19 @@ func DeleteUser(context *gin.Context) {
 		})
 		return
 	}
-	tx, err := utils.GetDbConnection()
-	// 开始一个新的事务
-	if tx == nil {
+	db := myDb.GetMyDbConnection()
+
+	// 删除用户
+	err = db.Delete(&model.User{}, "uid=?", uid).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot delete user",
 			"detail": err.Error(),
 			"code":   501,
 		})
 		return
 	}
-	// 删除用户
-	_, err = tx.Exec("DELETE FROM user WHERE uid=?", uid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete user",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
 
-	// 提交事务
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "User deleted successfully",
 		"code":    201,

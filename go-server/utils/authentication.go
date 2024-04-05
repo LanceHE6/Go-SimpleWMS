@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"Go_simpleWMS/database/model"
+	db2 "Go_simpleWMS/database/myDb"
 	"errors"
 	"net/http"
 	"strings"
@@ -15,21 +17,21 @@ var jwtKey = []byte(SecretKey) // 用于签名的密钥
 // 自定义载荷内容
 type myClaims struct {
 	jwt.StandardClaims
-	Uid          string `json:"uid"`
-	Permission   int    `json:"permission"`
-	RegisterTime string `json:"register_time"`
+	Uid        string `json:"uid"`
+	Permission int    `json:"permission"`
+	CreatedAT  string `json:"created-at"`
 }
 
 // GenerateToken 生成一个token
-func GenerateToken(id string, permission int, registerTime string) (string, error) {
+func GenerateToken(id string, permission int, createdAt string) (string, error) {
 	expirationTime := time.Now().Add(72 * time.Hour)
 	claims := &myClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
-		Uid:          id,
-		Permission:   permission,
-		RegisterTime: registerTime,
+		Uid:        id,
+		Permission: permission,
+		CreatedAT:  createdAt,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -64,7 +66,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		uid, _, registerTime, err := GetUserInfoByContext(c)
+		uid, _, createdAt, err := GetUserInfoByContext(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
@@ -100,19 +102,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// 判断是否在数据库中
-		tx, _ := GetDbConnection()
-		var isExist int
-		err = tx.QueryRow("SELECT count(*) from user where uid=? and register_time=?", uid, registerTime).Scan(&isExist)
+
+		var user model.User
+		db := db2.GetMyDbConnection()
+
+		err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
+
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot get the number of uid for this uid",
-				"detail": err.Error(),
-				"code":   501,
-			})
-			c.Abort()
-			return
-		}
-		if isExist <= 0 {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
 				"code":    106,
@@ -147,18 +143,6 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		tx, err := GetDbConnection()
-
-		if tx == nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot begin transaction",
-				"detail": err.Error(),
-				"code":   502,
-			})
-			context.Abort()
-			return
-		}
-
 		if permission == 3 {
 			context.Next()
 		} else {
@@ -184,6 +168,6 @@ func GetUserInfoByContext(context *gin.Context) (string, int, string, error) {
 	// 从token中获取载荷数据
 	uid := claims.Uid
 	permission := claims.Permission
-	registerTime := claims.RegisterTime
-	return uid, permission, registerTime, err
+	CreatedAt := claims.CreatedAT
+	return uid, permission, CreatedAt, err
 }

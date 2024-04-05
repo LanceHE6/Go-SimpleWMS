@@ -1,12 +1,14 @@
 package user
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
-	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"time"
 )
 
 type registerRequest struct {
@@ -41,73 +43,32 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	nickName := userData.NickName
 	phone := userData.Phone
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   "501",
-		}
-	}
-
-	// 函数结束时回滚事务以关闭数据库连接，若已经提交则不会产生影响
-	defer func(tx *sql.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-			return
-		}
-	}(tx)
-
-	// 锁定 user 表
-	_, err = tx.Exec("SELECT * FROM user FOR UPDATE")
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot lock user table",
-			"detail": err.Error(),
-			"code":   507,
-		}
-	}
+	db := myDb.GetMyDbConnection()
 
 	// 判断该账户是否已被注册
-	var registered int
-	err = tx.QueryRow("SELECT count(account) FROM user WHERE account=?", account).Scan(&registered)
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of users for this account",
-			"detail": err.Error(),
-			"code":   502,
-		}
-	}
-	if registered >= 1 {
+	var user model.User
+	if err := db.Where("account = ?", account).First(&user).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		return http.StatusForbidden, gin.H{
 			"message": fmt.Sprintf("The account '%s' has been registered", account),
 			"code":    402,
 		}
 	}
 
-	newUid := "u" + utils.GenerateUuid(8)
-	// 获取当前时间戳
-	registerTime := time.Now().Unix()
-
 	// 插入新用户
-	_, err = tx.Exec("INSERT INTO user (uid, account, password, nickname, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		newUid, account, password, nickName, permission, registerTime, phone)
-	if err != nil {
+	newUid := "u" + utils.GenerateUuid(8)
+	user = model.User{
+		Uid:        newUid,
+		Account:    account,
+		Password:   password,
+		Nickname:   nickName,
+		Permission: permission,
+		Phone:      phone,
+	}
+	if err := db.Create(&user).Error; err != nil {
 		return http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert new user",
 			"detail": err.Error(),
 			"code":   505,
-		}
-	}
-
-	// 提交事务
-	err = tx.Commit()
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit transaction",
-			"detail": err.Error(),
-			"code":   506,
 		}
 	}
 
