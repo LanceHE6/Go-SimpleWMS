@@ -1,7 +1,8 @@
 package department
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,52 +25,18 @@ func UpdateDepartment(context *gin.Context) {
 	did := data.Did
 	depName := data.Name
 
-	tx, err := utils.GetDbConnection()
+	dep := model.Department{
+		Name: depName,
+	}
 
-	if tx == nil {
+	db := myDb.GetMyDbConnection()
+
+	err := db.Model(&dep).Where("did = ?", did).Updates(dep).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot update department",
 			"detail": err.Error(),
 			"code":   501,
-		})
-		return
-	}
-
-	// 判断该部门是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM department WHERE did=?", did).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of department for this did",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The department does not exist",
-			"code":    402,
-		})
-		return
-	}
-
-	// 更新部门
-	_, err = tx.Exec("UPDATE department SET name=? WHERE did=?", depName, did)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update the department",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   504,
 		})
 		return
 	}

@@ -1,10 +1,13 @@
 package department
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"time"
 )
 
 type addDepartmentRequest struct {
@@ -23,51 +26,26 @@ func AddDepartment(context *gin.Context) {
 	}
 	depName := data.Name
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
-	// 判断该部门是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM department WHERE name=?", depName).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of department for this department name",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered >= 1 {
+	// 判断该部门是否已经存在
+	var dep model.Department
+	err := db.Where("name = ?", depName).First(&dep).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The department name already exists",
 			"code":    402,
 		})
 		return
 	}
-
 	newDid := "d" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	addTime := time.Now().Unix()
-	// 增加仓库
-	_, err = tx.Exec("INSERT INTO department(did, name, add_time) VALUES(?, ?, ?)", newDid, depName, addTime)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the department",
-			"detail": err.Error(),
-			"code":   505,
-		})
-		return
+	dep = model.Department{
+		Did:  newDid,
+		Name: depName,
 	}
-	err = tx.Commit()
+
+	err = db.Create(&dep).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot commit the transaction",

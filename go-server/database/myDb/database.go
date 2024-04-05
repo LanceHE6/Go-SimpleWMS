@@ -52,13 +52,11 @@ func Init() {
 		config.DB.MySQL.Port,
 		config.DB.MySQL.Database,
 	)
-	fmt.Println(dsn)
-	fmt.Println(config)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		fmt.Printf("Cannot connect to MySQL database: %v", err)
 	}
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.User{}, &model.Department{})
 }
 
 func CloseMyDb() {
