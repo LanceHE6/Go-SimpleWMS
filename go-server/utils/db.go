@@ -61,7 +61,7 @@ func InitDB() *sqlx.DB {
 		// 格式为：user:password@tcp(localhost:5555)/dbname?charset=utf8&parseTime=True&loc=Local
 		// 先连接到MySQL服务器，不指定数据库
 
-		db, err = sqlx.Connect("mysql", dsn)
+		db, err = sqlx.Open("mysql", dsn)
 		if err != nil {
 			log.Fatal("Connect DB error: " + err.Error())
 		}
@@ -84,6 +84,9 @@ func InitDB() *sqlx.DB {
 		if err != nil {
 			log.Fatal("Connect DB error: " + err.Error())
 		}
+
+		db.SetConnMaxLifetime(30) // 设置最大连接生命周期
+
 		log.Println("Check tables...")
 
 		// 表创建语句
@@ -125,16 +128,9 @@ func GetDbConnection() (*sql.Tx, error) {
 	// 开始一个新的事务
 	tx, err := db.Begin()
 	if err != nil {
-		log.Println("error: Cannot begin transaction")
+		log.Println("error: Cannot begin transaction " + err.Error())
 		return nil, err
 	}
-	defer func() {
-		if err != nil {
-			err := tx.Rollback()
-			if err != nil {
-				return
-			}
-		}
-	}()
+
 	return tx, nil
 }
