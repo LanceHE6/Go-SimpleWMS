@@ -1,14 +1,16 @@
 package auth
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func AuthByHeader(context *gin.Context) {
+func Auth(context *gin.Context) {
 
-	uid, _, registerTime, err := utils.GetUserInfoByContext(context)
+	uid, _, createdAt, err := utils.GetUserInfoByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Invalid token",
@@ -17,24 +19,15 @@ func AuthByHeader(context *gin.Context) {
 		return
 	}
 	// 判断是否在数据库中
-	tx, _ := utils.GetDbConnection()
-	var isExist int
-	err = tx.QueryRow("SELECT count(*) from user where uid=? and register_time=?", uid, registerTime).Scan(&isExist)
+	db := myDb.GetMyDbConnection()
+	var user model.User
+	err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
+
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of uid for this uid",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		context.Abort()
-		return
-	}
-	if isExist <= 0 {
 		context.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Invalid token",
 			"code":    101,
 		})
-		context.Abort()
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
