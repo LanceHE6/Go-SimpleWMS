@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user (
                                     uid VARCHAR(20) primary key not null ,
-                                    account VARCHAR(255),
+                                    account VARCHAR(255) unique not null,
                                     password VARCHAR(255),
                                     nickname VARCHAR(255),
                                     permission INT default 1,
