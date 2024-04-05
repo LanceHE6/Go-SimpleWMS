@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/sync/semaphore"
 	"time"
 )
 
@@ -44,7 +45,9 @@ func main() {
 		MaxAge: 24 * time.Hour,
 	}))
 
-	route.Route(ginServer)
+	sem := semaphore.NewWeighted(5) // 最大并发处理数为5
+
+	route.Route(ginServer, sem)
 
 	err := ginServer.Run(":8080")
 	if err != nil {
