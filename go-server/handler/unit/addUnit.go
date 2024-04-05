@@ -2,12 +2,8 @@ package unit
 
 import (
 	"Go_simpleWMS/utils"
-	"database/sql"
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -57,33 +53,7 @@ func AddUnit(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的单位的 unid
-	var lastUnid string
-	err = tx.QueryRow("SELECT unid FROM unit ORDER BY add_time DESC LIMIT 1").Scan(&lastUnid)
-	// 如果没有单位，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastUnid = "un0000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last unid",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastUnid = lastUnid[2:]
-	// 增加最近注册的单位的 unid
-	nextUnid, err := strconv.Atoi(lastUnid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert ITid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextUnid++
-	newUnid := fmt.Sprintf("un%04d", nextUnid) // 转换为 8 位字符串
+	newUnid := "un" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	//增加仓库

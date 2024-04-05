@@ -2,12 +2,8 @@ package staff
 
 import (
 	"Go_simpleWMS/utils"
-	"database/sql"
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -69,33 +65,7 @@ func AddStaff(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的员工的 sid
-	var lastSid string
-	err = tx.QueryRow("SELECT sid FROM staff ORDER BY add_time DESC LIMIT 1").Scan(&lastSid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastSid = "s00000000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last Sid",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastSid = lastSid[1:]
-	// 增加最近注册的用户的 uid
-	nextSid, err := strconv.Atoi(lastSid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert Sid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextSid++
-	newSid := fmt.Sprintf("s%08d", nextSid) // 转换为 8 位字符串
+	newSid := "s" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库

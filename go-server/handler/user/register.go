@@ -3,11 +3,9 @@ package user
 import (
 	"Go_simpleWMS/utils"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -44,20 +42,30 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	phone := userData.Phone
 
 	tx, err := utils.GetDbConnection()
-	defer func() {
-		if err != nil {
-			err := tx.Rollback()
-			if err != nil {
-				return
-			}
-		}
-	}()
 
 	if tx == nil {
 		return http.StatusInternalServerError, gin.H{
 			"error":  "Cannot begin transaction",
 			"detail": err.Error(),
 			"code":   "501",
+		}
+	}
+
+	// 函数结束时回滚事务以关闭数据库连接，若已经提交则不会产生影响
+	defer func(tx *sql.Tx) {
+		err := tx.Rollback()
+		if err != nil {
+			return
+		}
+	}(tx)
+
+	// 锁定 user 表
+	_, err = tx.Exec("SELECT * FROM user FOR UPDATE")
+	if err != nil {
+		return http.StatusInternalServerError, gin.H{
+			"error":  "Cannot lock user table",
+			"detail": err.Error(),
+			"code":   507,
 		}
 	}
 
@@ -77,32 +85,8 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 			"code":    402,
 		}
 	}
-	// 获取最近注册的用户的 uid
-	var lastUid string
-	err = tx.QueryRow("SELECT uid FROM user ORDER BY register_time DESC LIMIT 1").Scan(&lastUid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastUid = "u00000000"
-	} else if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last uid",
-			"detail": err.Error(),
-			"code":   503,
-		}
-	}
-	lastUid = lastUid[1:]
-	// 增加最近注册的用户的 uid
-	nextUid, err := strconv.Atoi(lastUid)
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert uid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		}
-	}
-	nextUid++
-	newUid := fmt.Sprintf("u%08d", nextUid) // 转换为 8 位字符串
 
+	newUid := "u" + utils.GenerateUuid(8)
 	// 获取当前时间戳
 	registerTime := time.Now().Unix()
 

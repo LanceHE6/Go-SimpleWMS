@@ -2,12 +2,8 @@ package goodsType
 
 import (
 	"Go_simpleWMS/utils"
-	"database/sql"
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -59,33 +55,7 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的货品类型的 gtid
-	var lastGTid string
-	err = tx.QueryRow("SELECT gtid FROM goods_type ORDER BY add_time DESC LIMIT 1").Scan(&lastGTid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastGTid = "gt0000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last GTid",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastGTid = lastGTid[2:]
-	// 增加最近注册的用户的 uid
-	nextGTid, err := strconv.Atoi(lastGTid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert GTid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextGTid++
-	newGTid := fmt.Sprintf("gt%04d", nextGTid) // 转换为 8 位字符串
+	newGTid := "gt" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库

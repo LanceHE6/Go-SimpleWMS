@@ -2,12 +2,8 @@ package department
 
 import (
 	"Go_simpleWMS/utils"
-	"database/sql"
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -57,32 +53,7 @@ func AddDepartment(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的部门的 did
-	var lastDid string
-	err = tx.QueryRow("SELECT did FROM department ORDER BY add_time DESC LIMIT 1").Scan(&lastDid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastDid = "d0000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last Did",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastDid = lastDid[1:]
-	nextDid, err := strconv.Atoi(lastDid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert Did to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextDid++
-	newDid := fmt.Sprintf("d%04d", nextDid) // 转换为 4 位字符串
+	newDid := "d" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
 	addTime := time.Now().Unix()
 	// 增加仓库
