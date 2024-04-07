@@ -1,9 +1,13 @@
 package goodsType
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
+	"strings"
 )
 
 type updateGoodsTypeRequest struct {
@@ -22,11 +26,11 @@ func UpdateGoodsType(context *gin.Context) {
 		})
 		return
 	}
-	GTid := data.GTid
-	GTName := data.Name
+	gTid := data.GTid
+	gTName := data.Name
 	typeCode := data.TypeCode
 
-	if GTName == "" && typeCode == "" {
+	if gTName == "" && typeCode == "" {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "name or type_code is required",
 			"code":    402,
@@ -34,29 +38,12 @@ func UpdateGoodsType(context *gin.Context) {
 		return
 	}
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
+	db := myDb.GetMyDbConnection()
 
 	// 判断该类型是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE gtid=?", GTid).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of goods type for this gtid",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered == 0 {
+	var gt model.GoodsType
+	err := db.Model(&model.GoodsType{}).Where("gtid=?", gTid).First(&gt).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The goods type does not exist",
 			"code":    403,
@@ -65,49 +52,26 @@ func UpdateGoodsType(context *gin.Context) {
 	}
 
 	// 更新仓库
-
-	if GTName == "" {
-		_, err = tx.Exec("UPDATE goods_type SET type_code=? WHERE gtid=?", typeCode, GTid)
-	} else {
-		// 判断该仓库名是否已存在
-		var registered int
-		err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE name=?", GTName).Scan(&registered)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot get the number of goods type for this type name",
-				"detail": err.Error(),
-				"code":   503,
-			})
-			return
-		}
-		if registered >= 1 {
-			context.JSON(http.StatusForbidden, gin.H{
-				"message": "The type name already exists",
-				"code":    404,
-			})
-			return
-		}
-
-		if typeCode == "" {
-			_, err = tx.Exec("update goods_type set name=? where gtid=?", GTName, GTid)
-		} else {
-			_, err = tx.Exec("update goods_type set name=?, type_code=? where gtid=?", GTName, typeCode, GTid)
-		}
+	gt = model.GoodsType{
+		Gtid:     gTid,
+		Name:     gTName,
+		TypeCode: typeCode,
 	}
+
+	err = db.Model(&model.GoodsType{}).Where("gtid=?", gt.Gtid).Updates(&gt).Error
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error":  "The name is already exists",
+				"detail": err.Error(),
+				"code":   404,
+			})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update the goods type",
 			"detail": err.Error(),
 			"code":   504,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   505,
 		})
 		return
 	}

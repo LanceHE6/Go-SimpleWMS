@@ -1,14 +1,13 @@
 package goodsType
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
-	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type addGoodsTypeRequest struct {
@@ -29,29 +28,12 @@ func AddGoodsType(context *gin.Context) {
 	typeName := data.Name
 	typeCode := data.TypeCode
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
+	db := myDb.GetMyDbConnection()
 
 	// 判断该仓库是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM goods_type WHERE name=?", typeName).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of goods type for this type name",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered >= 1 {
+	var gt model.GoodsType
+	err := db.Model(&model.GoodsType{}).Where("name=?", typeName).First(&gt).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The type name already exists",
 			"code":    402,
@@ -59,52 +41,20 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的货品类型的 gtid
-	var lastGTid string
-	err = tx.QueryRow("SELECT gtid FROM goods_type ORDER BY add_time DESC LIMIT 1").Scan(&lastGTid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastGTid = "gt0000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last GTid",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastGTid = lastGTid[2:]
-	// 增加最近注册的用户的 uid
-	nextGTid, err := strconv.Atoi(lastGTid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert GTid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextGTid++
-	newGTid := fmt.Sprintf("gt%04d", nextGTid) // 转换为 8 位字符串
+	newGTid := "gt" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	addTime := time.Now().Unix()
 	// 增加仓库
-	_, err = tx.Exec("INSERT INTO goods_type(gtid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newGTid, typeName, addTime, typeCode)
-
+	gt = model.GoodsType{
+		Gtid:     newGTid,
+		Name:     typeName,
+		TypeCode: typeCode,
+	}
+	err = db.Create(&gt).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the goods type",
 			"detail": err.Error(),
 			"code":   505,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   506,
 		})
 		return
 	}

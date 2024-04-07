@@ -1,14 +1,11 @@
 package inventoryType
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
-	"database/sql"
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type addInventoryTypeRequest struct {
@@ -29,29 +26,12 @@ func AddInventoryType(context *gin.Context) {
 	typeName := data.Name
 	typeCode := data.TypeCode
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
+	db := myDb.GetMyDbConnection()
 	// 判断该类型是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE name=?", typeName).Scan(&registered)
+	var invt model.InventoryType
+	err := db.Where(&invt, "name=?", typeName).Error
+
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of inventory type for this type name",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered >= 1 {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The type name already exists",
 			"code":    401,
@@ -59,52 +39,21 @@ func AddInventoryType(context *gin.Context) {
 		return
 	}
 
-	// 获取最近注册的货品类型的 gtid
-	var lastITid string
-	err = tx.QueryRow("SELECT itid FROM inventory_type ORDER BY add_time DESC LIMIT 1").Scan(&lastITid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastITid = "it0000"
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last ITid",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	lastITid = lastITid[2:]
-	// 增加最近注册的用户的 uid
-	nextITid, err := strconv.Atoi(lastITid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert ITid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	nextITid++
-	newITid := fmt.Sprintf("it%04d", nextITid) // 转换为 8 位字符串
+	newITid := "it" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	addTime := time.Now().Unix()
+	invt = model.InventoryType{
+		Name:     typeName,
+		Itid:     newITid,
+		TypeCode: typeCode,
+	}
 	// 增加仓库
-	_, err = tx.Exec("INSERT INTO inventory_type(itid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newITid, typeName, addTime, typeCode)
+	err = db.Create(&invt).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the inventory type",
 			"detail": err.Error(),
 			"code":   505,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   506,
 		})
 		return
 	}

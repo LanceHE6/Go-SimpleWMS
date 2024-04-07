@@ -1,14 +1,14 @@
 package user
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type registerRequest struct {
@@ -43,87 +43,32 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	nickName := userData.NickName
 	phone := userData.Phone
 
-	tx, err := utils.GetDbConnection()
-	defer func() {
-		if err != nil {
-			err := tx.Rollback()
-			if err != nil {
-				return
-			}
-		}
-	}()
-
-	if tx == nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   "501",
-		}
-	}
+	db := myDb.GetMyDbConnection()
 
 	// 判断该账户是否已被注册
-	var registered int
-	err = tx.QueryRow("SELECT count(account) FROM user WHERE account=?", account).Scan(&registered)
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of users for this account",
-			"detail": err.Error(),
-			"code":   502,
-		}
-	}
-	if registered >= 1 {
+	var user model.User
+	if err := db.Where("account = ?", account).First(&user).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		return http.StatusForbidden, gin.H{
 			"message": fmt.Sprintf("The account '%s' has been registered", account),
 			"code":    402,
 		}
 	}
-	// 获取最近注册的用户的 uid
-	var lastUid string
-	err = tx.QueryRow("SELECT uid FROM user ORDER BY register_time DESC LIMIT 1").Scan(&lastUid)
-	// 如果没有用户，就从 1 开始
-	if errors.Is(err, sql.ErrNoRows) {
-		lastUid = "u00000000"
-	} else if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get last uid",
-			"detail": err.Error(),
-			"code":   503,
-		}
-	}
-	lastUid = lastUid[1:]
-	// 增加最近注册的用户的 uid
-	nextUid, err := strconv.Atoi(lastUid)
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot convert uid to integer",
-			"detail": err.Error(),
-			"code":   504,
-		}
-	}
-	nextUid++
-	newUid := fmt.Sprintf("u%08d", nextUid) // 转换为 8 位字符串
-
-	// 获取当前时间戳
-	registerTime := time.Now().Unix()
 
 	// 插入新用户
-	_, err = tx.Exec("INSERT INTO user (uid, account, password, nickname, permission, register_time, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		newUid, account, password, nickName, permission, registerTime, phone)
-	if err != nil {
+	newUid := "u" + utils.GenerateUuid(8)
+	user = model.User{
+		Uid:        newUid,
+		Account:    account,
+		Password:   password,
+		Nickname:   nickName,
+		Permission: permission,
+		Phone:      phone,
+	}
+	if err := db.Create(&user).Error; err != nil {
 		return http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert new user",
 			"detail": err.Error(),
 			"code":   505,
-		}
-	}
-
-	// 提交事务
-	err = tx.Commit()
-	if err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit transaction",
-			"detail": err.Error(),
-			"code":   506,
 		}
 	}
 

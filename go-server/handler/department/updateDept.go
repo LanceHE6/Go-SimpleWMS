@@ -1,9 +1,13 @@
 package department
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
+	"strings"
 )
 
 type updateDeptRequest struct {
@@ -24,52 +28,35 @@ func UpdateDepartment(context *gin.Context) {
 	did := data.Did
 	depName := data.Name
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
+	dep := model.Department{
+		Name: depName,
 	}
 
+	db := myDb.GetMyDbConnection()
 	// 判断该部门是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM department WHERE did=?", did).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of department for this did",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered == 0 {
+	err := db.Model(&model.Department{}).Where("did=?", did).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The department does not exist",
-			"code":    402,
+			"code":    403,
 		})
 		return
 	}
 
-	// 更新部门
-	_, err = tx.Exec("UPDATE department SET name=? WHERE did=?", depName, did)
+	err = db.Model(&dep).Where("did = ?", did).Updates(dep).Error
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error":  "The name is already exists",
+				"detail": err.Error(),
+				"code":   402,
+			})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update the department",
+			"error":  "Cannot update department",
 			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   504,
+			"code":   501,
 		})
 		return
 	}

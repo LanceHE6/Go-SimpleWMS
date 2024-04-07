@@ -1,11 +1,12 @@
 package main
 
 import (
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/route"
-	"Go_simpleWMS/utils"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/sync/semaphore"
 	"time"
 )
 
@@ -20,10 +21,8 @@ func main() {
    |\_________\|__|\|__|     \|__|\|__|     \|_______|\|_______|\|____________|\|__|     \|__|\_________\
    \|_________|                                                                              \|_________|
 	`)
-	utils.InitDB()
-	defer utils.CloseDB()
-	ginServer := gin.Default()
 
+	ginServer := gin.Default()
 	// 解决跨域问题
 	ginServer.Use(cors.New(cors.Config{
 		//准许跨域请求网站,多个使用,分开,限制使用*
@@ -44,7 +43,12 @@ func main() {
 		MaxAge: 24 * time.Hour,
 	}))
 
-	route.Route(ginServer)
+	myDb.Init()
+	defer myDb.CloseMyDb()
+
+	sem := semaphore.NewWeighted(5) // 最大并发处理数为5
+
+	route.Route(ginServer, sem)
 
 	err := ginServer.Run(":8080")
 	if err != nil {

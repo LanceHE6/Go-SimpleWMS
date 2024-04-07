@@ -1,6 +1,8 @@
 package user
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -24,56 +26,36 @@ func Login(context *gin.Context) {
 	account := data.Account
 	password := data.Password
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
+	var user model.User
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
+	err := db.Where("account=? and password=?", account, password).First(&user).Error
 
-	var uid string
-	var permission int
-	var registerTime string
-	err = tx.QueryRow("SELECT uid, permission, register_time FROM user WHERE account = ? AND password = ?", account, password).Scan(&uid, &permission, &registerTime)
 	if err != nil {
 		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
 		return
 	} else {
-		token, err := utils.GenerateToken(uid, permission, registerTime)
+		token, err := utils.GenerateToken(user.Uid, user.Permission, user.CreatedAt.String())
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
 				"error":  "Cannot generate token",
+				"detail": err.Error(),
+				"code":   501,
+			})
+			return
+		}
+
+		// token写入数据库
+		err = db.Model(&user).Update("token", token).Error
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error":  "Cannot update token",
 				"detail": err.Error(),
 				"code":   502,
 			})
 			return
 		}
 
-		// token写入数据库
-		_, err = tx.Exec("UPDATE user set token=? WHERE uid=?", token, uid)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot update token",
-				"detail": err.Error(),
-				"code":   503,
-			})
-			return
-		}
-
-		// 提交事务
-		err = tx.Commit()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot commit transaction",
-				"detail": err.Error(),
-				"code":   504,
-			})
-			return
-		}
 		context.JSON(http.StatusOK, gin.H{
 			"message": "Login successfully",
 			"token":   token,

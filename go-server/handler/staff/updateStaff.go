@@ -1,8 +1,11 @@
 package staff
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -28,52 +31,50 @@ func UpdateStaff(context *gin.Context) {
 	phone := data.Phone
 	deptId := data.DeptId
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
 	if name == "" && phone == "" && deptId == "" {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "At least one of name, dept_id and phone is required",
+			"message": "One of name, phone, dept_id and phone is required",
 			"code":    402,
 		})
 		return
 	}
-	// 拼接sql语句
-	updateSql := "UPDATE staff SET "
-	if name != "" {
-		updateSql += "name='" + name + "',"
+
+	db := myDb.GetMyDbConnection()
+	// 判断该员工是否已存在
+	err := db.Model(&model.Staff{}).Where("sid=?", sid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The staff does not exist",
+			"code":    403,
+		})
+		return
 	}
-	if phone != "" {
-		updateSql += "phone='" + phone + "',"
-	}
+
+	var dep model.Department
+
 	if deptId != "" {
-		updateSql += "department=" + deptId + ","
+		err := db.Model(&model.Department{}).Where("did=?", deptId).Find(&dep).Error
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"message": "The staff's department does not exist",
+				"code":    404,
+			})
+			return
+		}
 	}
-	updateSql = updateSql[:len(updateSql)-1] // 去掉最后一个逗号
-	updateSql += " WHERE sid='" + sid + "'"
-	_, err = tx.Exec(updateSql)
+
+	var staff = model.Staff{
+		Sid:        sid,
+		Name:       name,
+		Phone:      phone,
+		Department: deptId,
+	}
+	err = db.Model(&model.Staff{}).Where("sid=?", staff.Sid).Updates(staff).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update staff",
 			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit transaction",
-			"detail": err.Error(),
-			"code":   503,
+			"code":   501,
 		})
 		return
 	}

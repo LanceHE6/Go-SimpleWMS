@@ -1,67 +1,38 @@
 package department
 
 import (
-	"Go_simpleWMS/utils"
-	"database/sql"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func ListDepartment(context *gin.Context) {
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
-	rows, err := tx.Query("SELECT * FROM department")
+	var departments []model.Department
+	err := db.Select([]string{"did", "name", "created_at"}).Find(&departments).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of departments",
+			"error":  "Can not get the list of departments",
 			"detail": err.Error(),
-			"code":   502,
+			"code":   201,
 		})
-		return
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of departments",
-				"detail": err.Error(),
-				"code":   503,
-			})
+	// 封装返回列表
+	var res []gin.H
+	for _, department := range departments {
+		departmentRes := gin.H{
+			"did":        department.Did,
+			"name":       department.Name,
+			"created_at": department.CreatedAt,
 		}
-	}(rows)
-
-	var departments []gin.H
-	for rows.Next() {
-		var did, name, addTime string
-
-		err = rows.Scan(&did, &name, &addTime)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of department",
-				"detail": err.Error(),
-				"code":   504,
-			})
-			return
-		}
-		department := gin.H{
-			"did":      did,
-			"name":     name,
-			"add_time": addTime,
-		}
-		departments = append(departments, department)
+		res = append(res, departmentRes)
 	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get departments list successfully",
-		"rows":    departments,
+		"rows":    res,
 		"code":    201,
 	})
 }
