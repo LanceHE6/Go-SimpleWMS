@@ -23,9 +23,9 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	ginServer.GET("/ping", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
 		test.Ping(c)
 	})
-	// 鉴权接口
-	ginServer.GET("/auth", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware(), func(c *gin.Context) {
-		auth.AuthByHeader(c)
+	//鉴权接口
+	ginServer.GET("/auth", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
+		auth.Auth(c)
 	})
 	ginServer.POST("/upload", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
 		upload.UploadFile(c)
@@ -45,7 +45,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	userGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		user.DeleteUser(c)
 	})
-	userGroup.PUT("/update", utils.AuthMiddleware(), func(c *gin.Context) {
+	userGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		user.UpdateUser(c)
 	})
 	userGroup.GET("/list", utils.AuthMiddleware(), func(c *gin.Context) {

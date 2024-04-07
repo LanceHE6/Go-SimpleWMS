@@ -63,6 +63,7 @@ func Init() {
 	db.AutoMigrate(&model.Staff{}).AddForeignKey("department", "departments(did)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.InventoryType{})
 	db.AutoMigrate(&model.Warehouse{}).AddForeignKey("manager", "staffs(sid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.GoodsType{})
 }
 
 func CloseMyDb() {

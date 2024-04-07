@@ -58,3 +58,10 @@ type Warehouse struct {
 	Comment string `gorm:"default:''"`
 	Status  int    `gorm:"default:1"`
 }
+
+type GoodsType struct {
+	MyModel
+	Gtid     string `gorm:"primary_key;index"`
+	Name     string
+	TypeCode string `gorm:"default:''"`
+}

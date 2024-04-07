@@ -1,7 +1,8 @@
 package goodsType
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,19 +23,10 @@ func DeleteGoodsType(context *gin.Context) {
 	}
 	gtid := data.GTid
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
+	db := myDb.GetMyDbConnection()
 
 	// 删除仓库
-	_, err = tx.Exec("DELETE FROM goods_type WHERE gtid=?", gtid)
+	err := db.Delete(&model.GoodsType{}, "gtid=?", gtid).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete the Goods type",
@@ -43,15 +35,7 @@ func DeleteGoodsType(context *gin.Context) {
 		})
 		return
 	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Goods type deleted successfully",
 		"code":    201,
