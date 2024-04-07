@@ -46,10 +46,10 @@ func UpdateStaff(context *gin.Context) {
 	}
 
 	var staff = model.Staff{
-		Sid:   sid,
-		Name:  name,
-		Phone: phone,
-		Did:   deptId,
+		Sid:        sid,
+		Name:       name,
+		Phone:      phone,
+		Department: deptId,
 	}
 	err := db.Model(&model.Staff{}).Where("sid=?", staff.Sid).Updates(staff).Error
 	if err != nil {

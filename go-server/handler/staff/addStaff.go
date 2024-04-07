@@ -58,10 +58,10 @@ func AddStaff(context *gin.Context) {
 
 	// 增加员工
 	staff = model.Staff{
-		Name:  staffName,
-		Sid:   newSid,
-		Phone: phone,
-		Did:   staffDeptId,
+		Name:       staffName,
+		Sid:        newSid,
+		Phone:      phone,
+		Department: staffDeptId,
 	}
 	err = db.Create(&staff).Error
 	if err != nil {

@@ -28,7 +28,7 @@ func ListStaff(context *gin.Context) {
 			"sid":        staff.Sid,
 			"name":       staff.Name,
 			"created_at": staff.CreatedAt,
-			"department": staff.Did,
+			"department": staff.Department,
 			"phone":      staff.Phone,
 		}
 		staffsRes = append(staffsRes, staffMeta)
