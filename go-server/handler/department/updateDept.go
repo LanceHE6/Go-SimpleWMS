@@ -3,8 +3,11 @@ package department
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
+	"strings"
 )
 
 type updateDeptRequest struct {
@@ -30,9 +33,26 @@ func UpdateDepartment(context *gin.Context) {
 	}
 
 	db := myDb.GetMyDbConnection()
+	// 判断该部门是否已存在
+	err := db.Model(&model.Department{}).Where("did=?", did).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The department does not exist",
+			"code":    403,
+		})
+		return
+	}
 
-	err := db.Model(&dep).Where("did = ?", did).Updates(dep).Error
+	err = db.Model(&dep).Where("did = ?", did).Updates(dep).Error
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error":  "The name is already exists",
+				"detail": err.Error(),
+				"code":   402,
+			})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update department",
 			"detail": err.Error(),

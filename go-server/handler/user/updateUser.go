@@ -3,7 +3,9 @@ package user
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -25,18 +27,41 @@ func UpdateUser(context *gin.Context) {
 		})
 		return
 	}
+	uid := data.Uid
+	password := data.Password
+	nickname := data.Nickname
+	permission := data.Permission
+	phone := data.Phone
+
+	if password == "" && nickname == "" && permission == 0 && phone == "" {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "One of password, nickname, permission and phone is required",
+			"code":    402,
+		})
+		return
+	}
 
 	db := myDb.GetMyDbConnection()
 
-	user := model.User{
-		Uid:        data.Uid,
-		Password:   data.Password,
-		Nickname:   data.Nickname,
-		Permission: data.Permission,
-		Phone:      data.Phone,
+	// 判断该用户是否已存在
+	err := db.Model(&model.User{}).Where("uid=?", uid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The user does not exist",
+			"code":    403,
+		})
+		return
 	}
 
-	err := db.Model(&user).Where("uid = ?", user.Uid).Updates(user).Error
+	user := model.User{
+		Uid:        uid,
+		Password:   password,
+		Nickname:   nickname,
+		Permission: permission,
+		Phone:      phone,
+	}
+
+	err = db.Model(&user).Where("uid = ?", user.Uid).Updates(user).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update user",

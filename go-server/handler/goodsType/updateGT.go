@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strings"
 )
 
 type updateGoodsTypeRequest struct {
@@ -41,8 +42,8 @@ func UpdateGoodsType(context *gin.Context) {
 
 	// 判断该类型是否已存在
 	var gt model.GoodsType
-	err := db.Model(&model.GoodsType{}).Where("name=?", gTid).First(&gt).Error
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	err := db.Model(&model.GoodsType{}).Where("gtid=?", gTid).First(&gt).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The goods type does not exist",
 			"code":    403,
@@ -59,6 +60,14 @@ func UpdateGoodsType(context *gin.Context) {
 
 	err = db.Model(&model.GoodsType{}).Where("gtid=?", gt.Gtid).Updates(&gt).Error
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error":  "The name is already exists",
+				"detail": err.Error(),
+				"code":   404,
+			})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update the goods type",
 			"detail": err.Error(),

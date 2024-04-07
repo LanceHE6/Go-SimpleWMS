@@ -26,13 +26,13 @@ type User struct {
 type Department struct {
 	MyModel
 	Did  string `gorm:"primary_key;index"`
-	Name string
+	Name string `gorm:"unique"`
 }
 
 type Unit struct {
 	MyModel
 	Unid string `gorm:"primary_key;index"`
-	Name string
+	Name string `gorm:"unique"`
 }
 
 type Staff struct {
@@ -46,14 +46,14 @@ type Staff struct {
 type InventoryType struct {
 	MyModel
 	Itid     string `gorm:"primary_key;index"`
-	Name     string
+	Name     string `gorm:"unique"`
 	TypeCode string
 }
 
 type Warehouse struct {
 	MyModel
 	Wid     string `gorm:"primary_key;index"`
-	Name    string
+	Name    string `gorm:"unique"`
 	Manager string
 	Comment string `gorm:"default:''"`
 	Status  int    `gorm:"default:1"`
@@ -62,6 +62,6 @@ type Warehouse struct {
 type GoodsType struct {
 	MyModel
 	Gtid     string `gorm:"primary_key;index"`
-	Name     string
+	Name     string `gorm:"unique"`
 	TypeCode string `gorm:"default:''"`
 }

@@ -3,7 +3,9 @@ package staff
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -29,9 +31,25 @@ func UpdateStaff(context *gin.Context) {
 	phone := data.Phone
 	deptId := data.DeptId
 
-	db := myDb.GetMyDbConnection()
+	if name == "" && phone == "" && deptId == "" {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "One of name, phone, dept_id and phone is required",
+			"code":    402,
+		})
+		return
+	}
 
-	// 获取更新后的部门实体
+	db := myDb.GetMyDbConnection()
+	// 判断该员工是否已存在
+	err := db.Model(&model.Staff{}).Where("sid=?", sid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The staff does not exist",
+			"code":    403,
+		})
+		return
+	}
+
 	var dep model.Department
 
 	if deptId != "" {
@@ -39,7 +57,7 @@ func UpdateStaff(context *gin.Context) {
 		if err != nil {
 			context.JSON(http.StatusBadRequest, gin.H{
 				"message": "The staff's department does not exist",
-				"code":    402,
+				"code":    404,
 			})
 			return
 		}
@@ -51,7 +69,7 @@ func UpdateStaff(context *gin.Context) {
 		Phone:      phone,
 		Department: deptId,
 	}
-	err := db.Model(&model.Staff{}).Where("sid=?", staff.Sid).Updates(staff).Error
+	err = db.Model(&model.Staff{}).Where("sid=?", staff.Sid).Updates(staff).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update staff",

@@ -3,7 +3,9 @@ package inventoryType
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -44,7 +46,15 @@ func UpdateInventoryType(context *gin.Context) {
 	}
 
 	// 判断该类型是否已存在
-	err := db.Model(&model.InventoryType{}).Where("itid=?", invT.Itid).Updates(invT).Error
+	err := db.Model(&model.InventoryType{}).Where("itid=?", ITid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The inventory type does not exist",
+			"code":    403,
+		})
+		return
+	}
+	err = db.Model(&model.InventoryType{}).Where("itid=?", invT.Itid).Updates(invT).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of inventory type for this itid",

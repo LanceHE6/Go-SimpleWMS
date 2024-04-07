@@ -3,7 +3,9 @@ package warehouse
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -32,13 +34,25 @@ func UpdateWarehouse(context *gin.Context) {
 	status := data.Status
 
 	if warehouseName == "" && comment == "" && manager == "" && status == 0 {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "One of name, comment, manager and status is required"})
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "One of name, comment, manager and status is required",
+			"code":    402,
+		})
 		return
 	}
 
 	db := myDb.GetMyDbConnection()
 
 	// 判断该仓库是否已存在
+	err := db.Model(&model.Warehouse{}).Where("wid=?", wid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "The department does not exist",
+			"code":    403,
+		})
+		return
+	}
+
 	var warehouse = model.Warehouse{
 		Wid:     wid,
 		Name:    warehouseName,
@@ -46,7 +60,7 @@ func UpdateWarehouse(context *gin.Context) {
 		Manager: manager,
 		Status:  status,
 	}
-	err := db.Model(&model.Warehouse{}).Where("wid=?", warehouse.Wid).Updates(&warehouse).Error
+	err = db.Model(&model.Warehouse{}).Where("wid=?", warehouse.Wid).Updates(&warehouse).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
