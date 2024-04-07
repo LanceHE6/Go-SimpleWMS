@@ -10,6 +10,8 @@ type MyModel struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli"`
 }
 
+// 数据表模型
+
 type User struct {
 	MyModel
 	Uid        string `gorm:"primary_key;index"`
@@ -39,4 +41,11 @@ type Staff struct {
 	Name  string
 	Did   string
 	Phone string `gorm:"default:''"`
+}
+
+type InventoryType struct {
+	MyModel
+	Itid     string `gorm:"primary_key;index"`
+	Name     string
+	TypeCode string
 }

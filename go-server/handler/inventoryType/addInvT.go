@@ -1,10 +1,11 @@
 package inventoryType
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 type addInventoryTypeRequest struct {
@@ -25,29 +26,12 @@ func AddInventoryType(context *gin.Context) {
 	typeName := data.Name
 	typeCode := data.TypeCode
 
-	tx, err := utils.GetDbConnection()
-
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
+	db := myDb.GetMyDbConnection()
 	// 判断该类型是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE name=?", typeName).Scan(&registered)
+	var invt model.InventoryType
+	err := db.Where(&invt, "name=?", typeName).Error
+
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of inventory type for this type name",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered >= 1 {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The type name already exists",
 			"code":    401,
@@ -57,24 +41,19 @@ func AddInventoryType(context *gin.Context) {
 
 	newITid := "it" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	addTime := time.Now().Unix()
+	invt = model.InventoryType{
+		Name:     typeName,
+		Itid:     newITid,
+		TypeCode: typeCode,
+	}
 	// 增加仓库
-	_, err = tx.Exec("INSERT INTO inventory_type(itid, name, add_time, type_code) VALUES(?, ?, ?, ?)", newITid, typeName, addTime, typeCode)
+	err = db.Create(&invt).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot insert the inventory type",
 			"detail": err.Error(),
 			"code":   505,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   506,
 		})
 		return
 	}

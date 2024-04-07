@@ -1,7 +1,8 @@
 package inventoryType
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,36 +23,19 @@ func DeleteInventoryType(context *gin.Context) {
 	}
 	itid := data.ITid
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
+	// 删除仓库
+	err := db.Delete(&model.InventoryType{}, "itid=?", itid).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot delete the inventory type",
 			"detail": err.Error(),
 			"code":   501,
 		})
 		return
 	}
 
-	// 删除仓库
-	_, err = tx.Exec("DELETE FROM inventory_type WHERE itid=?", itid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the inventory type",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Inventory type deleted successfully",
 		"code":    201,

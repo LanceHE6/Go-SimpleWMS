@@ -1,7 +1,8 @@
 package inventoryType
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -34,20 +35,16 @@ func UpdateInventoryType(context *gin.Context) {
 		return
 	}
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
+	var invT = model.InventoryType{
+		Itid:     ITid,
+		Name:     ITName,
+		TypeCode: typeCode,
 	}
 
 	// 判断该类型是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE itid=?", ITid).Scan(&registered)
+	err := db.Model(&model.InventoryType{}).Where("itid=?", invT.Itid).Updates(invT).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of inventory type for this itid",
@@ -56,61 +53,7 @@ func UpdateInventoryType(context *gin.Context) {
 		})
 		return
 	}
-	if registered == 0 {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The inventory type does not exist",
-			"code":    403,
-		})
-		return
-	}
 
-	// 更新仓库
-
-	if ITName == "" {
-		_, err = tx.Exec("UPDATE inventory_type SET type_code=? WHERE itid=?", typeCode, ITid)
-	} else {
-		// 判断该类型名是否已存在
-		var registered int
-		err = tx.QueryRow("SELECT count(name) FROM inventory_type WHERE name=?", ITName).Scan(&registered)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot get the number of inventory type for this type name",
-				"detail": err.Error(),
-				"code":   503,
-			})
-			return
-		}
-		if registered >= 1 {
-			context.JSON(http.StatusForbidden, gin.H{
-				"message": "The type name already exists",
-				"code":    404,
-			})
-			return
-		}
-
-		if typeCode == "" {
-			_, err = tx.Exec("update inventory_type set name=? where itid=?", ITName, ITid)
-		} else {
-			_, err = tx.Exec("update inventory_type set name=?, type_code=? where itid=?", ITName, typeCode, ITid)
-		}
-	}
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update the inventory type",
-			"detail": err.Error(),
-			"code":   504,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   505,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Inventory type updated successfully",
 		"code":    201,
