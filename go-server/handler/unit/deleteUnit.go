@@ -1,7 +1,8 @@
 package unit
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,36 +23,18 @@ func DeleteUnit(context *gin.Context) {
 	}
 	unid := data.Unid
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
+	err := db.Delete(&model.Unit{}, "unid=?", unid).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot delete the unit",
 			"detail": err.Error(),
 			"code":   501,
 		})
 		return
 	}
 
-	// 删除单位
-	_, err = tx.Exec("DELETE FROM unit WHERE unid=?", unid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the unit",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Unit deleted successfully",
 		"code":    201,

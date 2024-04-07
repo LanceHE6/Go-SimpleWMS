@@ -1,67 +1,39 @@
 package unit
 
 import (
-	"Go_simpleWMS/utils"
-	"database/sql"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func ListUnit(context *gin.Context) {
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
+	var units []model.Unit
 
-	rows, err := tx.Query("SELECT unid, name FROM unit")
+	err := db.Select([]string{"unid", "name", "created_at"}).Find(&units).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of unit",
+			"error":  "Can not get the list of units",
 			"detail": err.Error(),
-			"code":   502,
+			"code":   201,
 		})
-		return
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot close the list of unit",
-				"detail": err.Error(),
-				"code":   503,
-			})
+	// 封装返回列表
+	var res []gin.H
+	for _, unit := range units {
+		unitRes := gin.H{
+			"unid":       unit.Unid,
+			"name":       unit.Name,
+			"created_at": unit.CreatedAt,
 		}
-	}(rows)
-
-	var unitArray []gin.H
-	for rows.Next() {
-		var unid, name string
-
-		err = rows.Scan(&unid, &name)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot scan the list of unit",
-				"detail": err.Error(),
-				"code":   504,
-			})
-			return
-		}
-
-		unit := gin.H{
-			"unid": unid,
-			"name": name,
-		}
-		unitArray = append(unitArray, unit)
+		res = append(res, unitRes)
 	}
+
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Get inventory type list successfully",
-		"rows":    unitArray,
+		"message": "Get units list successfully",
+		"rows":    res,
 		"code":    201,
 	})
 }

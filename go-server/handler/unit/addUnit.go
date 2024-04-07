@@ -1,10 +1,13 @@
 package unit
 
 import (
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"time"
 )
 
 type addUnitRequest struct {
@@ -23,56 +26,31 @@ func AddUnit(context *gin.Context) {
 	}
 	unitName := data.Name
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
-			"detail": err.Error(),
-			"code":   501,
-		})
-		return
-	}
-
-	// 判断该类型是否已存在
-	var registered int
-	err = tx.QueryRow("SELECT count(name) FROM unit WHERE name=?", unitName).Scan(&registered)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of unit for this unit name",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	if registered >= 1 {
+	// 判断该单位是否已经存在
+	var unit model.Unit
+	err := db.Where("name = ?", unitName).First(&unit).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The unit already exists",
-			"code":    401,
+			"code":    402,
 		})
 		return
 	}
-
 	newUnid := "un" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	addTime := time.Now().Unix()
-	//增加仓库
-	_, err = tx.Exec("INSERT INTO unit(unid, name, add_time) VALUES(?, ?, ?)", newUnid, unitName, addTime)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the unit",
-			"detail": err.Error(),
-			"code":   505,
-		})
-		return
+	unit = model.Unit{
+		Unid: newUnid,
+		Name: unitName,
 	}
-	err = tx.Commit()
+
+	err = db.Create(&unit).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
+			"error":  "Cannot insert new unit",
 			"detail": err.Error(),
-			"code":   506,
+			"code":   501,
 		})
 		return
 	}

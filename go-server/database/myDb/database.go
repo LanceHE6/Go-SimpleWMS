@@ -56,7 +56,7 @@ func Init() {
 	if err != nil {
 		fmt.Printf("Cannot connect to MySQL database: %v", err)
 	}
-	db.AutoMigrate(&model.User{}, &model.Department{})
+	db.AutoMigrate(&model.User{}, &model.Department{}, model.Unit{})
 }
 
 func CloseMyDb() {

@@ -24,3 +24,9 @@ type Department struct {
 	Did  string `gorm:"primary_key"`
 	Name string
 }
+
+type Unit struct {
+	MyModel
+	Unid string `gorm:"primary_key"`
+	Name string
+}

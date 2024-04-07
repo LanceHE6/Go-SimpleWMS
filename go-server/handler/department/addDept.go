@@ -48,9 +48,9 @@ func AddDepartment(context *gin.Context) {
 	err = db.Create(&dep).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
+			"error":  "Cannot insert new department",
 			"detail": err.Error(),
-			"code":   506,
+			"code":   501,
 		})
 		return
 	}
