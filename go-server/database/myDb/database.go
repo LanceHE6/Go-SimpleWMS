@@ -56,7 +56,12 @@ func Init() {
 	if err != nil {
 		fmt.Printf("Cannot connect to MySQL database: %v", err)
 	}
-	db.AutoMigrate(&model.User{}, &model.Department{}, model.Unit{})
+	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Department{})
+	db.AutoMigrate(&model.Unit{})
+
+	// 声明外键，级联删除和更新
+	db.AutoMigrate(&model.Staff{}).AddForeignKey("did", "departments(did)", "SET NULL", "CASCADE")
 }
 
 func CloseMyDb() {

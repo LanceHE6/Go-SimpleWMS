@@ -1,7 +1,8 @@
 package staff
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,37 +23,18 @@ func DeleteStaff(context *gin.Context) {
 	}
 	sid := data.Sid
 
-	tx, err := utils.GetDbConnection()
-	// 开始一个新的事务
-	if tx == nil {
+	db := myDb.GetMyDbConnection()
+
+	err := db.Delete(&model.Staff{}, "sid=?", sid).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot delete staff",
 			"detail": err.Error(),
 			"code":   501,
 		})
 		return
 	}
-	// 删除用户
-	_, err = tx.Exec("DELETE FROM staff WHERE sid=?", sid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete staff",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
 
-	// 提交事务
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Staff deleted successfully",
 		"code":    201,

@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type MyModel struct {
 	ID        uint      `gorm:"primary_key;"`
@@ -10,7 +12,7 @@ type MyModel struct {
 
 type User struct {
 	MyModel
-	Uid        string `gorm:"primary_key"`
+	Uid        string `gorm:"primary_key;index"`
 	Account    string
 	Password   string
 	Permission int
@@ -21,12 +23,20 @@ type User struct {
 
 type Department struct {
 	MyModel
-	Did  string `gorm:"primary_key"`
+	Did  string `gorm:"primary_key;index"`
 	Name string
 }
 
 type Unit struct {
 	MyModel
-	Unid string `gorm:"primary_key"`
+	Unid string `gorm:"primary_key;index"`
 	Name string
+}
+
+type Staff struct {
+	MyModel
+	Sid   string `gorm:"primary_key;index"`
+	Name  string
+	Did   string
+	Phone string `gorm:"default:''"`
 }
