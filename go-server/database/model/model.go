@@ -37,10 +37,10 @@ type Unit struct {
 
 type Staff struct {
 	MyModel
-	Sid   string `gorm:"primary_key;index"`
-	Name  string
-	Did   string
-	Phone string `gorm:"default:''"`
+	Sid        string `gorm:"primary_key;index"`
+	Name       string
+	Department string
+	Phone      string `gorm:"default:''"`
 }
 
 type InventoryType struct {
@@ -48,4 +48,13 @@ type InventoryType struct {
 	Itid     string `gorm:"primary_key;index"`
 	Name     string
 	TypeCode string
+}
+
+type Warehouse struct {
+	MyModel
+	Wid     string `gorm:"primary_key;index"`
+	Name    string
+	Manager string
+	Comment string `gorm:"default:''"`
+	Status  int    `gorm:"default:1"`
 }

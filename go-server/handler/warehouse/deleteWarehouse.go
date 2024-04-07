@@ -1,7 +1,8 @@
 package warehouse
 
 import (
-	"Go_simpleWMS/utils"
+	"Go_simpleWMS/database/model"
+	"Go_simpleWMS/database/myDb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,36 +23,19 @@ func DeleteWarehouse(context *gin.Context) {
 	}
 	wid := data.Wid
 
-	tx, err := utils.GetDbConnection()
+	db := myDb.GetMyDbConnection()
 
-	if tx == nil {
+	// 删除仓库
+	err := db.Delete(&model.Warehouse{}, "wid=?", wid).Error
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot begin transaction",
+			"error":  "Cannot delete the warehouse",
 			"detail": err.Error(),
 			"code":   501,
 		})
 		return
 	}
 
-	// 删除仓库
-	_, err = tx.Exec("DELETE FROM warehouse WHERE wid=?", wid)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the warehouse",
-			"detail": err.Error(),
-			"code":   502,
-		})
-		return
-	}
-	err = tx.Commit()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   503,
-		})
-		return
-	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Warehouse deleted successfully",
 		"code":    201,

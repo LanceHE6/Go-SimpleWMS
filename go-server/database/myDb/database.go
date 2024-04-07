@@ -60,8 +60,9 @@ func Init() {
 	db.AutoMigrate(&model.Department{})
 	db.AutoMigrate(&model.Unit{})
 	// 声明外键，级联删除和更新
-	db.AutoMigrate(&model.Staff{}).AddForeignKey("did", "departments(did)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Staff{}).AddForeignKey("department", "departments(did)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.InventoryType{})
+	db.AutoMigrate(&model.Warehouse{}).AddForeignKey("manager", "staffs(sid)", "SET NULL", "CASCADE")
 }
 
 func CloseMyDb() {
