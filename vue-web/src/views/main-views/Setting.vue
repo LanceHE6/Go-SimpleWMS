@@ -37,12 +37,13 @@ onMounted(init)
 //侧边菜单内容
 const sideMenu = [
   {name: "用户管理", index: "/home/setting/userManagement", icon: "User"},
-  {name: "仓库管理", index: "/home/setting/warehouseManagement", icon: "PriceTag"},
-  {name: "货品类型管理", index: "/home/setting/goodsTypeManagement", icon: "Box"},
   {name: "部门管理", index: "/home/setting/departmentManagement", icon: "OfficeBuilding"},
   {name: "员工管理", index: "/home/setting/staffManagement", icon: "Avatar"},
+  {name: "仓库管理", index: "/home/setting/warehouseManagement", icon: "PriceTag"},
+  {name: "货品类型管理", index: "/home/setting/goodsTypeManagement", icon: "Box"},
   {name: "出入库类型管理", index: "/home/setting/inventoryTypeManagement", icon: "Van"},
 ];
+
 //初始tab内容
 const defaultTab = {
     label: '用户管理',
