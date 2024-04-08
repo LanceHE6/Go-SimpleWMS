@@ -101,6 +101,18 @@
           />
         </el-select>
 
+        <el-select
+            v-if="item.isFK"
+            v-model.trim="editForm.data[item.dataName]"
+            placeholder="请选择"
+        >
+          <el-option
+              v-for="i in editFKList"
+              :label="i[item.FKData.label]"
+              :value="i[item.FKData.property]"
+          />
+        </el-select>
+
       </el-form-item>
     </el-form>
 
@@ -144,6 +156,18 @@
               v-for="i in item.selectOptions"
               :label="i.label"
               :value="i.value"
+          />
+        </el-select>
+
+        <el-select
+            v-if="item.isFK"
+            v-model.trim="addForm.data[item.dataName]"
+            placeholder="请选择"
+        >
+          <el-option
+              v-for="i in addFKList"
+              :label="i[item.FKData.label]"
+              :value="i[item.FKData.property]"
           />
         </el-select>
 
@@ -238,6 +262,18 @@ const prop = defineProps({
     default: () => {},
     description: '编辑数据模版, 包含数据模版以及约束模版'+
         '\n对象格式为：{data: "数据模版对象", rules: "约束模版对象"}'
+  },
+  addFKList:{
+    type: Array,
+    default: () => [],
+    description: '添加窗口外键数据列表'+
+        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  },
+  editFKList:{
+    type: Array,
+    default: () => [],
+    description: '编辑窗口外键数据列表'+
+        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
   }
 });
 
@@ -270,7 +306,6 @@ const addFormVisible = ref(false)
 const myUploadForm = ref(null)
 //上传表单是否可见
 const uploadFormVisible = ref(false)
-
 
 //监听数据变化并实时更新表格
 watch(() => prop.defaultData, (newValue) => {
@@ -323,6 +358,7 @@ function download(){
 }
 function upload(){
   uploadFormVisible.value = true
+  console.log("FK:", JSON.stringify(getFK(prop.addFKList, 'did')))
 }
 
 function submitUploadData(){
@@ -356,7 +392,7 @@ function edit(row){
 
 function confirmDel(row){
   ElMessageBox.confirm(
-      '你确定要删除用户' + row.nickname + '吗？用户被删除后无法恢复！',
+      '你确定要删除' + row[prop.searchData] + '吗？数据被删除后无法恢复！',
       '注意',
       {
         confirmButtonText: '确定',
@@ -393,17 +429,29 @@ function excelToJson(e){
       })
       const excelName = workbook.SheetNames[0] // 取第一张表
       const exl = XLSX.utils.sheet_to_json(workbook.Sheets[excelName]) // 生成json表格内容
-      console.log("excelToJson:", exl)
+      //console.log("excelToJson:", exl)
       // 将 JSON 数据上传给服务器
-      let userList = []
+      let dataList = []
       for (const item in exl) {
-        const user = exl[item]
-        user.phone = user.phone.toString()
-        user.password = user.password.toString()
-        userList.push(user)
+        const data = exl[item]
+        console.log("data:", data)
+        for (const i in prop.addDataTemplate.dataType){
+          if(data[i]) {
+            if (prop.addDataTemplate.dataType[i] === "String") {
+              data[i] = data[i].toString()
+            }
+            else if(prop.addDataTemplate.dataType[i] === "Int"){
+              data[i] = parseInt(data[i])
+            }
+            else if(prop.addDataTemplate.dataType[i] === "Float"){
+              data[i] = parseFloat(data[i])
+            }
+          }
+          dataList.push(data)
+        }
       }
-      userList = Array.from(new Set(userList))
-      emit("upload", userList)
+      dataList = Array.from(new Set(dataList))
+      emit("upload", dataList)
       // document.getElementsByName('file')[0].value = '' // 根据自己需求，可重置上传value为空，允许重复上传同一文件
     } catch (error) {
       console.error("excelToJson:", error)
@@ -420,6 +468,12 @@ function downloadTemplate(){
   worksheet["!cols"] = new Array(addForm.value.dataNum).fill({ wch: 15 });
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
 }
+
+//通过name找到指定外键数据列表
+const getFK = (arr, name) => {
+  return arr.filter(item => item.name === name);
+}
+
 
 </script>
 
