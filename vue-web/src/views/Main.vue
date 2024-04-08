@@ -93,9 +93,9 @@
             </el-icon>
             用户
           </template>
-          <el-menu-item index="/">one</el-menu-item>
-          <el-menu-item index="/">two</el-menu-item>
-          <el-menu-item index="/">three</el-menu-item>
+          <el-menu-item @click="help">帮助中心</el-menu-item>
+          <el-menu-item @click="about">关于</el-menu-item>
+          <el-menu-item @click="logout">退出登录</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-header>
@@ -119,7 +119,7 @@ import {onMounted, reactive} from 'vue'
 import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 onMounted(initialize)
 
@@ -127,6 +127,21 @@ const state = reactive({
   nowMenuActive: '/home/homePage',  //当前首部栏界面
 })
 
+function help(){
+  window.open('https://sr.mihoyo.com/', '_blank');
+}
+
+function about(){
+  ElMessageBox.alert('Go-SimpleWMS v1.0.0', '关于', {
+    autofocus: false,
+    confirmButtonText: '确定',
+  })
+}
+
+function logout(){
+  localStorage.setItem("token", "");
+  router.push("/")
+}
 
 //点击首部菜单
 const handleSelect = (key) => {
