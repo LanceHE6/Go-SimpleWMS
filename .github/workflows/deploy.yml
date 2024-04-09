@@ -18,10 +18,10 @@ jobs:
           go-version: 1.21
 
       - name: Build
-        run: go build -v ./Go-SimpleWMS/go-server
+        run: go build -v ./go-server/...
 
       - name: Test
-        run: go test -v ./Go-SimpleWMS/go-server
+        run: go test -v ./go-server/...
 
       - name: Docker build and push
         uses: docker/build-push-action@v2
