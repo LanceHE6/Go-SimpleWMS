@@ -32,13 +32,13 @@ const editForm = {
     sid:'',
     name:'',
     phone:'',
-    department:'',
+    dept_id:'',
   },
   dataType:{
     sid:'String',
     name:'String',
     phone:'String',
-    department:'String',
+    dept_id:'String',
   },
   dataNum: 4,
   rules: {
