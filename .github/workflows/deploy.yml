@@ -17,14 +17,15 @@ jobs:
         with:
           go-version: 1.21
 
-      - name: Change to Go directory
-        run: cd go-server
-
       - name: Build
-        run: go build -v ./...
+        run: |
+          cd go-server
+          go build -v ./...
 
       - name: Test
-        run: go test -v ./...
+        run: |
+          cd go-server
+          go test -v ./...
 
       - name: Docker build and push
         uses: docker/build-push-action@v2
