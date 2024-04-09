@@ -71,13 +71,16 @@ onMounted(async () => {
 //获取外键列表
 async function getFKList() {
   const addFormItem = prop.addForm.item
+  let addUrl = ''
+  let editUrl = ''
   for (const i in addFormItem) {
     if (addFormItem[i].isFK === true) {
       // state.addFKList.push({
       //   name: addFormItem[i].FKData.property,
       //   data: await getData(addFormItem[i].FKData.url)
       // })
-      state.addFKList = await getData(addFormItem[i].FKData.url)
+      addUrl = addFormItem[i].FKData.url
+      state.addFKList = await getData(addUrl)
     }
   }
   const editFormItem = prop.editForm.item
@@ -87,7 +90,13 @@ async function getFKList() {
       //   name: editFormItem[i].FKData.property,
       //   data: await getData(editFormItem[i].FKData.url)
       // })
-      state.editFKList = await getData(editFormItem[i].FKData.url)
+      editUrl = editFormItem[i].FKData.url
+      if(editUrl !== addUrl) {
+        state.editFKList = await getData()
+      }
+      else{
+        state.editFKList = state.addFKList
+      }
     }
   }
 }
@@ -104,6 +113,7 @@ function upload(form){
 
 //点击子组件的删除按钮
 function del(row){
+  console.log(JSON.stringify(row))
   prop.deleteDataBody[prop.keyData] = row[prop.keyData]
   deleteData(prop.deleteDataBody)
 }
