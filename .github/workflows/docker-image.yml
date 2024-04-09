@@ -44,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./go-server
-          file: Dockerfile
+          dockerfile: Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
