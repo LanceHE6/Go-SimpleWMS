@@ -10,7 +10,12 @@
         :label="item.label"
         :name="item.path"
     >
-      <router-view></router-view>
+
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </el-tab-pane>
   </el-tabs>
 </template>
