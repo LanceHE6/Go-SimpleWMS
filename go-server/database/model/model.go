@@ -76,5 +76,6 @@ type Goods struct {
 	Warehouse    string
 	Manufacturer string `gorm:"default:''"`
 	Unit         string
-	Quantity     int `gorm:"default:0"`
+	Image        string `gorm:"default:''"`
+	Quantity     int    `gorm:"default:0"`
 }
