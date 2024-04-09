@@ -46,7 +46,7 @@ func main() {
 	myDb.Init()
 	defer myDb.CloseMyDb()
 
-	sem := semaphore.NewWeighted(5) // 最大并发处理数为5
+	sem := semaphore.NewWeighted(50) // 最大并发处理数为5
 
 	route.Route(ginServer, sem)
 
