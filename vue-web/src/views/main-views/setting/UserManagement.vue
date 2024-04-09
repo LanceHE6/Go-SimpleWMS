@@ -36,6 +36,13 @@ const editForm = {
     nickname:'',
     phone:''
   },
+  dataType:{
+    uid:'String',
+    password:'String',
+    permission:'Int',
+    nickname:'String',
+    phone:'String'
+  },
   dataNum: 5,
   rules: {
     password: [
