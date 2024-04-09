@@ -20,7 +20,7 @@ const tableColList = [
   {property: "name", label: "货品类型名", sortable: false},
   {property: "type_code", label: "货品类型编号", sortable: true},
   {property: "created_at", label: "创建时间", sortable: true},
-  {property: "gtid", label: "货品类型ID", sortable: true, width: 120},
+  {property: "gtid", label: "货品类型ID", sortable: true, width: 130},
 ]
 
 /**
@@ -45,7 +45,7 @@ const editForm = {
   },
   item:[
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
-    {label: '货品类型编码', prop: 'account', dataName: 'account', isInput: true},
+    {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
   key: 'gtid'
 }
@@ -70,7 +70,7 @@ const addForm = {
   },
   item:[
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
-    {label: '货品类型编码', prop: 'account', dataName: 'account', isInput: true},
+    {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
 }
 
