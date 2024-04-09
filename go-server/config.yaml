@@ -1,8 +1,15 @@
+server:
+    port: "8080" # Server port
+    mode: "debug" # 输出模式 debug/release
+    log:
+        path: "logs"
+        file: "request.log"
+    secretKey: "simple_wms" # 用于token签名的密钥
 db:
   mysql:
     host: "localhost"
     port: "3306"
     account: "root"
     password: "root"
-    database: "simple_wms"
+    dbname: "simple_wms"
 
