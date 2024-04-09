@@ -1,7 +1,7 @@
 <template>
   <DataShowView
       :table-col-list="tableColList"
-      :key-data="'gtid'"
+      :key-data="'itid'"
       :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
@@ -20,7 +20,7 @@ const tableColList = [
   {property: "name", label: "出入库类型名", sortable: false},
   {property: "type_code", label: "出入库类型编号", sortable: true},
   {property: "created_at", label: "创建时间", sortable: true},
-  {property: "itid", label: "出入库类型ID", sortable: true, width: 130},
+  {property: "itid", label: "出入库类型ID", sortable: true, width: 140},
 ]
 
 /**
