@@ -1,8 +1,10 @@
 package main
 
 import (
+	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/route"
+	"Go_simpleWMS/utils"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -46,11 +48,17 @@ func main() {
 	myDb.Init()
 	defer myDb.CloseMyDb()
 
-	sem := semaphore.NewWeighted(50) // 最大并发处理数为5
+	if config.ServerConfig.SERVER.MODE == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	ginServer.Use(utils.LoggerToFile())
+
+	sem := semaphore.NewWeighted(50) // 最大并发处理数为50
 
 	route.Route(ginServer, sem)
 
-	err := ginServer.Run(":8080")
+	err := ginServer.Run(":" + config.ServerConfig.SERVER.PORT)
 	if err != nil {
 		return
 	}
