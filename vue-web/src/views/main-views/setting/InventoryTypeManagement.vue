@@ -17,10 +17,10 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "货品类型名", sortable: false},
-  {property: "type_code", label: "货品类型编号", sortable: true},
+  {property: "name", label: "出入库类型名", sortable: false},
+  {property: "type_code", label: "出入库类型编号", sortable: true},
   {property: "created_at", label: "创建时间", sortable: true},
-  {property: "gtid", label: "货品类型ID", sortable: true, width: 120},
+  {property: "itid", label: "出入库类型ID", sortable: true, width: 130},
 ]
 
 /**
@@ -28,7 +28,7 @@ const tableColList = [
  * */
 const editForm = {
   data :{
-    gtid:'',
+    itid:'',
     name:'',
     type_code:''
   },
@@ -45,9 +45,9 @@ const editForm = {
   },
   item:[
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
-    {label: '货品类型编码', prop: 'account', dataName: 'account', isInput: true},
+    {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
-  key: 'gtid'
+  key: 'itid'
 }
 
 /**
@@ -65,12 +65,12 @@ const addForm = {
   dataNum: 2,
   rules: {
     name:[
-      { required: 'true', message: '请输入货品类型名', trigger: 'blur' }
+      { required: 'true', message: '请输入出入库类型名', trigger: 'blur' }
     ]
   },
   item:[
-    {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
-    {label: '货品类型编码', prop: 'account', dataName: 'account', isInput: true},
+    {label: '出入库类型名', prop: 'name', dataName: 'name', isInput: true},
+    {label: '出入库类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
 }
 
@@ -78,18 +78,18 @@ const addForm = {
  * 删除请求体
  * */
 const deleteDataBody = {
-  gtid: ""
+  itid: ""
 }
 
 /**
  * 网络请求url
  * */
 const urls = {
-  getData: "/gt/list",
-  deleteData: "/gt/delete",
-  addData: "/gt/register",
-  updateData: "/gt/update",
-  uploadData: "/gt/upload",
+  getData: "/invt/list",
+  deleteData: "/invt/delete",
+  addData: "/invt/add",
+  updateData: "/invt/update",
+  uploadData: "/invt/upload",
 }
 
 </script>
