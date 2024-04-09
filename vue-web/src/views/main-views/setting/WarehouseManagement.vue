@@ -37,6 +37,13 @@ const editForm = reactive({
     manager:'',
     status:'',
   },
+  dataType:{
+    wid:'String',
+    name:'String',
+    comment:'String',
+    manager:'String',
+    status:'Int',
+  },
   dataNum: 5,
   rules: {
     status:[
