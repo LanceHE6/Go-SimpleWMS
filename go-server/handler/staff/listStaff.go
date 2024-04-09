@@ -11,7 +11,7 @@ func ListStaff(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var staffs []model.Staff
 
-	err := db.Select([]string{"sid", "name", "phone", "created_at"}).Find(&staffs).Error
+	err := db.Select([]string{"sid", "name", "phone", "created_at", "department"}).Find(&staffs).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of staffs",
