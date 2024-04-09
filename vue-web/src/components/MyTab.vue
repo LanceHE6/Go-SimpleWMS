@@ -9,21 +9,17 @@
         v-for="item in tabList"
         :label="item.label"
         :name="item.path"
-    >
-
-      <router-view v-slot="{ Component }">
-        <keep-alive>
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
-    </el-tab-pane>
+    />
   </el-tabs>
+  <keep-alive>
+    <router-view/>
+  </keep-alive>
 </template>
 
 <script setup>
 
 import {router} from "@/router/index.js";
-import {onMounted, ref, watch} from "vue";
+import {ref, watch} from "vue";
 
 const prop = defineProps({
   defaultTab: {
@@ -42,13 +38,7 @@ defineExpose({
   addTab
 });
 
-onMounted(init)
-
-//初始化函数
-function init(){
-  router.push(activeTab.value);
-}
-
+router.push(prop.defaultTab.path);
 //监听当前tab界面，发生改变时自动切换路由
 watch(() => activeTab.value, (newValue) => {
   router.push(newValue);
@@ -60,9 +50,9 @@ function addTab(name, path){
   if (!tabList.value.some(tab => tab.path === path)) {
     // 如果不在，就添加到 tabList 中
     tabList.value.push({
-      label: name, // 这只是一个示例，你应该根据你的实际情况来设置标签的名称
+      label: name, // 设置标签的名称
       path: path,
-      closable: true, // 这些 tab 可以被关掉
+      closable: true, // tab可以被关掉
     });
   }
   // 设置这个路由为当前活动的 tab
