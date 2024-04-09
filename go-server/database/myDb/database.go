@@ -2,6 +2,7 @@ package myDb
 
 import (
 	"Go_simpleWMS/database/model"
+	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -44,14 +45,40 @@ func Init() {
 	}
 
 	// 创建MySQL连接字符串
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=True&loc=Local",
+		config.DB.MySQL.Account,
+		config.DB.MySQL.Password,
+		config.DB.MySQL.Host,
+		config.DB.MySQL.Port,
+	)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	// 连接到MySQL
+	tdb, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return
+	}
+
+	// 创建数据库
+	_, err = tdb.Exec("CREATE DATABASE IF NOT EXISTS " + config.DB.MySQL.Database)
+	if err != nil {
+		return
+	}
+	// 关闭数据库连接
+	err = tdb.Close()
+	if err != nil {
+		return
+	}
+
+	// 创建MySQL连接字符串
+
+	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.DB.MySQL.Account,
 		config.DB.MySQL.Password,
 		config.DB.MySQL.Host,
 		config.DB.MySQL.Port,
 		config.DB.MySQL.Database,
 	)
+
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		fmt.Printf("Cannot connect to MySQL database: %v", err)
