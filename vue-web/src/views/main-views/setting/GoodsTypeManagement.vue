@@ -87,7 +87,7 @@ const deleteDataBody = {
 const urls = {
   getData: "/gt/list",
   deleteData: "/gt/delete",
-  addData: "/gt/register",
+  addData: "/gt/add",
   updateData: "/gt/update",
   uploadData: "/gt/upload",
 }
