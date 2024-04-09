@@ -104,7 +104,7 @@ const submitForm = async (form) => {
       if (state.ruleForm.account && state.ruleForm.password) {
         await axios.post('/user/login', data)
             .then(async result => {
-              if (result.status === 200) {
+              if (result.data.code === 201) {
                 // 需要将返回的数据存入Store中
                 UserStore.token = result.data.token
                 localStorage.setItem("token", UserStore.token)
