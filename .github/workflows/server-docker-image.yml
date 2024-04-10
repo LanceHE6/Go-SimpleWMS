@@ -50,4 +50,4 @@ jobs:
           push: true
           # 镜像标签， 以commit 的hash 值作为tag like lancehe/go-simplewms-test:2fa54fa5133af
           tags: |
-            ${{ env.DOCKER_REGISTRY }}:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}:latest
