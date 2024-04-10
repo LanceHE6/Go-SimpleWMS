@@ -19,9 +19,19 @@ jobs:
     steps:
       # 拉取代码
       - uses: actions/checkout@v3
+      # 检查提交信息 当提交信息中包含 #docker-push 时，才构建并推送镜像
+      - name: Check commit message
+        id: check_message
+        run: |
+            if echo "${{ github.event.head_commit.message }}" | grep -q "#docker-push"; then
+              echo "::set-output name=RUN_TESTS::true"
+            else
+              echo "::set-output name=RUN_TESTS::false"
+            fi
 
       # 登录镜像仓库
       - name: Login Docker Hub
+        if: steps.check_message.outputs.RUN_TESTS == 'true'
         uses: docker/login-action@v2
         with:
           #这里引用仓库的secrets登录dockerhub
@@ -29,6 +39,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }} # dockerhub 密码
       # 打包构建并推送
       - name: Build and push
+        if: steps.check_message.outputs.RUN_TESTS == 'true'
         uses: docker/build-push-action@v4
         with:
           context: ./go-server
