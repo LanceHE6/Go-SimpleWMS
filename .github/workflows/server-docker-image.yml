@@ -1,0 +1,42 @@
+#workflow名称
+name: Build Test Environment Image
+# 触发条件 在backend-dev分支上push时触发
+on:
+  push:
+    branches:
+      - backend-dev
+#变量配置      
+env:
+  #dockerHub仓库名称
+  DOCKER_REGISTRY: lancehe/go-simplewms-test
+
+jobs:
+  build-image:
+    #运行的环境  
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      # 拉取代码
+      - uses: actions/checkout@v3
+
+      # 登录镜像仓库
+      - name: Login Docker Hub
+        uses: docker/login-action@v2
+        with:
+          #这里引用仓库的secrets登录dockerhub
+          username: ${{ secrets.DOCKER_USERNAME }} # dockerhub 用户名
+          password: ${{ secrets.DOCKER_PASSWORD }} # dockerhub 密码
+      # 打包构建并推送
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./go-server
+          dockerfile: Dockerfile
+          platforms: |
+            linux/amd64
+          #推送到镜像仓库  
+          push: true
+          # 镜像标签， 以commit 的hash 值作为tag like lancehe/go-simplewms-test:2fa54fa5133af
+          tags: |
+            ${{DOCKER_REGISTRY}}:${{ github.sha }}
