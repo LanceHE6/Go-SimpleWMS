@@ -16,12 +16,34 @@ var db *gorm.DB
 func Init() {
 	var err error
 
+	// 从环境变量获取配置
+	account := os.Getenv("MYSQL_ACCOUNT")
+	if account == "" {
+		account = config.ServerConfig.DB.MYSQL.ACCOUNT
+	}
+	password := os.Getenv("MYSQL_PASSWORD")
+	if password == "" {
+		password = config.ServerConfig.DB.MYSQL.PASSWORD
+	}
+	host := os.Getenv("MYSQL_HOST")
+	if host == "" {
+		host = config.ServerConfig.DB.MYSQL.HOST
+	}
+	port := os.Getenv("MYSQL_PORT")
+	if port == "" {
+		port = config.ServerConfig.DB.MYSQL.PORT
+	}
+	dbname := os.Getenv("MYSQL_DBNAME")
+	if dbname == "" {
+		dbname = config.ServerConfig.DB.MYSQL.DBNAME
+	}
+
 	// 创建MySQL连接字符串
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=True&loc=Local",
-		config.ServerConfig.DB.MYSQL.ACCOUNT,
-		config.ServerConfig.DB.MYSQL.PASSWORD,
-		config.ServerConfig.DB.MYSQL.HOST,
-		config.ServerConfig.DB.MYSQL.PORT,
+		account,
+		password,
+		host,
+		port,
 	)
 
 	// 连接到MySQL
@@ -50,11 +72,11 @@ func Init() {
 	// 创建MySQL连接字符串
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.ServerConfig.DB.MYSQL.ACCOUNT,
-		config.ServerConfig.DB.MYSQL.PASSWORD,
-		config.ServerConfig.DB.MYSQL.HOST,
-		config.ServerConfig.DB.MYSQL.PORT,
-		config.ServerConfig.DB.MYSQL.DBNAME,
+		account,
+		password,
+		host,
+		port,
+		dbname,
 	)
 
 	db, err = gorm.Open("mysql", dsn)
