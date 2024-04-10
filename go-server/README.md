@@ -138,9 +138,9 @@ headers:{
 
 **请求参数**：
 
-| 参数名    | 参数类型       | 是否必填 | 参数说明 |
-| --------- | -------------- | -------- | -------- |
-| user_list | Array <Object> | 是       | 用户列表 |
+| 参数名 | 参数类型       | 是否必填 | 参数说明 |
+| ------ | -------------- | -------- | -------- |
+| list   | Array <Object> | 是       | 用户列表 |
 
 **列表参数**
 
@@ -378,7 +378,7 @@ headers:{
             "nickname": "admin",
             "permission": 3,
             "phone": "1924658487",
-            "register_time": "123456",
+            "created_at": "2024-04-07 17:17:44",
             "uid": "00000001"
         },
         {
@@ -386,7 +386,7 @@ headers:{
             "nickname": "admin",
             "permission": 3,
             "phone": "",
-            "register_time": "1711266620",
+            "created_at": "2024-04-07 17:17:44",
             "uid": "00000002"
         },
         {
@@ -394,7 +394,7 @@ headers:{
             "nickName": "admin",
             "permission": 3,
             "phone": "",
-            "register_time": "1711267355",
+            "created_at": "2024-04-07 17:17:44",
             "uid": "00000003"
         },
         {
@@ -402,7 +402,7 @@ headers:{
             "nickname": "admin",
             "permission": 3,
             "phone": "",
-            "register_time": "1711267524",
+            "created_at": "2024-04-07 17:17:44",
             "uid": "00000004"
         },
         {
@@ -410,7 +410,7 @@ headers:{
             "nickname": "admin",
             "permission": 3,
             "phone": "123456789",
-            "register_time": "1711267576",
+            "created_at": "2024-04-07 17:17:44",
             "uid": "00000005"
         }
     ]
@@ -605,7 +605,7 @@ headers:{
     "message": "Get warehouse list successfully",
     "rows": [
         {
-            "add_time": "1711267718",
+            "created_at": "2024-04-07 17:17:44",
             "comment": "123",
             "manager": "00000001",
             "name": "F",
@@ -613,7 +613,7 @@ headers:{
             "wid": "000001"
         },
         {
-            "add_time": "1711267858",
+            "created_at": "2024-04-07 17:17:44",
             "comment": "123",
             "manager": "00000002",
             "name": "A",
@@ -806,13 +806,13 @@ headers:{
     "message": "Get user list successfully",
     "rows": [
         {
-            "addTime": "1711273694",
+            "created_at": "2024-04-07 17:17:44",
             "gtid": "0001",
             "name": "yzl",
             "type_code": "bzx"
         },
         {
-            "addTime": "1711275118",
+            "created_at": "2024-04-07 17:17:44",
             "gtid": "0002",
             "name": "印字轮",
             "type_code": "yzl"
@@ -999,7 +999,7 @@ headers:{
     "message": "Get departments list successfully",
     "rows": [
         {
-            "add_time": "1711672832",
+            "created_at": "2024-04-07 17:17:44",
             "did": "d0002",
             "name": "生产"
         }
@@ -1189,21 +1189,21 @@ headers:{
     "message": "Get staffs list successfully",
     "rows": [
         {
-            "add_time": "1711676374",
+            "created_at": "2024-04-07 17:17:44",
             "department": "d0002",
             "name": "李四",
             "phone": "",
             "sid": "s00000002"
         },
         {
-            "add_time": "1711676876",
+            "created_at": "2024-04-07 17:17:44",
             "department": "d0002",
             "name": "王五",
             "phone": "",
             "sid": "s00000003"
         },
         {
-            "add_time": "1711677476",
+            "created_at": "2024-04-07 17:17:44",
             "department": "d0002",
             "name": "王liu",
             "phone": "",
@@ -1395,13 +1395,13 @@ headers:{
     "message": "Get inventory type list successfully",
     "rows": [
         {
-            "addTime": "1711799217",
+            "created_at": "2024-04-07 17:17:44",
             "gtid": "it0001",
             "name": "采购入库",
             "type_code": "cg"
         },
         {
-            "addTime": "1711799272",
+            "created_at": "2024-04-07 17:17:44",
             "gtid": "it0002",
             "name": "生产入库",
             "type_code": "sc"
@@ -1590,69 +1590,69 @@ headers:{
 
 # 数据库建表示例
 
-## user表
+## users表
 
-| 字段 |          uid           |   account    |   password   |  nick_name   |   permission    | register_time |     token      |    phone     |
-| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :-----------: | :------------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255)  |  varchar(255)  | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳   | 登录生成的凭证 |     电话     |
+| 字段 |          uid           |   account    |   password   |  nick_name   |   permission    |  created_at  |     token      |    phone     |
+| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :----------: | :------------: | :----------: |
+| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255) |  varchar(255)  | varchar(255) |
+| 说明 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳  | 登录生成的凭证 |     电话     |
 
 ----
 
-## warehouse表
+## warehouses表
 
-| 字段 |          wid           |     name     |   add_time   |   comment    |     manager     |  status  |
+| 字段 |          wid           |     name     |  created_at  |   comment    |     manager     |  status  |
 | :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :------: |
 | 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |  varchar(255)   |   int    |
-| 说明 | 标识+4位唯一索引(主键) |    仓库名    |  添加时间戳  |     备注     | 负责人sid(外键) | 仓库状态 |
+| 说明 | 标识+8位唯一索引(主键) |    仓库名    |  添加时间戳  |     备注     | 负责人sid(外键) | 仓库状态 |
 
 ----
 
-## goods_type表
+## goods_types表
 
-| 字段 |          gtid          |     name     |  type_code   |   add_time   |
+| 字段 |          gtid          |     name     |  type_code   |  created_at  |
 | :--: | :--------------------: | :----------: | :----------: | :----------: |
 | 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |
-| 说明 | 标识+4位唯一索引(主键) |  货品类型名  | 货品类型编码 |  添加时间戳  |
+| 说明 | 标识+8位唯一索引(主键) |  货品类型名  | 货品类型编码 |  添加时间戳  |
 
 ----
 
-## department表
+## departments表
 
-| 字段 |          did           |     name     |   add_time   |
+| 字段 |          did           |     name     |  created_at  |
 | :--: | :--------------------: | :----------: | :----------: |
 | 类型 |      varchar(20)       | varchar(255) | varchar(255) |
-| 说明 | 标识+4位唯一索引(主键) |   部门名称   |  添加时间戳  |
+| 说明 | 标识+8位唯一索引(主键) |   部门名称   |  添加时间戳  |
 
 ----
 
-## staff表
+## staffs表
 
-| 字段 |          sid           |     name     |    phone     |      department      |   add_time   |
+| 字段 |          sid           |     name     |    phone     |      department      |  created_at  |
 | :--: | :--------------------: | :----------: | :----------: | :------------------: | :----------: |
 | 类型 |      varchar(20)       | varchar(255) | varchar(255) |     varchar(255)     | varchar(255) |
 | 说明 | 标识+8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  添加时间戳  |
 
 ----
 
-## inventory_type表
+## inventory_types表
 
-| 字段 |          itid          |      name      |   type_code    |   add_time   |
+| 字段 |          itid          |      name      |   type_code    |  created_at  |
 | :--: | :--------------------: | :------------: | :------------: | :----------: |
 | 类型 |      varchar(20)       |  varchar(255)  |  varchar(255)  | varchar(255) |
-| 说明 | 标识+4位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  添加时间戳  |
+| 说明 | 标识+8位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  添加时间戳  |
 
 ## goods表
 
-| 字段 |       gid        |  goods_code  |     name     |    model     |   type_code    |   warehouse    | manufacturer |   quantity   |     unit     |
-| :--: | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :----------: |
-| 类型 |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) | varchar(255) |
-| 说明 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     |   计量单位   |
+| 字段 |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      |
+| :--: | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: |
+| 类型 |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  |
+| 说明 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) |
 
-## unit表
+## units表
 
 | 字段 |       unid       |     name     |
 | :--: | :--------------: | :----------: |
 | 类型 |   varchar(20)    | varchar(255) |
-| 说明 | 表示+3位唯一索引 |   单位名称   |
+| 说明 | 表示+8位唯一索引 |   单位名称   |
 

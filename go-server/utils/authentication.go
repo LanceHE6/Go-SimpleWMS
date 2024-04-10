@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/model"
 	db2 "Go_simpleWMS/database/myDb"
 	"errors"
@@ -12,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte(SecretKey) // 用于签名的密钥
+var jwtKey = []byte(config.ServerConfig.SERVER.SECRET_KEY) // 用于签名的密钥
 
 // 自定义载荷内容
 type myClaims struct {

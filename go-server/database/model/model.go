@@ -65,3 +65,17 @@ type GoodsType struct {
 	Name     string `gorm:"unique"`
 	TypeCode string `gorm:"default:''"`
 }
+
+type Goods struct {
+	MyModel
+	Gid          string `gorm:"primary_key;index"`
+	GoodsCode    string `gorm:"unique"`
+	Name         string
+	Model        string
+	GoodsType    string `gorm:"default:''"`
+	Warehouse    string
+	Manufacturer string `gorm:"default:''"`
+	Unit         string
+	Image        string `gorm:"default:''"`
+	Quantity     int    `gorm:"default:0"`
+}

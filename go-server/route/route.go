@@ -3,6 +3,7 @@ package route
 import (
 	"Go_simpleWMS/handler/auth"
 	"Go_simpleWMS/handler/department"
+	"Go_simpleWMS/handler/goods"
 	"Go_simpleWMS/handler/goodsType"
 	"Go_simpleWMS/handler/inventoryType"
 	"Go_simpleWMS/handler/staff"
@@ -131,5 +132,10 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	})
 	unitGroup.GET("/list", func(c *gin.Context) {
 		unit.ListUnit(c)
+	})
+
+	goodsGroup := ginServer.Group("/goods", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	goodsGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+		goods.AddGoods(c)
 	})
 }

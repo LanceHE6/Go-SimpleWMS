@@ -7,7 +7,7 @@ import (
 )
 
 type uploadUsersRequest struct {
-	UserList []registerRequest `json:"user_list" form:"user_list" binding:"required"`
+	UserList []registerRequest `json:"list" form:"list" binding:"required"`
 }
 
 func UploadUsers(context *gin.Context) {
