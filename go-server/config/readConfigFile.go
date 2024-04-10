@@ -14,7 +14,6 @@ type Config struct {
 		MODE string `yaml:"mode"`
 		LOG  struct {
 			PATH string `yaml:"path"`
-			FILE string `yaml:"file"`
 		} `yaml:"log"`
 		SECRET_KEY string `yaml:"secretKey"`
 	} `yaml:"server"`
