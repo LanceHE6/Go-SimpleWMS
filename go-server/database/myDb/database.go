@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
+	"os"
 )
 
 var db *gorm.DB
@@ -26,17 +27,23 @@ func Init() {
 	// 连接到MySQL
 	tdb, err := sql.Open("mysql", dsn)
 	if err != nil {
+		_ = fmt.Errorf("can not connect to database")
+		os.Exit(-1)
 		return
 	}
 
 	// 创建数据库
 	_, err = tdb.Exec("CREATE DATABASE IF NOT EXISTS " + config.ServerConfig.DB.MYSQL.DBNAME)
 	if err != nil {
+		_ = fmt.Errorf("can not create database")
+		os.Exit(-2)
 		return
 	}
 	// 关闭数据库连接
 	err = tdb.Close()
 	if err != nil {
+		_ = fmt.Errorf("can not close the database")
+		os.Exit(-3)
 		return
 	}
 
@@ -53,6 +60,7 @@ func Init() {
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		fmt.Printf("Cannot connect to MYSQL database: %v", err)
+		os.Exit(-4)
 	}
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.Department{})
