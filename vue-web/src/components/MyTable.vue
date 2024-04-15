@@ -43,6 +43,7 @@
           :label="item.label"
           :width="item.width"
           :sortable="item.sortable"
+          :formatter="mapping(item.property)"
         >
 
         </el-table-column>
@@ -118,7 +119,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="editFormVisible = false">取消</el-button>
+        <el-button @click="editFormVisible.value = false">取消</el-button>
         <el-button type="primary" @click="submitEditForm(myEditForm)">
           确定
         </el-button>
@@ -177,7 +178,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="addFormVisible = false">取消</el-button>
+        <el-button @click="addFormVisible.value = false">取消</el-button>
         <el-button type="primary" @click="submitAddForm(myAddForm)">
           确定
         </el-button>
@@ -213,7 +214,7 @@
     </el-upload>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="uploadFormVisible = false">取消</el-button>
+        <el-button @click="uploadFormVisible.value = false">取消</el-button>
         <el-button type="primary" @click="submitUploadData()">
           上传
         </el-button>
@@ -230,6 +231,11 @@ import {Delete, UploadFilled} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
 
 const prop = defineProps({
+  keyData:{
+    type: String,
+    default: () => "",
+    description: '数据主键'
+  },
   loading:{
     type: Boolean,
     default: () => true,
@@ -325,6 +331,29 @@ const filterTableData = computed(() =>
     )
 )
 
+// 数据显示转换(映射)
+function mapping(property){
+  return (row) => {
+    for(const i in prop.tableColList){
+      const item = prop.tableColList[i]
+      if(item.property === property){
+        if(item.isMapping){
+          for(const j in item.mappingList){
+            const item2 = item.mappingList[j]
+            // 映射
+            if(row[property] === item2.value){
+              return item2.label
+            }
+          }
+          return "unknown"
+        }
+      }
+    }
+    return row[property]
+  }
+}
+
+
 function add(){
   addFormVisible.value = true
 }
@@ -383,7 +412,7 @@ async function submitEditForm(form){
   })
 }
 function edit(row){
-  editForm.value.data[editForm.value.key] = row[editForm.value.key]
+  editForm.value.data[prop.keyData] = row[prop.keyData]
   for(const item in editForm.value.item){
     editForm.value.data[editForm.value.item[item].dataName] = row[editForm.value.item[item].dataName]
   }
