@@ -9,6 +9,7 @@
       :loading="state.isLoading"
       :add-f-k-list="state.addFKList"
       :edit-f-k-list="state.editFKList"
+      :key-data="keyData"
       @add="add"
       @upload="upload"
       @del="del"
