@@ -19,7 +19,11 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "name", label: "员工名", sortable: false},
   {property: "phone", label: "手机号码", sortable: false},
-  {property: "department", label: "所属部门", sortable: false},
+  {property: "department", label: "所属部门", sortable: false, isFK: true, FKData: {
+      url: "/dept/list",
+      property: "did",
+      label: "name"
+    }},
   {property: "created_at", label: "注册时间", sortable: true},
   {property: "sid", label: "员工ID", sortable: true, width: 120},
 ]
@@ -32,27 +36,27 @@ const editForm = {
     sid:'',
     name:'',
     phone:'',
-    dept_id:'',
+    department:'',
   },
   dataType:{
     sid:'String',
     name:'String',
     phone:'String',
-    dept_id:'String',
+    department:'String',
   },
   dataNum: 4,
   rules: {
     name:[
       { required: 'true', message: '请输入员工名', trigger: 'blur' }
     ],
-    dept_id:[
+    department:[
       { required: 'true', message: '请选择员工所属部门', trigger: 'blur' }
     ]
   },
   item:[
     {label: '员工名', prop: 'name', dataName: 'name', isInput: true},
     {label: '电话', prop: 'phone', dataName: 'phone', isInput: true, type: 'number'},
-    {label: '所属部门', prop: 'dept_id', dataName: 'dept_id', isFK: true,
+    {label: '所属部门', prop: 'department', dataName: 'department', isFK: true,
       FKData: {
         url: "/dept/list",
         property: "did",
@@ -68,26 +72,26 @@ const addForm = {
   data :{
     name:'',
     phone:'',
-    dept_id:'',
+    department:'',
   },
   dataType:{
     name:'String',
     phone:'String',
-    dept_id:'String',
+    department:'String',
   },
   dataNum: 3,
   rules: {
     name:[
       { required: 'true', message: '请输入员工名', trigger: 'blur' }
     ],
-    dept_id:[
+    department:[
       { required: 'true', message: '请选择员工所属部门', trigger: 'blur' }
     ]
   },
   item:[
     {label: '员工名', prop: 'name', dataName: 'name', isInput: true},
     {label: '电话', prop: 'phone', dataName: 'phone', isInput: true, type: 'number'},
-    {label: '所属部门', prop: 'dept_id', dataName: 'dept_id', isFK: true,
+    {label: '所属部门', prop: 'department', dataName: 'department', isFK: true,
       FKData: {
         url: "/dept/list",
         property: "did",
