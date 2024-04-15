@@ -59,7 +59,6 @@ const editForm = {
         label: "name"
       }},
   ],
-  key: 'sid'
 }
 
 /**
