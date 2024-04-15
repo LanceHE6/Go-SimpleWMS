@@ -41,6 +41,21 @@ npm run dev
 # 前端访问地址 http://localhost:80
 ```
 
+## 后端运行
+
+```
+# 进入项目目录
+cd go-server
+
+# 下载依赖
+go mod download
+
+# 构建项目
+go build -o main .
+```
+
+
+
 ## 内置功能
 
 
