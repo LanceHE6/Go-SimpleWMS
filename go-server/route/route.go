@@ -138,4 +138,13 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	goodsGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		goods.AddGoods(c)
 	})
+	goodsGroup.POST("/update", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+		goods.UpdateGoods(c)
+	})
+	goodsGroup.DELETE("/delete", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+		goods.DeleteGoods(c)
+	})
+	goodsGroup.GET("/search", func(c *gin.Context) {
+		goods.SearchGoods(c)
+	})
 }
