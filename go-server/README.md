@@ -26,7 +26,7 @@ headers:{
 
 请求头携带鉴权JWT token
 
-**请求路径**：/auth
+**请求路径**：/api/auth
 
 **请求方法**：GET
 
@@ -87,7 +87,7 @@ headers:{
 
 ### 注册
 
-**请求路径**：/user/register
+**请求路径**：/api/user/register
 
 **请求方法**：POST
 
@@ -136,7 +136,7 @@ headers:{
 
 ### 批量注册（上传用户）
 
-**请求路径**：/user/upload
+**请求路径**：/api/user/upload
 
 **请求方法**：POST
 
@@ -218,7 +218,7 @@ headers:{
 
 ### 登录
 
-**请求路径**：/user/login
+**请求路径**：/api/user/login
 
 **请求方法**：POST
 
@@ -266,7 +266,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/user/delete
+**请求路径**：/api/user/delete
 
 **请求方法**：DELETE
 
@@ -311,7 +311,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/user/update
+**请求路径**：/api/user/update
 
 **请求方法**：PUT
 
@@ -360,7 +360,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/user/list
+**请求路径**：/api/user/list
 
 **请求方法**：GET
 
@@ -451,7 +451,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/warehouse/add
+**请求路径**：/api/warehouse/add
 
 **请求方法**：POST
 
@@ -498,7 +498,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/warehouse/delete
+**请求路径**：/api/warehouse/delete
 
 **请求方法**：DELETE
 
@@ -541,7 +541,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/warehouse/update
+**请求路径**：/api/warehouse/update
 
 **请求方法**：PUT
 
@@ -591,7 +591,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/warehouse/list
+**请求路径**：/api/warehouse/list
 
 **请求方法**：GET
 
@@ -656,7 +656,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/gt/add
+**请求路径**：/api/gt/add
 
 **请求方法**：POST
 
@@ -701,7 +701,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/gt/update
+**请求路径**：/api/gt/update
 
 **请求方法**：PUT
 
@@ -749,7 +749,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/gt/delete
+**请求路径**：/api/gt/delete
 
 **请求方法**：DELETE
 
@@ -792,7 +792,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/gt/list
+**请求路径**：/api/gt/list
 
 **请求方法**：GET
 
@@ -853,7 +853,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/dept/add
+**请求路径**：/api/dept/add
 
 **请求方法**：POST
 
@@ -897,7 +897,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/dept/update
+**请求路径**：/api/dept/update
 
 **请求方法**：PUT
 
@@ -942,7 +942,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/dept/delete
+**请求路径**：/api/dept/delete
 
 **请求方法**：DELETE
 
@@ -985,7 +985,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/dept/list
+**请求路径**：/api/dept/list
 
 **请求方法**：GET
 
@@ -1039,7 +1039,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/staff/add
+**请求路径**：/api/staff/add
 
 **请求方法**：POST
 
@@ -1085,7 +1085,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/staff/update
+**请求路径**：/api/staff/update
 
 **请求方法**：PUT
 
@@ -1132,7 +1132,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/staff/delete
+**请求路径**：/api/staff/delete
 
 **请求方法**：DELETE
 
@@ -1175,7 +1175,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/staff/list
+**请求路径**：/api/staff/list
 
 **请求方法**：GET
 
@@ -1245,7 +1245,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/invt/add
+**请求路径**：/api/invt/add
 
 **请求方法**：POST
 
@@ -1290,7 +1290,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/invt/update
+**请求路径**：/api/invt/update
 
 **请求方法**：PUT
 
@@ -1338,7 +1338,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/invt/delete
+**请求路径**：/api/invt/delete
 
 **请求方法**：DELETE
 
@@ -1383,7 +1383,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/invt/list
+**请求路径**：/api/invt/list
 
 **请求方法**：GET
 
@@ -1444,7 +1444,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/unit/add
+**请求路径**：/api/unit/add
 
 **请求方法**：POST
 
@@ -1490,7 +1490,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/unit/delete
+**请求路径**：/api/unit/delete
 
 **请求方法**：DELETE
 
@@ -1535,7 +1535,7 @@ headers:{
 
 ### 列表
 
-**请求路径**：/unit/list
+**请求路径**：/api/unit/list
 
 **请求方法**：GET
 
@@ -1596,7 +1596,7 @@ headers:{
 
 ### 添加
 
-**请求路径**：/goods/add
+**请求路径**：/api/goods/add
 
 **请求方法**：POST
 
@@ -1649,7 +1649,7 @@ headers:{
 
 ### 更新
 
-**请求路径**：/goods/update
+**请求路径**：/api/goods/update
 
 **请求方法**：PUT
 
@@ -1705,7 +1705,7 @@ headers:{
 
 ### 删除
 
-**请求路径**：/goods/delete
+**请求路径**：/api/goods/delete
 
 **请求方法**：DELETE
 
@@ -1750,7 +1750,7 @@ headers:{
 
 ### 查询
 
-**请求路径**：/goods/search
+**请求路径**：/api/goods/search
 
 **请求方法**：GET
 
