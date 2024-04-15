@@ -12,9 +12,9 @@ import (
 
 type addGoodsRequest struct {
 	Name         string `json:"name" form:"name" binding:"required"`
-	Model        string `json:"model" form:"model" binding:"required"`
-	GoodsCode    string `json:"goods_code" form:"goods_code" binding:"required"`
-	GoodsType    string `json:"goods_type" form:"goods_type"`
+	Model        string `json:"model" form:"model"`
+	GoodsCode    string `json:"goods_code" form:"goods_code"`
+	GoodsType    string `json:"goods_type" form:"goods_type" binding:"required"`
 	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`
 	Manufacturer string `json:"manufacturer" form:"manufacturer"`
 	Unit         string `json:"unit" form:"unit" binding:"required"`
@@ -43,8 +43,9 @@ func AddGoods(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 
 	// 判断该仓库是否已存在
+	var goods model.Goods
 	if GCode != "" {
-		err := db.Model(&model.Goods{}).Where("goods_code=?", GCode).Error
+		err := db.Model(&model.Goods{}).Where("goods_code=?", GCode).First(&goods).Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			context.JSON(http.StatusForbidden, gin.H{
 				"message": "The goods with this code already exists",
@@ -57,7 +58,7 @@ func AddGoods(context *gin.Context) {
 	newGid := "g" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
 	// 增加仓库
-	goods := model.Goods{
+	goods = model.Goods{
 		Gid:          newGid,
 		Name:         GName,
 		Model:        GModel,
