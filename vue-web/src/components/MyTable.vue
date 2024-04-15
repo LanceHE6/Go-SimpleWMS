@@ -209,6 +209,7 @@
         <div class="el-upload__tip">
           <el-text type="info">支持xls或xlsx类型文件, </el-text>
           <el-button type="primary" @click="downloadTemplate" text>点击此处下载提交模版</el-button>
+          <el-text type="info">, 输入格式参考导出表格中的格式 </el-text>
         </div>
       </template>
     </el-upload>
@@ -280,7 +281,13 @@ const prop = defineProps({
     default: () => [],
     description: '编辑窗口外键数据列表'+
         '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
-  }
+  },
+  showFKList:{
+    type: Array,
+    default: () => [],
+    description: '显示外键数据列表'+
+        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  },
 });
 
 //对外事件列表
@@ -343,6 +350,16 @@ function mapping(property){
             // 映射
             if(row[property] === item2.value){
               return item2.label
+            }
+          }
+          return "unknown"
+        }
+        else if(item.isFK){
+          for(const j in prop.showFKList){
+            const item2 = prop.showFKList[j]
+            // 映射
+            if(row[property] === item2[item.FKData.property]){
+              return item2[item.FKData.label]
             }
           }
           return "unknown"
@@ -414,7 +431,8 @@ async function submitEditForm(form){
 function edit(row){
   editForm.value.data[prop.keyData] = row[prop.keyData]
   for(const item in editForm.value.item){
-    editForm.value.data[editForm.value.item[item].dataName] = row[editForm.value.item[item].dataName]
+    const i = editForm.value.item[item].dataName
+    editForm.value.data[i] = row[i]
   }
   editFormVisible.value = true
 }
