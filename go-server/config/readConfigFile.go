@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"os"
 )
 
 // 定义你的数据结构
@@ -33,6 +34,65 @@ var ServerConfig Config
 // 创建一个函数来读取和解析YAML文件
 
 func init() {
+	// 检查文件是否存在
+	if _, err := os.Stat("config.yaml"); os.IsNotExist(err) {
+		// 如果文件不存在，创建并写入默认值
+		defaultConfig := Config{
+			SERVER: struct {
+				PORT string `yaml:"port"`
+				MODE string `yaml:"mode"`
+				LOG  struct {
+					PATH string `yaml:"path"`
+				} `yaml:"log"`
+				SECRET_KEY string `yaml:"secretKey"`
+			}{
+				PORT: "8080",
+				MODE: "debug",
+				LOG: struct {
+					PATH string `yaml:"path"`
+				}{
+					PATH: "logs",
+				},
+				SECRET_KEY: "simple_wms_secret_key",
+			},
+			DB: struct {
+				MYSQL struct {
+					HOST     string `yaml:"host"`
+					PORT     string `yaml:"port"`
+					ACCOUNT  string `yaml:"account"`
+					PASSWORD string `yaml:"password"`
+					DBNAME   string `yaml:"dbname"`
+				} `yaml:"mysql"`
+			}{
+				MYSQL: struct {
+					HOST     string `yaml:"host"`
+					PORT     string `yaml:"port"`
+					ACCOUNT  string `yaml:"account"`
+					PASSWORD string `yaml:"password"`
+					DBNAME   string `yaml:"dbname"`
+				}{
+					HOST:     "localhost",
+					PORT:     "3306",
+					ACCOUNT:  "root",
+					PASSWORD: "root",
+					DBNAME:   "simple_wms",
+				},
+			},
+		}
+
+		defaultBytes, err := yaml.Marshal(&defaultConfig)
+		if err != nil {
+			_ = fmt.Errorf("can not marshal the default config")
+			return
+		}
+
+		err = ioutil.WriteFile("config.yaml", defaultBytes, 0644)
+		if err != nil {
+			_ = fmt.Errorf("can not write the default config to file")
+			return
+		}
+	}
+
 	// 读取文件
 	fileBytes, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
