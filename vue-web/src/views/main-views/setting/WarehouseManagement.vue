@@ -21,7 +21,10 @@ const tableColList = [
   {property: "name", label: "仓库名", sortable: false},
   {property: "comment", label: "备注", sortable: false},
   {property: "manager", label: "管理人", sortable: false},
-  {property: "status", label: "状态", sortable: false},
+  {property: "status", label: "状态", sortable: false, isMapping: true, mappingList:[
+      {label: "禁用", value: 0},
+      {label: "启用", value: 1},
+    ]},
   {property: "created_at", label: "创建时间", sortable: true},
   {property: "wid", label: "仓库ID", sortable: true, width: 120},
 ]
@@ -71,7 +74,6 @@ const editForm = reactive({
       }},
     {label: '备注', prop: 'comment', dataName: 'comment', isInput: true},
   ],
-  key: 'wid'
 })
 
 /**
