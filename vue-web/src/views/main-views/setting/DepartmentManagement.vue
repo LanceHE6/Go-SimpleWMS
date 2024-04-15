@@ -43,7 +43,6 @@ const editForm = {
   item:[
     {label: '部门名称', prop: 'name', dataName: 'name', isInput: true},
   ],
-  key: 'did'
 }
 
 /**
