@@ -19,7 +19,11 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "account", label: "账号", sortable: false},
   {property: "nickname", label: "昵称", sortable: false},
-  {property: "permission", label: "权限", sortable: true},
+  {property: "permission", label: "权限", sortable: true, isMapping: true, mappingList:[
+      {label: '普通用户', value: 1},
+      {label: '管理员', value: 2},
+      {label: '超级管理员', value: 3},
+    ]},
   {property: "phone", label: "手机号码", sortable: false},
   {property: "created_at", label: "注册时间", sortable: true},
   {property: "uid", label: "用户ID", sortable: true, width: 120},
@@ -67,7 +71,6 @@ const editForm = {
     {label: '电话', prop: 'phone', dataName: 'phone', isInput: true, type: 'number'},
     {label: '新密码', prop: 'password', dataName: 'password', isInput: true, type: 'password'},
   ],
-  key: 'uid'
 }
 
 /**
