@@ -47,7 +47,6 @@ const editForm = {
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
     {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
-  key: 'gtid'
 }
 
 /**
