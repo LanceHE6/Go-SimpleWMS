@@ -20,7 +20,11 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "name", label: "仓库名", sortable: false},
   {property: "comment", label: "备注", sortable: false},
-  {property: "manager", label: "管理人", sortable: false},
+  {property: "manager", label: "管理人", sortable: false, isFK: true, FKData:{
+      url: "/staff/list",
+      property: "sid",
+      label: "name"
+    }},
   {property: "status", label: "状态", sortable: false, isMapping: true, mappingList:[
       {label: "禁用", value: 0},
       {label: "启用", value: 1},
