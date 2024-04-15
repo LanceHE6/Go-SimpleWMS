@@ -21,18 +21,20 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	// 设置静态资源路径
 	ginServer.Static("/res", "./static/res")
 
-	ginServer.GET("/ping", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
+	ginApi := ginServer.Group("/api", utils.SemaphoreMiddleware(sem))
+
+	ginApi.GET("/ping", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
 		test.Ping(c)
 	})
 	//鉴权接口
-	ginServer.GET("/auth", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
+	ginApi.GET("/auth", func(c *gin.Context) {
 		auth.Auth(c)
 	})
-	ginServer.POST("/upload", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
+	ginApi.POST("/upload", func(c *gin.Context) {
 		upload.UploadFile(c)
 	})
 	// 路由分组
-	userGroup := ginServer.Group("/user", utils.SemaphoreMiddleware(sem))
+	userGroup := ginApi.Group("/user")
 
 	userGroup.POST("/register", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		user.Register(c)
@@ -53,7 +55,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		user.ListUsers(c)
 	})
 
-	warehouseGroup := ginServer.Group("/warehouse", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	warehouseGroup := ginApi.Group("/warehouse", utils.AuthMiddleware())
 	warehouseGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		warehouse.AddWarehouse(c)
 	})
@@ -67,7 +69,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		warehouse.ListWarehouse(c)
 	})
 
-	goodsTypeGroup := ginServer.Group("/gt", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	goodsTypeGroup := ginApi.Group("/gt", utils.AuthMiddleware())
 	goodsTypeGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		goodsType.AddGoodsType(c)
 	})
@@ -81,7 +83,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		goodsType.ListGoodsType(c)
 	})
 
-	departmentGroup := ginServer.Group("/dept", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	departmentGroup := ginApi.Group("/dept", utils.AuthMiddleware())
 	departmentGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		department.AddDepartment(c)
 	})
@@ -95,7 +97,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		department.ListDepartment(c)
 	})
 
-	staffGroup := ginServer.Group("/staff", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	staffGroup := ginApi.Group("/staff", utils.AuthMiddleware())
 	staffGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		staff.AddStaff(c)
 	})
@@ -109,7 +111,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		staff.ListStaff(c)
 	})
 
-	inventoryTypeGroup := ginServer.Group("/invt", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	inventoryTypeGroup := ginApi.Group("/invt", utils.AuthMiddleware())
 	inventoryTypeGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		inventoryType.AddInventoryType(c)
 	})
@@ -123,7 +125,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		inventoryType.ListInventoryType(c)
 	})
 
-	unitGroup := ginServer.Group("/unit", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	unitGroup := ginApi.Group("/unit", utils.AuthMiddleware())
 	unitGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		unit.AddUnit(c)
 	})
@@ -134,7 +136,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 		unit.ListUnit(c)
 	})
 
-	goodsGroup := ginServer.Group("/goods", utils.SemaphoreMiddleware(sem), utils.AuthMiddleware())
+	goodsGroup := ginApi.Group("/goods", utils.AuthMiddleware())
 	goodsGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
 		goods.AddGoods(c)
 	})
