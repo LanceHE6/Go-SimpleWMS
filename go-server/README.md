@@ -1,5 +1,11 @@
 # 后端接口文档
 
+
+
+*测试地址：`http://47.236.80.244:6007`* 
+
+
+
 ## 请求说明
 
 **所有接口需携带Content-Type头**
@@ -1373,6 +1379,8 @@ headers:{
 
 ----
 
+
+
 ### 列表
 
 **请求路径**：/invt/list
@@ -1476,7 +1484,7 @@ headers:{
 |  403   |      Forbidden      |    类型已存在    |
 |  500   | InternalServerError | 后端服务内部错误 |
 
-### 
+
 
 ----
 
@@ -1584,7 +1592,262 @@ headers:{
 
 
 
+## 货品
 
+### 添加
+
+**请求路径**：/goods/add
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名       | 参数类型 | 是否必填 | 参数说明           |
+| ------------ | -------- | -------- | ------------------ |
+| name         | String   | 是       | 货品名称           |
+| model        | String   | 否       | 类型规格           |
+| goods_code   | String   | 否       | 货品编码           |
+| goods_type   | String   | 是       | 货品类型id（gtid） |
+| warehouse    | String   | 是       | 所属仓库id（wid）  |
+| manufacturer | String   | 否       | 制造商             |
+| unit         | String   | 是       | 单位id（unid）     |
+| quantity     | int      | 否       | 数量               |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Goods added successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
+
+### 更新
+
+**请求路径**：/goods/update
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名       | 参数类型 | 是否必填 | 参数说明           |
+| ------------ | -------- | -------- | ------------------ |
+| gid          | string   | 是       | 货品id             |
+| name         | String   | 否       | 货品名称           |
+| model        | String   | 否       | 规格类型           |
+| goods_code   | String   | 否       | 货品编码           |
+| goods_type   | String   | 否       | 货品类型id（gtid） |
+| warehouse    | String   | 否       | 所属仓库id（wid）  |
+| manufacturer | String   | 否       | 制造商             |
+| unit         | String   | 否       | 单位id（unid）     |
+| quantity     | int      | 否       | 数量               |
+
+*注:8个可选参数至少需提供一个*
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Goods updated successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 类型名已经存在/该类型不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
+
+----
+
+
+
+### 删除
+
+**请求路径**：/goods/delete
+
+**请求方法**：DELETE
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| gid    | String   | 是       | 货品id   |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Goods deleted successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
+
+### 查询
+
+**请求路径**：/goods/search
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+**请求参数**：None
+
+| 参数名       | 参数类型 | 是否必填 | 参数说明                    |
+| ------------ | -------- | -------- | --------------------------- |
+| page         | int      | 否       | 页数，默认为1               |
+| page_size    | int      | 否       | 单页大小，默认为10          |
+| name         | string   | 否       | 依货品名称查询              |
+| model        | string   | 否       | 依货品规格类型查询          |
+| goods_type   | string   | 否       | 依货品类型id（gtid）查询    |
+| warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
+| manufacturer | string   | 否       | 依货品所属生产厂商查询      |
+| quantity     | int      | 否       | 依货品数量查询              |
+| keyword      | string   | 否       | 关键字模糊查询              |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "keyword": "重",
+    "message": "Query successfully",
+    "page": 1,
+    "page_size": 10,
+    "rows": [
+        {
+            "ID": 1,
+            "CreatedAt": "2024-04-15T20:24:46+08:00",
+            "UpdatedAt": "2024-04-15T20:24:46+08:00",
+            "Gid": "g07a99cb7",
+            "GoodsCode": "XJ001",
+            "Name": "橡胶",
+            "Model": "XJ-JT",
+            "GoodsType": "gtd180d212",
+            "Warehouse": "w62d263ec",
+            "Manufacturer": "重游",
+            "Unit": "un546af271",
+            "Image": "",
+            "Quantity": 200
+        },
+        {
+            "ID": 2,
+            "CreatedAt": "2024-04-15T20:27:39+08:00",
+            "UpdatedAt": "2024-04-15T20:27:39+08:00",
+            "Gid": "gc034b22e",
+            "GoodsCode": "XJ002",
+            "Name": "橡胶",
+            "Model": "XJ-JT",
+            "GoodsType": "gtd180d212",
+            "Warehouse": "w62d263ec",
+            "Manufacturer": "重游",
+            "Unit": "un546af271",
+            "Image": "",
+            "Quantity": 300
+        },
+        {
+            "ID": 3,
+            "CreatedAt": "2024-04-15T20:27:47+08:00",
+            "UpdatedAt": "2024-04-15T20:27:47+08:00",
+            "Gid": "g643cb699",
+            "GoodsCode": "XJ003",
+            "Name": "橡胶",
+            "Model": "XJ-JT",
+            "GoodsType": "gtd180d212",
+            "Warehouse": "w62d263ec",
+            "Manufacturer": "重游",
+            "Unit": "un546af271",
+            "Image": "",
+            "Quantity": 400
+        }
+    ],
+    "total": 3,
+    "total_pages": 1
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
 
 
 
