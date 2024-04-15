@@ -9,6 +9,7 @@
       :loading="state.isLoading"
       :add-f-k-list="state.addFKList"
       :edit-f-k-list="state.editFKList"
+      :show-f-k-list="state.showFKList"
       :key-data="keyData"
       @add="add"
       @upload="upload"
@@ -74,6 +75,7 @@ async function getFKList() {
   const addFormItem = prop.addForm.item
   let addUrl = ''
   let editUrl = ''
+  let showUrl = ''
   for (const i in addFormItem) {
     if (addFormItem[i].isFK === true) {
       // state.addFKList.push({
@@ -92,11 +94,25 @@ async function getFKList() {
       //   data: await getData(editFormItem[i].FKData.url)
       // })
       editUrl = editFormItem[i].FKData.url
-      if(editUrl !== addUrl) {
-        state.editFKList = await getData()
+      if(editUrl === addUrl) {
+        state.editFKList = state.addFKList
       }
       else{
-        state.editFKList = state.addFKList
+        state.editFKList = await getData(editUrl)
+      }
+    }
+  }
+  for (const i in prop.tableColList){
+    if(prop.tableColList[i].isFK === true){
+      showUrl = prop.tableColList[i].FKData.url
+      if(showUrl === addUrl) {
+        state.showFKList = state.addFKList
+      }
+      else if(showUrl === editUrl) {
+        state.showFKList = state.editFKList
+      }
+      else{
+        state.showFKList = await getData(showUrl)
       }
     }
   }
@@ -129,6 +145,7 @@ const state =  reactive({
   dataArray: [],  //接收用户对象的列表
   addFKList: [],  //添加窗口外键列表
   editFKList: [],  //编辑窗口外键列表
+  showFKList: [],  //显示映射外键列表
 })
 
 
