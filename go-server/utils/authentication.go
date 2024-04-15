@@ -103,7 +103,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// 判断是否在数据库中
-
 		var user model.User
 		db := db2.GetMyDbConnection()
 
