@@ -13,7 +13,7 @@ import (
 type addStaffRequest struct {
 	Name   string `json:"name" form:"name" binding:"required"`
 	Phone  string `json:"phone" form:"phone"`
-	DeptId string `json:"dept_id" form:"dept_id" binding:"required"`
+	DeptId string `json:"department" form:"department" binding:"required"`
 }
 
 func AddStaff(context *gin.Context) {

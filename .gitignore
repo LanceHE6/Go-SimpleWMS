@@ -1,2 +1,3 @@
-/go-server/db/simpleWMS.db
 .idea
+/go-server/logs
+/go-server/static

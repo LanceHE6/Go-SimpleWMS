@@ -1,87 +1,88 @@
 package myDb
 
 import (
+	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/model"
 	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 var db *gorm.DB
 
-// DbConfig 用于映射YAML文件的内容
-type dbConfig struct {
-	DB struct {
-		MySQL struct {
-			Host     string `yaml:"host"`
-			Port     string `yaml:"port"`
-			Account  string `yaml:"account"`
-			Password string `yaml:"password"`
-			Database string `yaml:"database"`
-		} `yaml:"mysql"`
-	} `yaml:"db"`
-}
-
 func Init() {
 	var err error
-	// 读取YAML文件
-	data, err := ioutil.ReadFile("config.yaml")
-	if err != nil {
-		log.Fatalf("Error reading YAML file: %s\n", err)
+
+	// 从环境变量获取配置
+	account := os.Getenv("MYSQL_ACCOUNT")
+	if account == "" {
+		account = config.ServerConfig.DB.MYSQL.ACCOUNT
 	}
-
-	// 创建一个DBConfig实例
-	var config dbConfig
-
-	// 解析YAML文件
-	err = yaml.Unmarshal(data, &config)
-
-	if err != nil {
-		log.Fatalf("Error parsing YAML file: %s\n", err)
+	password := os.Getenv("MYSQL_PASSWORD")
+	if password == "" {
+		password = config.ServerConfig.DB.MYSQL.PASSWORD
+	}
+	host := os.Getenv("MYSQL_HOST")
+	if host == "" {
+		host = config.ServerConfig.DB.MYSQL.HOST
+	}
+	port := os.Getenv("MYSQL_PORT")
+	if port == "" {
+		port = config.ServerConfig.DB.MYSQL.PORT
+	}
+	dbname := os.Getenv("MYSQL_DBNAME")
+	if dbname == "" {
+		dbname = config.ServerConfig.DB.MYSQL.DBNAME
 	}
 
 	// 创建MySQL连接字符串
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8&parseTime=True&loc=Local",
-		config.DB.MySQL.Account,
-		config.DB.MySQL.Password,
-		config.DB.MySQL.Host,
-		config.DB.MySQL.Port,
+		account,
+		password,
+		host,
+		port,
 	)
 
 	// 连接到MySQL
 	tdb, err := sql.Open("mysql", dsn)
 	if err != nil {
+		_ = fmt.Errorf("can not connect to database")
+		os.Exit(-1)
 		return
 	}
 
 	// 创建数据库
-	_, err = tdb.Exec("CREATE DATABASE IF NOT EXISTS " + config.DB.MySQL.Database)
+	_, err = tdb.Exec("CREATE DATABASE IF NOT EXISTS " + config.ServerConfig.DB.MYSQL.DBNAME)
 	if err != nil {
+		_ = fmt.Errorf("can not create database")
+		os.Exit(-2)
 		return
 	}
 	// 关闭数据库连接
 	err = tdb.Close()
 	if err != nil {
+		_ = fmt.Errorf("can not close the database")
+		os.Exit(-3)
 		return
 	}
 
 	// 创建MySQL连接字符串
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.DB.MySQL.Account,
-		config.DB.MySQL.Password,
-		config.DB.MySQL.Host,
-		config.DB.MySQL.Port,
-		config.DB.MySQL.Database,
+		account,
+		password,
+		host,
+		port,
+		dbname,
 	)
 
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
-		fmt.Printf("Cannot connect to MySQL database: %v", err)
+		fmt.Printf("Cannot connect to MYSQL database: %v", err)
+		os.Exit(-4)
 	}
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.Department{})
