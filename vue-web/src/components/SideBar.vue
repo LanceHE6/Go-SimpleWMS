@@ -19,10 +19,10 @@
     <!--其他选项动态设置-->
     <el-menu-item
         v-for="item in menuList"
-        :index="item.index"
+        :index="item.path"
     >
       <component :is="item.icon" style="margin-right: 5px; height: 20px; width: 20px"></component>
-      <span>{{item.name}}</span>
+      <span>{{item.label}}</span>
     </el-menu-item>
 
   </el-menu>
@@ -41,7 +41,7 @@ import {reactive} from "vue";
       type: Array,
       default: () => [],
       description: '侧边栏的菜单列表，该组件通过v-for遍历这个列表来绘制侧边栏。' +
-          '\n列表子元素格式为：{name: "子菜单名称", index: "路由地址", icon: "图标名称(参考el-plus文档)"}'
+          '\n列表子元素格式为：{name: "菜单对应vue文件名称", label: "子菜单名称", path: "路由地址", icon: "图标名称(参考el-plus文档)"}'
     }
   });
 
@@ -53,16 +53,17 @@ import {reactive} from "vue";
   const emit = defineEmits(["selectMenu"]);
 
   //点击侧边栏, 返回menu, 包含菜单的显示名以及路由
-  const handleSideMenu = (key) => {
+  const handleSideMenu = (path) => {
     //如果点到折叠按钮则不触发
-    if(key === ""){
+    if(path === ""){
       return;
     }
 
-    const n = prop.menuList.find(menu => menu.index === key).name
+    const item = prop.menuList.find(menu => menu.path === path)
     const menu = {
-      name: n,  //菜单名字
-      key: key,  //路由
+      name: item.name,
+      label: item.label,  //菜单名字
+      path: path,  //路由
     }
     emit("selectMenu", menu);
   }
