@@ -36,16 +36,17 @@ onMounted(init)
 
 //侧边菜单内容
 const sideMenu = [
-  {name: "用户管理", index: "/home/setting/userManagement", icon: "User"},
-  {name: "部门管理", index: "/home/setting/departmentManagement", icon: "OfficeBuilding"},
-  {name: "员工管理", index: "/home/setting/staffManagement", icon: "Avatar"},
-  {name: "仓库管理", index: "/home/setting/warehouseManagement", icon: "PriceTag"},
-  {name: "货品类型管理", index: "/home/setting/goodsTypeManagement", icon: "Box"},
-  {name: "出入库类型管理", index: "/home/setting/inventoryTypeManagement", icon: "Van"},
+  {name: 'UserManagement', label: "用户管理", path: "/home/setting/userManagement", icon: "User"},
+  {name: 'DepartmentManagement', label: "部门管理", path: "/home/setting/departmentManagement", icon: "OfficeBuilding"},
+  {name: 'StaffManagement', label: "员工管理", path: "/home/setting/staffManagement", icon: "Avatar"},
+  {name: 'WarehouseManagement', label: "仓库管理", path: "/home/setting/warehouseManagement", icon: "PriceTag"},
+  {name: 'GoodsTypeManagement', label: "货品类型管理", path: "/home/setting/goodsTypeManagement", icon: "Box"},
+  {name: 'InventoryTypeManagement', label: "出入库类型管理", path: "/home/setting/inventoryTypeManagement", icon: "Van"},
 ];
 
 //初始tab内容
 const defaultTab = {
+    name: 'UserManagement',
     label: '用户管理',
     path: '/home/setting/userManagement',
   }
@@ -57,7 +58,7 @@ function init() {}
 
 //点击侧边栏菜单
 function handleSelect(menu){
-  myTab.value.addTab(menu.name, menu.key)
+  myTab.value.addTab(menu.name, menu.label, menu.path)
 }
 
 </script>
