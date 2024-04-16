@@ -41,7 +41,7 @@ const routes = [
                     { path: '/home/setting/warehouseManagement', component: WarehouseManagement , name: 'warehouseManagement'},
                     { path: '/home/setting/goodsTypeManagement', component: GoodsTypeManagement , name: 'goodsTypeManagement'},
                     { path: '/home/setting/departmentManagement', component: DepartmentManagement , name: 'departmentManagement'},
-                    { path: '/home/setting/staffManagement', component: StaffManagement , name: 'sStaffManagement'},
+                    { path: '/home/setting/staffManagement', component: StaffManagement , name: 'staffManagement'},
                     { path: '/home/setting/inventoryTypeManagement', component: InventoryTypeManagement , name: 'inventoryTypeManagement'},
                 ]
             },
