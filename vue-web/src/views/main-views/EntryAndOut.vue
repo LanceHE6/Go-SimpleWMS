@@ -36,10 +36,10 @@ onMounted(init)
 
 //侧边菜单内容
 const sideMenu = [
-  {name: "入库单", index: "/home/entryAndOut/entry", icon: "FolderAdd"},
-  {name: "出库单", index: "/home/entryAndOut/out", icon: "FolderRemove"},
-  {name: "盘点单", index: "/home/entryAndOut/check", icon: "FolderChecked"},
-  {name: "调拨单", index: "/home/entryAndOut/allocate", icon: "Folder"},
+  {label: "入库单", path: "/home/entryAndOut/entry", icon: "FolderAdd"},
+  {label: "出库单", path: "/home/entryAndOut/out", icon: "FolderRemove"},
+  {label: "盘点单", path: "/home/entryAndOut/check", icon: "FolderChecked"},
+  {label: "调拨单", path: "/home/entryAndOut/allocate", icon: "Folder"},
 ];
 //初始tab内容
 const defaultTab = {
