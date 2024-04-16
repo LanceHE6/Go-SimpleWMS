@@ -11,9 +11,11 @@
         :name="item.path"
     />
   </el-tabs>
-  <keep-alive>
-    <router-view/>
-  </keep-alive>
+  <router-view v-slot="{ Component }">
+    <keep-alive :include="cachedViews">
+      <component :is="Component" />
+    </keep-alive>
+  </router-view>
 </template>
 
 <script setup>
@@ -32,6 +34,7 @@ const prop = defineProps({
 
 const tabList = ref([prop.defaultTab]);
 const activeTab = ref(prop.defaultTab.path)
+const cachedViews = ref([prop.defaultTab.name]); // 缓存的视图
 
 //暴露函数，可供父组件调用
 defineExpose({
@@ -45,15 +48,18 @@ watch(() => activeTab.value, (newValue) => {
 });
 
 //添加tab界面
-function addTab(name, path){
+function addTab(name, label, path){
   // 检查这个路由是否已经在 tabList 中
   if (!tabList.value.some(tab => tab.path === path)) {
     // 如果不在，就添加到 tabList 中
     tabList.value.push({
-      label: name, // 设置标签的名称
+      name: name,
+      label: label, // 设置标签的名称
       path: path,
       closable: true, // tab可以被关掉
     });
+    // 将新的视图添加到缓存中
+    cachedViews.value.push(name);
   }
   // 设置这个路由为当前活动的 tab
   activeTab.value = path;
@@ -63,11 +69,13 @@ function addTab(name, path){
 function removeTab(currentTab){
   let tabs = tabList.value;
   let a = activeTab.value;
+  let currentTabName;
   //如果当前路径和你要删除的路径一致
   if (currentTab === a) {
     tabs.forEach((tab, index) => {
       //要删除的路径和tabList的路径匹配
       if (tab.path === currentTab) {
+        currentTabName = tab.name
         const nextTab = tabs[index + 1] || tabs[index - 1];
         //如果存在，获取nextTab路径
         if (nextTab) {
@@ -76,10 +84,12 @@ function removeTab(currentTab){
       }
     });
   }
-  //重新赋值activeTab
+  // 重新赋值activeTab
   activeTab.value = a;
-  //过滤删除后的tabList
+  // 过滤删除后的tabList
   tabList.value = tabList.value.filter((tab) => tab.path !== currentTab);
+  // 从缓存中移除视图
+  cachedViews.value = cachedViews.value.filter((view) => view !== currentTabName);
 }
 </script>
 
