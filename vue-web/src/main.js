@@ -7,7 +7,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import "element-plus/theme-chalk/el-message.css";
 
-axios.defaults.baseURL = "http://26.107.171.13:8080"
+axios.defaults.baseURL = "http://26.107.171.13:8080/api"
 
 const app = createApp(App)
 
