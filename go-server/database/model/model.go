@@ -79,3 +79,16 @@ type Goods struct {
 	Image        string `gorm:"default:''"`
 	Quantity     int    `gorm:"default:0"`
 }
+
+type Inventory struct {
+	MyModel
+	Iid           string `gorm:"primary_key;index"`
+	Number        string `gorm:"unique"`
+	Goods         string
+	Amount        int
+	InventoryType string
+	Warehouse     string
+	Operator      string
+	Comment       string `gorm:"default:''"`
+	Manufacturer  string `gorm:"default:''"`
+}
