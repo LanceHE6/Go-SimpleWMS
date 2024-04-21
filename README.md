@@ -43,7 +43,7 @@ npm run dev
 
 ## 后端运行
 
-```
+```bash
 # 进入项目目录
 cd go-server
 

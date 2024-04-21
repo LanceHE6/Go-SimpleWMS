@@ -162,11 +162,6 @@ headers:{
 
 ```json
 {
-    "code": 201,
-    "message": "User registered successfully"
-}
-
-{
     "code": 403,
     "detail": [
         {
