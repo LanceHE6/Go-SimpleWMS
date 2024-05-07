@@ -29,20 +29,19 @@ func UpdateInventoryType(context *gin.Context) {
 	ITName := data.Name
 	typeCode := data.TypeCode
 
-	if ITName == "" && typeCode == "" {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Name or type_code is required",
-			"code":    402,
-		})
-		return
-	}
+	//if ITName == "" && typeCode == "" {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "Name or type_code is required",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
 	db := myDb.GetMyDbConnection()
 
-	var invT = model.InventoryType{
-		Itid:     ITid,
-		Name:     ITName,
-		TypeCode: typeCode,
+	var updateData = map[string]interface{}{
+		"name":      ITName,
+		"type_code": typeCode,
 	}
 
 	// 判断该类型是否已存在
@@ -54,7 +53,7 @@ func UpdateInventoryType(context *gin.Context) {
 		})
 		return
 	}
-	err = db.Model(&model.InventoryType{}).Where("itid=?", invT.Itid).Updates(invT).Error
+	err = db.Model(&model.InventoryType{}).Where("itid=?", ITid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the number of inventory type for this itid",

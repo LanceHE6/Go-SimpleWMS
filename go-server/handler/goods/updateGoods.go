@@ -40,24 +40,23 @@ func UpdateGoods(context *gin.Context) {
 	GUnit := data.Unit
 	GQuantity := data.Quantity
 
-	if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "No data to update",
-			"code":    402,
-		})
-		return
-	}
+	//if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "No data to update",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
-	goods := model.Goods{
-		Gid:          Gid,
-		Name:         GName,
-		Model:        GModel,
-		GoodsCode:    GCode,
-		GoodsType:    GType,
-		Warehouse:    GWarehouse,
-		Manufacturer: GManufacturer,
-		Unit:         GUnit,
-		Quantity:     GQuantity,
+	var goods = map[string]interface{}{
+		"name":         GName,
+		"model":        GModel,
+		"goods_code":   GCode,
+		"goods_type":   GType,
+		"warehouse":    GWarehouse,
+		"manufacturer": GManufacturer,
+		"unit":         GUnit,
+		"quantity":     GQuantity,
 	}
 
 	db := myDb.GetMyDbConnection()
