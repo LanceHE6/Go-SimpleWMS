@@ -21,7 +21,7 @@
       <el-input
           v-model="search"
           style="width: 240px; margin-left: 20px"
-          placeholder="搜索"
+          placeholder="在当前页搜索"
           prefix-icon="Search"
           clearable
       />
@@ -66,6 +66,16 @@
         </el-table-column>
       </el-table>
     </el-main>
+
+    <el-footer>
+      <el-pagination
+          v-model:current-page="currentPage"
+          :page-count="pageCount"
+          background
+          layout="prev, pager, next, jumper"
+          @current-change="pageChange"
+      />
+    </el-footer>
   </el-container>
 
   <el-dialog
@@ -108,7 +118,7 @@
             placeholder="请选择"
         >
           <el-option
-              v-for="i in editFKList"
+              v-for="i in Array.from(editFKMap.get(item.FKData.property))"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -119,7 +129,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="editFormVisible.value = false">取消</el-button>
+        <el-button @click="editFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitEditForm(myEditForm)">
           确定
         </el-button>
@@ -166,7 +176,7 @@
             placeholder="请选择"
         >
           <el-option
-              v-for="i in addFKList"
+              v-for="i in Array.from(addFKMap.get(item.FKData.property))"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -178,7 +188,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="addFormVisible.value = false">取消</el-button>
+        <el-button @click="addFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitAddForm(myAddForm)">
           确定
         </el-button>
@@ -215,7 +225,7 @@
     </el-upload>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="uploadFormVisible.value = false">取消</el-button>
+        <el-button @click="uploadFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitUploadData()">
           上传
         </el-button>
@@ -232,6 +242,11 @@ import {Delete, UploadFilled} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
 
 const prop = defineProps({
+  pageCount:{
+    type: Number,
+    default: () => 1,
+    description: '数据总页数'
+  },
   keyData:{
     type: String,
     default: () => "",
@@ -270,28 +285,28 @@ const prop = defineProps({
     description: '编辑数据模版, 包含数据模版以及约束模版'+
         '\n对象格式为：{data: "数据模版对象", rules: "约束模版对象"}'
   },
-  addFKList:{
-    type: Array,
-    default: () => [],
-    description: '添加窗口外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  addFKMap:{
+    type: Map,
+    default: () => null,
+    description: '添加窗口外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
-  editFKList:{
-    type: Array,
-    default: () => [],
-    description: '编辑窗口外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  editFKMap:{
+    type: Map,
+    default: () => null,
+    description: '编辑窗口外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
-  showFKList:{
-    type: Array,
-    default: () => [],
-    description: '显示外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  showFKMap:{
+    type: Map,
+    default: () => null,
+    description: '显示外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
 });
 
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del"]);
+const emit = defineEmits(["add", "download", "upload", "edit", "del", "update"]);
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -299,6 +314,9 @@ const tableData = ref(prop.defaultData)
 const editForm = ref(prop.editDataTemplate)
 //添加表单数据模版
 const addForm = ref(prop.addDataTemplate)
+
+//当前页数
+const currentPage = ref(1)
 
 //显示名表头
 const tableHead = prop.tableColList.map( item => {
@@ -324,7 +342,6 @@ const uploadFormVisible = ref(false)
 watch(() => prop.defaultData, (newValue) => {
   tableData.value = newValue;
 });
-
 
 //搜索栏文字
 const search = ref('')
@@ -355,8 +372,9 @@ function mapping(property){
           return "unknown"
         }
         else if(item.isFK){
-          for(const j in prop.showFKList){
-            const item2 = prop.showFKList[j]
+          const fkList = prop.showFKMap.get(item.FKData.property)
+          for(const j in fkList){
+            const item2 = fkList[j]
             // 映射
             if(row[property] === item2[item.FKData.property]){
               return item2[item.FKData.label]
@@ -370,6 +388,9 @@ function mapping(property){
   }
 }
 
+function pageChange(){
+  emit("update", currentPage.value);
+}
 
 function add(){
   addFormVisible.value = true
@@ -404,7 +425,6 @@ function download(){
 }
 function upload(){
   uploadFormVisible.value = true
-  console.log("FK:", JSON.stringify(getFK(prop.addFKList, 'did')))
 }
 
 function submitUploadData(){
@@ -515,12 +535,6 @@ function downloadTemplate(){
   worksheet["!cols"] = new Array(addForm.value.dataNum).fill({ wch: 15 });
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
 }
-
-//通过name找到指定外键数据列表
-const getFK = (arr, name) => {
-  return arr.filter(item => item.name === name);
-}
-
 
 </script>
 
