@@ -1,29 +1,31 @@
-# vue-web
+# Go-SimpleWMS文档前端
 
-This template should help get you started developing with Vue 3 in Vite.
+## 项目文档
 
-## Recommended IDE Setup
+### 接口文档
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+ApiPost：https://xxx.apipost.cn/
 
-## Customize configuration
+### 设计文档
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+项目需求和设计文档.md
 
-## Project Setup
+项目系统架构和技术文档.md
 
-```sh
-npm install
+## 项目结构
+
+```
+doc 			项目文档
+vue-web 		前端项目
+go-server 		后端项目
 ```
 
-### Compile and Hot-Reload for Development
+## 启动项目
 
-```sh
+### 前端
+
+```shell
+cd vue-web
+npm i 
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
 ```
