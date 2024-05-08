@@ -64,9 +64,9 @@ func UpdateStaff(context *gin.Context) {
 	}
 
 	var updateData = map[string]interface{}{
-		"name":   name,
-		"phone":  phone,
-		"deptId": deptId,
+		"name":       name,
+		"phone":      phone,
+		"department": deptId,
 	}
 	err = db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
 	if err != nil {
