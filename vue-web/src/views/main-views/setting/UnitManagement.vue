@@ -1,0 +1,87 @@
+<template>
+  <DataShowView
+      :table-col-list="tableColList"
+      :key-data="'unid'"
+      :search-data="'name'"
+      :add-form="addForm"
+      :edit-form="editForm"
+      :delete-data-body="deleteDataBody"
+      :urls="urls"
+  />
+</template>
+
+<script setup>
+import DataShowView from "@/components/DataShowView.vue";
+
+/**
+ * 表头属性列表
+ * */
+const tableColList = [
+  {property: "name", label: "计量单位名", sortable: false},
+  {property: "unid", label: "计量单位ID", sortable: true, width: 140},
+]
+
+/**
+ * 编辑用户时所用到的表单对象
+ * */
+const editForm = {
+  data :{
+    unid:'',
+    name:'',
+  },
+  dataType:{
+    name:'String',
+  },
+  dataNum: 2,
+  rules: {
+
+  },
+  item:[
+    {label: '计量单位名', prop: 'name', dataName: 'name', isInput: true},
+  ],
+}
+
+/**
+ * 注册用户时所用到的对象
+ * */
+const addForm = {
+  data :{
+    name:'',
+  },
+  dataType:{
+    name:'String',
+  },
+  dataNum: 1,
+  rules: {
+    name:[
+      { required: 'true', message: '请输入计量单位名', trigger: 'blur' }
+    ]
+  },
+  item:[
+    {label: '计量单位名', prop: 'name', dataName: 'name', isInput: true},
+  ],
+}
+
+/**
+ * 删除请求体
+ * */
+const deleteDataBody = {
+  unid: ""
+}
+
+/**
+ * 网络请求url
+ * */
+const urls = {
+  getData: "/unit/list",
+  deleteData: "/unit/delete",
+  addData: "/unit/add",
+  updateData: "/unit/update",
+  uploadData: "/unit/upload",
+}
+
+</script>
+
+<style scoped>
+
+</style>
