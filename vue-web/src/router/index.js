@@ -5,6 +5,7 @@ import Main from  '../views/Main.vue'
 import HomePage from  '../views/main-views/HomePage.vue'
 
 import ProductManagement from  '../views/main-views/ProductManagement.vue'
+import AllProduction from "../views/main-views/product-management/AllProduction.vue";
 
 import EntryAndOut from  '../views/main-views/EntryAndOut.vue'
 import Entry from '../views/main-views/entry-and-out/Entry.vue'
@@ -20,13 +21,19 @@ import GoodsTypeManagement from '../views/main-views/setting/GoodsTypeManagement
 import DepartmentManagement from '../views/main-views/setting/DepartmentManagement.vue'
 import StaffManagement from '../views/main-views/setting/StaffManagement.vue'
 import InventoryTypeManagement from '../views/main-views/setting/InventoryTypeManagement.vue'
+import UnitManagement from "../views/main-views/setting/UnitManagement.vue";
+
 
 const routes = [
     { path: '/', component: Login , name: 'login'},
     { path: '/home', component: Main , name: 'home', meta: { requiresAuth: true },
         children: [
             { path: '/home/homePage', component: HomePage , name: 'homePage'},
-            { path: '/home/productManagement', component: ProductManagement , name: 'productManagement'},
+            { path: '/home/productManagement', component: ProductManagement , name: 'productManagement',
+                children: [
+                    { path: '/home/productManagement/allProduction', component: AllProduction , name: 'allProduction'},
+                ]
+            },
             { path: '/home/entryAndOut', component: EntryAndOut , name: 'entryAndOut',
                 children:[
                     { path: '/home/entryAndOut/entry', component: Entry , name: 'entry'},
@@ -43,6 +50,7 @@ const routes = [
                     { path: '/home/setting/departmentManagement', component: DepartmentManagement , name: 'departmentManagement'},
                     { path: '/home/setting/staffManagement', component: StaffManagement , name: 'staffManagement'},
                     { path: '/home/setting/inventoryTypeManagement', component: InventoryTypeManagement , name: 'inventoryTypeManagement'},
+                    { path: '/home/setting/unitManagement', component: UnitManagement , name: 'unitManagement'},
                 ]
             },
         ]
