@@ -12,11 +12,13 @@
       :show-f-k-map="state.showFKMap"
       :key-data="keyData"
       :page-count="state.pageCount"
+      :large="large"
       @add="add"
       @upload="upload"
       @del="del"
       @edit="edit"
       @update="update"
+      @search="startSearch"
   >
   </my-table>
 </template>
@@ -30,6 +32,11 @@ import MyTable from "@/components/MyTable.vue";
 const PAGE_SIZE = 10 //每页展示多少个数据
 
 const prop = defineProps({
+  large:{
+    type: Boolean,
+    default: () => false,
+    description: '是否启用大数据表格(由后端分页的数据)'
+  },
   tableColList:{
     type: Array,
     default: () => [],
@@ -70,8 +77,10 @@ const prop = defineProps({
 //初始化函数
 onMounted(async () => {
   await getFKList()
-  state.allDataArray = await getData()
-  update(1)
+  if(!prop.large) {
+    state.allDataArray = await getData()
+  }
+  await update(state.currentPage)
 })
 
 //获取外键列表
@@ -143,25 +152,49 @@ async function getFKList() {
 }
 
 //页数更新时更新数据
-function update(currentPage){
-  state.currentPage = currentPage
-  //获取数据总数
-  const dataSize = state.allDataArray.length
+async function update(currentPage) {
+  if (!prop.large) {  //前端分页
+    //获取数据总数
+    const dataSize = state.allDataArray.length
 
-  // 计算总页数
-  state.pageCount = Math.ceil(dataSize / PAGE_SIZE);
+    // 计算总页数
+    state.pageCount = Math.max(Math.ceil(dataSize / PAGE_SIZE), 1);
 
-  //判断数据更新后当前页数是否大于总页数
-  if(currentPage > state.pageCount) {
-    currentPage = state.pageCount
+    //判断数据更新后当前页数是否大于总页数
+    if (currentPage > state.pageCount) {
+      currentPage = state.pageCount
+    }
+    state.currentPage = currentPage
+
+    // 计算当前页的第一个元素和最后一个元素在 allDataArray 中的索引
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = Math.min(startIndex + PAGE_SIZE, dataSize);
+
+    // 使用这些索引来获取对应的元素
+    state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
+  } else {  //后端分页
+    state.currentDataArray = await getData(undefined, {
+      page: currentPage,
+      page_size: PAGE_SIZE,
+      keyword: state.searchWord
+    })
+    //判断数据更新后当前页数是否大于总页数
+    if (currentPage > state.pageCount) {
+      currentPage = state.pageCount
+    }
+    state.currentPage = currentPage
   }
+}
 
-  // 计算当前页的第一个元素和最后一个元素在 allDataArray 中的索引
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const endIndex = Math.min(startIndex + PAGE_SIZE, dataSize);
-
-  // 使用这些索引来获取对应的元素
-  state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
+//后端查询
+async function startSearch(s) {
+  state.isLoading = true
+  state.searchWord = s
+  state.currentDataArray = await getData(undefined, {
+    page_size: PAGE_SIZE,
+    keyword: s
+  })
+  state.isLoading = false
 }
 
 //点击子组件的添加按钮, 子组件处理完返回的可提交表单
@@ -189,6 +222,7 @@ function edit(form){
 const state =  reactive({
   pageCount: 1, //数据总页数
   currentPage: 1, //当前页数
+  searchWord: '',  //后端查询关键词
   isLoading: true,  //数据是否正在加载
   allDataArray: [],  //所有表格展示数据列表
   currentDataArray: [], //当前表格展示数据列表
@@ -207,13 +241,14 @@ const token="bearer "+localStorage.getItem("token");
  * 结果：dataArray中包含一到多个data对象
  * */
 
-const getData = async (url = prop.urls.getData) => {
+const getData = async (url = prop.urls.getData, params = {}) => {
   state.isLoading = true
   let resultList = []
   await axios.get(url, {
     headers: {
       'Authorization': token
-    }
+    },
+    params: params
   })
       .then(result => {
         console.log("getData:", result)
@@ -222,6 +257,9 @@ const getData = async (url = prop.urls.getData) => {
             result.data.rows[i].created_at = new Date(result.data.rows[i].created_at).toLocaleString()
           }
           resultList = result.data.rows;
+          if(prop.large){
+            state.pageCount = Math.max(result.data.total_pages, 1)
+          }
         }
       })
       .catch(error => {
@@ -254,7 +292,7 @@ const deleteData=async (data) => {
         ElMessage.error("网络请求出错了！")
         console.error("deleteData:", error)
       })
-  update(state.currentPage)
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -263,7 +301,6 @@ const deleteData=async (data) => {
  * 新增数据 param: newData对象
  * */
 const addData=async (newData) => {
-  console.log("sss",newData)
   state.isLoading = true
   await axios.post(prop.urls.addData, newData, {
     headers: {
@@ -276,10 +313,10 @@ const addData=async (newData) => {
         state.allDataArray = await getData()
       })
       .catch( error => {
-        ElMessage.error("网络请求出错了！该数据是否已被添加？")
+        ElMessage.error("网络请求出错了！")
         console.error("addData:", error)
       })
-  update(state.currentPage)
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -303,7 +340,7 @@ const updateData=async (newData) => {
         ElMessage.error("网络请求出错了！")
         console.error("updateData:", error)
       })
-  update(state.currentPage)
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -349,7 +386,7 @@ const uploadData=async (list) => {
         ElMessage.error("网络请求出错了！数据是否已被添加过？")
         console.error("uploadData:", error)
       })
-  update(state.currentPage)
+  await update(state.currentPage)
   state.isLoading = false
 }
 </script>
