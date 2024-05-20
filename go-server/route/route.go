@@ -12,7 +12,7 @@ import (
 
 func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	// 设置静态资源路径
-	ginServer.Static("/res", "./static/res")
+	ginServer.Static("/static", "./static")
 
 	ginApi := ginServer.Group("/api", utils.SemaphoreMiddleware(sem))
 
@@ -23,8 +23,8 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	ginApi.GET("/auth", func(c *gin.Context) {
 		auth.Auth(c)
 	})
-	ginApi.POST("/upload", func(c *gin.Context) {
-		upload.UploadFile(c)
+	ginApi.POST("/upload/goods_img", func(c *gin.Context) {
+		upload.GoodsImageUpload(c)
 	})
 	// 分组路由
 	group.UserGroup(ginApi)          // 用户路由
