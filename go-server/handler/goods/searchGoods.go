@@ -84,6 +84,25 @@ func SearchGoods(context *gin.Context) {
 		return
 	}
 
+	var goodsRes []gin.H
+	for _, g := range goods {
+		goodsMeta := gin.H{
+			"created_at":   g.CreatedAt,
+			"update_at":    g.UpdatedAt,
+			"gid":          g.Gid,
+			"goods_code":   g.GoodsCode,
+			"name":         g.Name,
+			"model":        g.Model,
+			"goods_type":   g.GoodsType,
+			"warehouse":    g.Warehouse,
+			"manufacturer": g.Manufacturer,
+			"unit":         g.Unit,
+			"quantity":     g.Quantity,
+			"image":        g.Image,
+		}
+		goodsRes = append(goodsRes, goodsMeta)
+	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"code":        201,
 		"message":     "Query successfully",
@@ -92,7 +111,7 @@ func SearchGoods(context *gin.Context) {
 		"total":       total,
 		"total_pages": totalPages,
 		"keyword":     keyword,
-		"rows":        goods,
+		"rows":        goodsRes,
 	})
 
 }
