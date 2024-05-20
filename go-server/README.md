@@ -1905,67 +1905,75 @@ headers:{
 
 ## users表
 
-| 字段 |          uid           |   account    |   password   |  nick_name   |   permission    |  created_at  |     token      |    phone     |
-| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :----------: | :------------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255) |  varchar(255)  | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳  | 登录生成的凭证 |     电话     |
+| 字段 | id             |          uid           |   account    |   password   |  nick_name   |   permission    | created_at | updated_at |     token      |    phone     |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :--------: | ---------- | :------------: | :----------: |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       |  datetime  | datetime   |  varchar(255)  | varchar(255) |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  创建时间  | 更新时间   | 登录生成的凭证 |     电话     |
 
 ----
 
 ## warehouses表
 
-| 字段 |          wid           |     name     |  created_at  |   comment    |     manager     |  status  |
-| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |  varchar(255)   |   int    |
-| 说明 | 标识+8位唯一索引(主键) |    仓库名    |  添加时间戳  |     备注     | 负责人sid(外键) | 仓库状态 |
+| 字段 | id             |          wid           |     name     | created_at | updated_at |   comment    |     manager     |  status  |
+| :--: | -------------- | :--------------------: | :----------: | :--------: | ---------- | :----------: | :-------------: | :------: |
+| 类型 | int            |      varchar(20)       | varchar(255) |  datetime  | datetime   | varchar(255) |  varchar(255)   |   int    |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    仓库名    |  创建时间  | 更新时间   |     备注     | 负责人sid(外键) | 仓库状态 |
 
 ----
 
 ## goods_types表
 
-| 字段 |          gtid          |     name     |  type_code   |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |  货品类型名  | 货品类型编码 |  添加时间戳  |
+| 字段 | id             |          gtid          |     name     |  type_code   | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |  货品类型名  | 货品类型编码 |  创建时间  | 更新时间   |
 
 ----
 
 ## departments表
 
-| 字段 |          did           |     name     |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |   部门名称   |  添加时间戳  |
+| 字段 | id             |          did           |     name     | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |   部门名称   |  创建时间  | datetime   |
 
 ----
 
 ## staffs表
 
-| 字段 |          sid           |     name     |    phone     |      department      |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: | :------------------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) |     varchar(255)     | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  添加时间戳  |
+| 字段 | id             |          sid           |     name     |    phone     |      department      | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :------------------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |     varchar(255)     |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  创建时间  | 更新时间   |
 
 ----
 
 ## inventory_types表
 
-| 字段 |          itid          |      name      |   type_code    |  created_at  |
-| :--: | :--------------------: | :------------: | :------------: | :----------: |
-| 类型 |      varchar(20)       |  varchar(255)  |  varchar(255)  | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  添加时间戳  |
+| 字段 | id             |          itid          |      name      |   type_code    | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :------------: | :------------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       |  varchar(255)  |  varchar(255)  |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  创建时间  | 更新时间   |
 
 ## goods表
 
-| 字段 |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      |
-| :--: | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: |
-| 类型 |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  |
-| 说明 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) |
+| 字段 | id             |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      | created_at | updated_at |
+| :--: | -------------- | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: | ---------- | ---------- |
+| 类型 | int            |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) | 创建时间   | 更新时间   |
 
 ## units表
 
-| 字段 |       unid       |     name     |
-| :--: | :--------------: | :----------: |
-| 类型 |   varchar(20)    | varchar(255) |
-| 说明 | 表示+8位唯一索引 |   单位名称   |
+| 字段 | id             |       unid       |     name     | created_at | updated_at |
+| :--: | -------------- | :--------------: | :----------: | ---------- | ---------- |
+| 类型 | int            |   varchar(20)    | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 表示+8位唯一索引 |   单位名称   | 创建时间   | 更新时间   |
 
+----
+
+## inventories表
+
+| 字段 | id             |          iid           |    number    |   inventory_type   |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------------: | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) |    varchar(255)    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 出入库类型id(外键) | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       | 创建时间   | 更新时间   |
