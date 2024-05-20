@@ -1844,6 +1844,61 @@ headers:{
 |  401   |    Unauthorized     |    鉴权未通过    |
 |  500   | InternalServerError | 后端服务内部错误 |
 
+----
+
+
+
+### 图片上传
+
+**请求路径**：/api/upload/goods_img
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| gid    | String   | 是       | 货品id   |
+| image  | File     | 是       | 图片文件 |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "data": {
+        "gid": "g07a99cb7",
+        "image_name": "goods_1716190218.png",
+        "image_path": "static/res/goodsImage/goods_1716190218.png"
+    },
+    "message": "Upload successfully"
+}
+```
+
+**返回数据说明**
+
+|   参数名   | 参数类型 |     参数说明     |
+| :--------: | :------: | :--------------: |
+|    code    |   int    |      业务码      |
+|  message   |  string  |     返回消息     |
+|   error    |  string  | 后端内部错误消息 |
+|   detail   |  string  |     错误详情     |
+|    data    |  string  |    返回数据体    |
+|    gid     |  string  |    目标货品id    |
+| image_name |  string  |      图片名      |
+| image_path |  string  |     访问路径     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
 
 
 # 数据库建表示例
