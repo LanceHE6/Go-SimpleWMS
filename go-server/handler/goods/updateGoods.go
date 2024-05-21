@@ -9,15 +9,16 @@ import (
 )
 
 type updateGoodsRequest struct {
-	Gid          string `json:"gid" form:"gid" binding:"required"`
-	Name         string `json:"name" form:"name"`
-	Model        string `json:"model" form:"model"`
-	GoodsCode    string `json:"goods_code" form:"goods_code"`
-	GoodsType    string `json:"goods_type" form:"goods_type"`
-	Warehouse    string `json:"warehouse" form:"warehouse"`
-	Manufacturer string `json:"manufacturer" form:"manufacturer"`
-	Unit         string `json:"unit" form:"unit"`
-	Quantity     int    `json:"quantity" form:"quantity"`
+	Gid          string  `json:"gid" form:"gid" binding:"required"`
+	Name         string  `json:"name" form:"name"`
+	Model        string  `json:"model" form:"model"`
+	GoodsCode    string  `json:"goods_code" form:"goods_code"`
+	GoodsType    string  `json:"goods_type" form:"goods_type"`
+	Warehouse    string  `json:"warehouse" form:"warehouse"`
+	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
+	Unit         string  `json:"unit" form:"unit"`
+	Quantity     int     `json:"quantity" form:"quantity"`
+	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 
 func UpdateGoods(context *gin.Context) {
@@ -57,6 +58,7 @@ func UpdateGoods(context *gin.Context) {
 		"manufacturer": GManufacturer,
 		"unit":         GUnit,
 		"quantity":     GQuantity,
+		"unit_price":   data.UnitPrice,
 	}
 
 	db := myDb.GetMyDbConnection()

@@ -10,14 +10,15 @@ import (
 )
 
 type addInvRequest struct {
-	Gid          string `json:"gid" form:"gid"`
-	Name         string `json:"name" form:"name"`
-	Amount       int    `json:"amount" form:"amount" binding:"required"`
-	InventoryTpe string `json:"inventory_type" form:"inventory_type" binding:"required"`
-	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`
-	Operator     string `json:"operator" form:"operator" binding:"required"`
-	Comment      string `json:"comment" form:"comment"`
-	Manufacturer string `json:"manufacturer" form:"manufacturer"`
+	Gid          string  `json:"gid" form:"gid"`
+	Name         string  `json:"name" form:"name"`
+	Amount       int     `json:"amount" form:"amount" binding:"required"`
+	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
+	InventoryTpe string  `json:"inventory_type" form:"inventory_type" binding:"required"`
+	Warehouse    string  `json:"warehouse" form:"warehouse" binding:"required"`
+	Operator     string  `json:"operator" form:"operator" binding:"required"`
+	Comment      string  `json:"comment" form:"comment"`
+	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
 }
 
 func AddInv(context *gin.Context) {
@@ -38,6 +39,7 @@ func AddInv(context *gin.Context) {
 	Sid := data.Operator
 	Comment := data.Comment
 	Manufacturer := data.Manufacturer
+	UnitPrice := data.UnitPrice
 
 	db := myDb.GetMyDbConnection()
 
@@ -79,6 +81,7 @@ func AddInv(context *gin.Context) {
 			Manufacturer: Manufacturer,
 			Unit:         "_default_",
 			Quantity:     0,
+			UnitPrice:    UnitPrice,
 		}
 		err = db.Create(&goods).Error
 		if err != nil {
