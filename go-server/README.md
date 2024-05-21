@@ -1610,6 +1610,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 是       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 **返回结果示例**：
 
@@ -1664,6 +1665,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
 
@@ -1764,6 +1766,7 @@ headers:{
 | warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
 | manufacturer | string   | 否       | 依货品所属生产厂商查询      |
 | quantity     | int      | 否       | 依货品数量查询              |
+| unit_price   | float    | 否       | 依单价查询                  |
 | keyword      | string   | 否       | 关键字模糊查询              |
 
 **返回结果示例**：
@@ -1921,6 +1924,7 @@ headers:{
 | gid            | String   | 否       | 货品id            |
 | name           | String   | 否       | 货品名称          |
 | amount         | int      | 是       | 数量              |
+| unit_price     | float    | 否       | 单价              |
 | inventory_type | String   | 是       | 出入库类型(itid)  |
 | warehouse      | String   | 是       | 所属仓库id（wid） |
 | manufacturer   | String   | 否       | 制造商            |
