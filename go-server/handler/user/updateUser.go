@@ -33,13 +33,13 @@ func UpdateUser(context *gin.Context) {
 	permission := data.Permission
 	phone := data.Phone
 
-	if password == "" && nickname == "" && permission == 0 && phone == "" {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "One of password, nickname, permission and phone is required",
-			"code":    402,
-		})
-		return
-	}
+	//if password == "" && nickname == "" && permission == 0 && phone == "" {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "One of password, nickname, permission and phone is required",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
 	db := myDb.GetMyDbConnection()
 
@@ -53,15 +53,14 @@ func UpdateUser(context *gin.Context) {
 		return
 	}
 
-	user := model.User{
-		Uid:        uid,
-		Password:   password,
-		Nickname:   nickname,
-		Permission: permission,
-		Phone:      phone,
+	var updateData = map[string]interface{}{
+		"password":   password,
+		"nickname":   nickname,
+		"permission": permission,
+		"phone":      phone,
 	}
 
-	err = db.Model(&user).Where("uid = ?", user.Uid).Updates(user).Error
+	err = db.Model(&model.User{}).Where("uid = ?", uid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update user",

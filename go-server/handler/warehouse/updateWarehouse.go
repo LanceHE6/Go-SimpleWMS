@@ -33,14 +33,6 @@ func UpdateWarehouse(context *gin.Context) {
 	manager := data.Manager
 	status := data.Status
 
-	if warehouseName == "" && comment == "" && manager == "" && status == 0 {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "One of name, comment, manager and status is required",
-			"code":    402,
-		})
-		return
-	}
-
 	db := myDb.GetMyDbConnection()
 
 	// 判断该仓库是否已存在
@@ -53,14 +45,15 @@ func UpdateWarehouse(context *gin.Context) {
 		return
 	}
 
-	var warehouse = model.Warehouse{
-		Wid:     wid,
-		Name:    warehouseName,
-		Comment: comment,
-		Manager: manager,
-		Status:  status,
+	// 使用map封装更新数据，能更新所有数据，包括零值字段
+	var updateData = map[string]interface{}{
+		"name":    warehouseName,
+		"comment": comment,
+		"manager": manager,
+		"status":  status,
 	}
-	err = db.Model(&model.Warehouse{}).Where("wid=?", warehouse.Wid).Updates(&warehouse).Error
+
+	err = db.Model(&model.Warehouse{}).Where("wid=?", wid).Updates(updateData).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{

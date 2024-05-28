@@ -31,13 +31,13 @@ func UpdateStaff(context *gin.Context) {
 	phone := data.Phone
 	deptId := data.DeptId
 
-	if name == "" && phone == "" && deptId == "" {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "One of name, phone, dept_id and phone is required",
-			"code":    402,
-		})
-		return
-	}
+	//if name == "" && phone == "" && deptId == "" {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "One of name, phone, dept_id and phone is required",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
 	db := myDb.GetMyDbConnection()
 	// 判断该员工是否已存在
@@ -63,13 +63,12 @@ func UpdateStaff(context *gin.Context) {
 		}
 	}
 
-	var staff = model.Staff{
-		Sid:        sid,
-		Name:       name,
-		Phone:      phone,
-		Department: deptId,
+	var updateData = map[string]interface{}{
+		"name":       name,
+		"phone":      phone,
+		"department": deptId,
 	}
-	err = db.Model(&model.Staff{}).Where("sid=?", staff.Sid).Updates(staff).Error
+	err = db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update staff",

@@ -30,13 +30,13 @@ func UpdateGoodsType(context *gin.Context) {
 	gTName := data.Name
 	typeCode := data.TypeCode
 
-	if gTName == "" && typeCode == "" {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "name or type_code is required",
-			"code":    402,
-		})
-		return
-	}
+	//if gTName == "" && typeCode == "" {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "name or type_code is required",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
 	db := myDb.GetMyDbConnection()
 
@@ -51,14 +51,12 @@ func UpdateGoodsType(context *gin.Context) {
 		return
 	}
 
-	// 更新仓库
-	gt = model.GoodsType{
-		Gtid:     gTid,
-		Name:     gTName,
-		TypeCode: typeCode,
+	var updateData = map[string]interface{}{
+		"name":      gTName,
+		"type_code": typeCode,
 	}
 
-	err = db.Model(&model.GoodsType{}).Where("gtid=?", gt.Gtid).Updates(&gt).Error
+	err = db.Model(&model.GoodsType{}).Where("gtid=?", gTid).Updates(updateData).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			context.JSON(http.StatusBadRequest, gin.H{

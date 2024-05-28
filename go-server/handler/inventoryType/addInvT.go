@@ -11,6 +11,7 @@ import (
 type addInventoryTypeRequest struct {
 	Name     string `json:"name" form:"name" binding:"required"`
 	TypeCode string `json:"type_code" form:"type_code"`
+	Type     int    `json:"type" form:"type" binding:"required"`
 }
 
 func AddInventoryType(context *gin.Context) {
@@ -25,6 +26,7 @@ func AddInventoryType(context *gin.Context) {
 	}
 	typeName := data.Name
 	typeCode := data.TypeCode
+	typeNum := data.Type
 
 	db := myDb.GetMyDbConnection()
 	// 判断该类型是否已存在
@@ -45,6 +47,7 @@ func AddInventoryType(context *gin.Context) {
 		Name:     typeName,
 		Itid:     newITid,
 		TypeCode: typeCode,
+		Type:     typeNum,
 	}
 	// 增加仓库
 	err = db.Create(&invt).Error

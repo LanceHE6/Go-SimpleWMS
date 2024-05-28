@@ -11,14 +11,15 @@ import (
 )
 
 type addGoodsRequest struct {
-	Name         string `json:"name" form:"name" binding:"required"`
-	Model        string `json:"model" form:"model"`
-	GoodsCode    string `json:"goods_code" form:"goods_code"`
-	GoodsType    string `json:"goods_type" form:"goods_type" binding:"required"`
-	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`
-	Manufacturer string `json:"manufacturer" form:"manufacturer"`
-	Unit         string `json:"unit" form:"unit" binding:"required"`
-	Quantity     int    `json:"quantity" form:"quantity"`
+	Name         string  `json:"name" form:"name" binding:"required"`
+	Model        string  `json:"model" form:"model"`
+	GoodsCode    string  `json:"goods_code" form:"goods_code"`
+	GoodsType    string  `json:"goods_type" form:"goods_type" binding:"required"`
+	Warehouse    string  `json:"warehouse" form:"warehouse" binding:"required"`
+	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
+	Unit         string  `json:"unit" form:"unit" binding:"required"`
+	Quantity     int     `json:"quantity" form:"quantity"`
+	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 
 func AddGoods(context *gin.Context) {
@@ -39,6 +40,7 @@ func AddGoods(context *gin.Context) {
 	GManufacturer := data.Manufacturer
 	GUnit := data.Unit
 	GQuantity := data.Quantity
+	GUnitPrice := data.UnitPrice
 
 	db := myDb.GetMyDbConnection()
 
@@ -68,6 +70,7 @@ func AddGoods(context *gin.Context) {
 		Manufacturer: GManufacturer,
 		Unit:         GUnit,
 		Quantity:     GQuantity,
+		UnitPrice:    GUnitPrice,
 	}
 	err := db.Create(&goods).Error
 	if err != nil {

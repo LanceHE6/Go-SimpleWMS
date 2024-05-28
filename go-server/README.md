@@ -162,11 +162,6 @@ headers:{
 
 ```json
 {
-    "code": 201,
-    "message": "User registered successfully"
-}
-
-{
     "code": 403,
     "detail": [
         {
@@ -1253,10 +1248,11 @@ headers:{
 
 **请求参数**：
 
-| 参数名    | 参数类型 | 是否必填 | 参数说明       |
-| --------- | -------- | -------- | -------------- |
-| name      | String   | 是       | 出入库类型名称 |
-| type_code | string   | 否       | 类型编码       |
+| 参数名    | 参数类型 | 是否必填 | 参数说明        |
+| --------- | -------- | -------- | --------------- |
+| name      | String   | 是       | 出入库类型名称  |
+| type_code | string   | 否       | 类型编码        |
+| type      | int      | 是       | 1为入库 2为出库 |
 
 **返回结果示例**：
 
@@ -1614,6 +1610,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 是       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 **返回结果示例**：
 
@@ -1668,6 +1665,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
 
@@ -1768,6 +1766,7 @@ headers:{
 | warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
 | manufacturer | string   | 否       | 依货品所属生产厂商查询      |
 | quantity     | int      | 否       | 依货品数量查询              |
+| unit_price   | float    | 否       | 依单价查询                  |
 | keyword      | string   | 否       | 关键字模糊查询              |
 
 **返回结果示例**：
@@ -1849,73 +1848,195 @@ headers:{
 |  401   |    Unauthorized     |    鉴权未通过    |
 |  500   | InternalServerError | 后端服务内部错误 |
 
+----
+
+
+
+### 图片上传
+
+**请求路径**：/api/upload/goods_img
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| gid    | String   | 是       | 货品id   |
+| image  | File     | 是       | 图片文件 |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "data": {
+        "gid": "g07a99cb7",
+        "image_name": "goods_1716190218.png",
+        "image_path": "static/res/goodsImage/goods_1716190218.png"
+    },
+    "message": "Upload successfully"
+}
+```
+
+**返回数据说明**
+
+|   参数名   | 参数类型 |     参数说明     |
+| :--------: | :------: | :--------------: |
+|    code    |   int    |      业务码      |
+|  message   |  string  |     返回消息     |
+|   error    |  string  | 后端内部错误消息 |
+|   detail   |  string  |     错误详情     |
+|    data    |  string  |    返回数据体    |
+|    gid     |  string  |    目标货品id    |
+| image_name |  string  |      图片名      |
+| image_path |  string  |     访问路径     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
+
+## 出入库
+
+### 添加
+
+**请求路径**：/api/inv/add
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明          |
+| -------------- | -------- | -------- | ----------------- |
+| gid            | String   | 否       | 货品id            |
+| name           | String   | 否       | 货品名称          |
+| amount         | int      | 是       | 数量              |
+| unit_price     | float    | 否       | 单价              |
+| inventory_type | String   | 是       | 出入库类型(itid)  |
+| warehouse      | String   | 是       | 所属仓库id（wid） |
+| manufacturer   | String   | 否       | 制造商            |
+| operator       | String   | 是       | 操作员(sid)       |
+| comment        | String   | 否       | 备注              |
+| manufacturer   | String   | 否       | 制造商            |
+
+*注：当gid为空时且为入库类型时会根据name创建货品并添加出入库记录*
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Inventory added successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
 
 
 # 数据库建表示例
 
 ## users表
 
-| 字段 |          uid           |   account    |   password   |  nick_name   |   permission    |  created_at  |     token      |    phone     |
-| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :----------: | :------------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       | varchar(255) |  varchar(255)  | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  注册时间戳  | 登录生成的凭证 |     电话     |
+| 字段 | id             |          uid           |   account    |   password   |  nick_name   |   permission    | created_at | updated_at |     token      |    phone     |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :--------: | ---------- | :------------: | :----------: |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       |  datetime  | datetime   |  varchar(255)  | varchar(255) |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  创建时间  | 更新时间   | 登录生成的凭证 |     电话     |
 
 ----
 
 ## warehouses表
 
-| 字段 |          wid           |     name     |  created_at  |   comment    |     manager     |  status  |
-| :--: | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |  varchar(255)   |   int    |
-| 说明 | 标识+8位唯一索引(主键) |    仓库名    |  添加时间戳  |     备注     | 负责人sid(外键) | 仓库状态 |
+| 字段 | id             |          wid           |     name     | created_at | updated_at |   comment    |     manager     |  status  |
+| :--: | -------------- | :--------------------: | :----------: | :--------: | ---------- | :----------: | :-------------: | :------: |
+| 类型 | int            |      varchar(20)       | varchar(255) |  datetime  | datetime   | varchar(255) |  varchar(255)   |   int    |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    仓库名    |  创建时间  | 更新时间   |     备注     | 负责人sid(外键) | 仓库状态 |
 
 ----
 
 ## goods_types表
 
-| 字段 |          gtid          |     name     |  type_code   |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |  货品类型名  | 货品类型编码 |  添加时间戳  |
+| 字段 | id             |          gtid          |     name     |  type_code   | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |  货品类型名  | 货品类型编码 |  创建时间  | 更新时间   |
 
 ----
 
 ## departments表
 
-| 字段 |          did           |     name     |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |   部门名称   |  添加时间戳  |
+| 字段 | id             |          did           |     name     | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |   部门名称   |  创建时间  | datetime   |
 
 ----
 
 ## staffs表
 
-| 字段 |          sid           |     name     |    phone     |      department      |  created_at  |
-| :--: | :--------------------: | :----------: | :----------: | :------------------: | :----------: |
-| 类型 |      varchar(20)       | varchar(255) | varchar(255) |     varchar(255)     | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  添加时间戳  |
+| 字段 | id             |          sid           |     name     |    phone     |      department      | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :------------------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |     varchar(255)     |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |   员工名称   |     电话     | 员工所属部门id(外键) |  创建时间  | 更新时间   |
 
 ----
 
 ## inventory_types表
 
-| 字段 |          itid          |      name      |   type_code    |  created_at  |
-| :--: | :--------------------: | :------------: | :------------: | :----------: |
-| 类型 |      varchar(20)       |  varchar(255)  |  varchar(255)  | varchar(255) |
-| 说明 | 标识+8位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  添加时间戳  |
+| 字段 | id             |          itid          |      name      |   type_code    | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :------------: | :------------: | :--------: | ---------- |
+| 类型 | int            |      varchar(20)       |  varchar(255)  |  varchar(255)  |  datetime  | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) | 出入库类型名称 | 出入库类型编码 |  创建时间  | 更新时间   |
 
 ## goods表
 
-| 字段 |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      |
-| :--: | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: |
-| 类型 |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  |
-| 说明 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) |
+| 字段 | id             |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      | created_at | updated_at |
+| :--: | -------------- | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: | ---------- | ---------- |
+| 类型 | int            |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) | 创建时间   | 更新时间   |
 
 ## units表
 
-| 字段 |       unid       |     name     |
-| :--: | :--------------: | :----------: |
-| 类型 |   varchar(20)    | varchar(255) |
-| 说明 | 表示+8位唯一索引 |   单位名称   |
+| 字段 | id             |       unid       |     name     | created_at | updated_at |
+| :--: | -------------- | :--------------: | :----------: | ---------- | ---------- |
+| 类型 | int            |   varchar(20)    | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 表示+8位唯一索引 |   单位名称   | 创建时间   | 更新时间   |
 
+----
+
+## inventories表
+
+| 字段 | id             |          iid           |    number    |   inventory_type   |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | :----------------: | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) |    varchar(255)    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 出入库类型id(外键) | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       | 创建时间   | 更新时间   |

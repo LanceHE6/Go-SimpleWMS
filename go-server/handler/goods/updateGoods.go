@@ -9,15 +9,16 @@ import (
 )
 
 type updateGoodsRequest struct {
-	Gid          string `json:"gid" form:"gid" binding:"required"`
-	Name         string `json:"name" form:"name"`
-	Model        string `json:"model" form:"model"`
-	GoodsCode    string `json:"goods_code" form:"goods_code"`
-	GoodsType    string `json:"goods_type" form:"goods_type"`
-	Warehouse    string `json:"warehouse" form:"warehouse"`
-	Manufacturer string `json:"manufacturer" form:"manufacturer"`
-	Unit         string `json:"unit" form:"unit"`
-	Quantity     int    `json:"quantity" form:"quantity"`
+	Gid          string  `json:"gid" form:"gid" binding:"required"`
+	Name         string  `json:"name" form:"name"`
+	Model        string  `json:"model" form:"model"`
+	GoodsCode    string  `json:"goods_code" form:"goods_code"`
+	GoodsType    string  `json:"goods_type" form:"goods_type"`
+	Warehouse    string  `json:"warehouse" form:"warehouse"`
+	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
+	Unit         string  `json:"unit" form:"unit"`
+	Quantity     int     `json:"quantity" form:"quantity"`
+	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 
 func UpdateGoods(context *gin.Context) {
@@ -40,24 +41,24 @@ func UpdateGoods(context *gin.Context) {
 	GUnit := data.Unit
 	GQuantity := data.Quantity
 
-	if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "No data to update",
-			"code":    402,
-		})
-		return
-	}
+	//if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
+	//	context.JSON(http.StatusBadRequest, gin.H{
+	//		"message": "No data to update",
+	//		"code":    402,
+	//	})
+	//	return
+	//}
 
-	goods := model.Goods{
-		Gid:          Gid,
-		Name:         GName,
-		Model:        GModel,
-		GoodsCode:    GCode,
-		GoodsType:    GType,
-		Warehouse:    GWarehouse,
-		Manufacturer: GManufacturer,
-		Unit:         GUnit,
-		Quantity:     GQuantity,
+	var goods = map[string]interface{}{
+		"name":         GName,
+		"model":        GModel,
+		"goods_code":   GCode,
+		"goods_type":   GType,
+		"warehouse":    GWarehouse,
+		"manufacturer": GManufacturer,
+		"unit":         GUnit,
+		"quantity":     GQuantity,
+		"unit_price":   data.UnitPrice,
 	}
 
 	db := myDb.GetMyDbConnection()
