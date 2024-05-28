@@ -5,25 +5,20 @@
     <el-header
       style="height: 20px"
     >
-      <el-button type="primary" icon="Plus" @click="add">
-        添加
-      </el-button>
+      <large-table-header
+          v-if="large"
+          @add="add"
+          @download="download"
+          @upload="upload"
+          @search="searchChange"
+      />
 
-      <el-button type="primary" icon="Download" @click="upload" plain>
-        导入
-      </el-button>
-
-
-      <el-button type="primary" icon="Upload" @click="download" plain>
-        导出
-      </el-button>
-
-      <el-input
-          v-model="search"
-          style="width: 240px; margin-left: 20px"
-          placeholder="搜索"
-          prefix-icon="Search"
-          clearable
+      <table-header
+          v-else
+          @add="add"
+          @download="download"
+          @upload="upload"
+          @search="searchChange"
       />
 
     </el-header>
@@ -66,6 +61,16 @@
         </el-table-column>
       </el-table>
     </el-main>
+
+    <el-footer>
+      <el-pagination
+          v-model:current-page="currentPage"
+          :page-count="pageCount"
+          background
+          layout="prev, pager, next, jumper"
+          @current-change="pageChange"
+      />
+    </el-footer>
   </el-container>
 
   <el-dialog
@@ -75,7 +80,7 @@
       center
   >
 
-    <el-form :model="editForm.data" :rules="editForm.rules" ref="myEditForm" label-position="top" status-icon>
+    <el-form :model="editForm.data" :rules="editForm.rules" ref="myEditForm" label-position="top" :class="editDialogClass" status-icon>
 
       <el-form-item
         v-for="item in editForm.item"
@@ -108,7 +113,7 @@
             placeholder="请选择"
         >
           <el-option
-              v-for="i in editFKList"
+              v-for="i in Array.from(editFKMap.get(item.FKData.property))"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -119,7 +124,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="editFormVisible.value = false">取消</el-button>
+        <el-button @click="editFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitEditForm(myEditForm)">
           确定
         </el-button>
@@ -134,7 +139,7 @@
       center
   >
 
-    <el-form :model="addForm.data" :rules="addForm.rules" ref="myAddForm" label-position="top" status-icon>
+    <el-form :model="addForm.data" :rules="addForm.rules" ref="myAddForm" label-position="top" :class="addDialogClass" status-icon>
       <el-form-item
           v-for="item in addForm.item"
           :label="item.label"
@@ -166,7 +171,7 @@
             placeholder="请选择"
         >
           <el-option
-              v-for="i in addFKList"
+              v-for="i in Array.from(addFKMap.get(item.FKData.property))"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -178,7 +183,7 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="addFormVisible.value = false">取消</el-button>
+        <el-button @click="addFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitAddForm(myAddForm)">
           确定
         </el-button>
@@ -215,7 +220,7 @@
     </el-upload>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="uploadFormVisible.value = false">取消</el-button>
+        <el-button @click="uploadFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitUploadData()">
           上传
         </el-button>
@@ -230,8 +235,20 @@ import {computed, markRaw, ref, watch} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, UploadFilled} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
+import TableHeader from "@/components/TableHeader.vue";
+import LargeTableHeader from "@/components/LargeTableHeader.vue";
 
 const prop = defineProps({
+  large:{
+    type: Boolean,
+    default: () => false,
+    description: '是否启用大数据表格(由后端分页的数据)'
+  },
+  pageCount:{
+    type: Number,
+    default: () => 1,
+    description: '数据总页数'
+  },
   keyData:{
     type: String,
     default: () => "",
@@ -270,28 +287,28 @@ const prop = defineProps({
     description: '编辑数据模版, 包含数据模版以及约束模版'+
         '\n对象格式为：{data: "数据模版对象", rules: "约束模版对象"}'
   },
-  addFKList:{
-    type: Array,
-    default: () => [],
-    description: '添加窗口外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  addFKMap:{
+    type: Map,
+    default: () => null,
+    description: '添加窗口外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
-  editFKList:{
-    type: Array,
-    default: () => [],
-    description: '编辑窗口外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  editFKMap:{
+    type: Map,
+    default: () => null,
+    description: '编辑窗口外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
-  showFKList:{
-    type: Array,
-    default: () => [],
-    description: '显示外键数据列表'+
-        '\n列表中的对象格式为：{name: "外键名", data: "外键对象"}'
+  showFKMap:{
+    type: Map,
+    default: () => null,
+    description: '显示外键数据'+
+        '\n其中key为外键名, data为外键对象'
   },
 });
 
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del"]);
+const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search"]);
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -299,6 +316,9 @@ const tableData = ref(prop.defaultData)
 const editForm = ref(prop.editDataTemplate)
 //添加表单数据模版
 const addForm = ref(prop.addDataTemplate)
+
+//当前页数
+const currentPage = ref(1)
 
 //显示名表头
 const tableHead = prop.tableColList.map( item => {
@@ -325,7 +345,6 @@ watch(() => prop.defaultData, (newValue) => {
   tableData.value = newValue;
 });
 
-
 //搜索栏文字
 const search = ref('')
 
@@ -333,10 +352,15 @@ const search = ref('')
 const filterTableData = computed(() =>
     tableData.value.filter(
         (data) =>
-            !search.value ||
+            !search.value || prop.large ||
             data[prop.searchData].toLowerCase().includes(search.value.toLowerCase())
     )
 )
+
+//输入元素超过4个的窗口分列显示
+const DIALOG_COL = 4
+const addDialogClass = ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+const editDialogClass = ref(prop.editDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
 
 // 数据显示转换(映射)
 function mapping(property){
@@ -355,8 +379,9 @@ function mapping(property){
           return "unknown"
         }
         else if(item.isFK){
-          for(const j in prop.showFKList){
-            const item2 = prop.showFKList[j]
+          const fkList = prop.showFKMap.get(item.FKData.property)
+          for(const j in fkList){
+            const item2 = fkList[j]
             // 映射
             if(row[property] === item2[item.FKData.property]){
               return item2[item.FKData.label]
@@ -370,6 +395,16 @@ function mapping(property){
   }
 }
 
+function searchChange(s){
+  search.value = s
+  if(prop.large){
+    emit("search", search.value);
+  }
+}
+
+function pageChange(){
+  emit("update", currentPage.value);
+}
 
 function add(){
   addFormVisible.value = true
@@ -379,6 +414,20 @@ async function submitAddForm(form) {
   if (!form) return
   await form.validate((valid) => {
     if (valid) {
+      //类型转换
+      for (const i in prop.addDataTemplate.dataType) {
+        if (addForm.value.data[i]) {
+          if (prop.addDataTemplate.dataType[i] === "String") {
+            addForm.value.data[i] = addForm.value.data[i].toString()
+          }
+          else if (prop.addDataTemplate.dataType[i] === "Int") {
+            addForm.value.data[i] = parseInt(addForm.value.data[i])
+          }
+          else if (prop.addDataTemplate.dataType[i] === "Float") {
+            addForm.value.data[i] = parseFloat(addForm.value.data[i])
+          }
+        }
+      }
       //提交窗口数据给父组件
       emit("add", addForm.value.data);
       //清空原窗口
@@ -404,7 +453,6 @@ function download(){
 }
 function upload(){
   uploadFormVisible.value = true
-  console.log("FK:", JSON.stringify(getFK(prop.addFKList, 'did')))
 }
 
 function submitUploadData(){
@@ -417,6 +465,20 @@ async function submitEditForm(form){
   if (!form) return
   await form.validate((valid) => {
     if (valid) {
+      //类型转换
+      for (const i in prop.editDataTemplate.dataType) {
+        if (editForm.value.data[i]) {
+          if (prop.editDataTemplate.dataType[i] === "String") {
+            editForm.value.data[i] = editForm.value.data[i].toString()
+          }
+          else if (prop.editDataTemplate.dataType[i] === "Int") {
+            editForm.value.data[i] = parseInt(editForm.value.data[i])
+          }
+          else if (prop.editDataTemplate.dataType[i] === "Float") {
+            editForm.value.data[i] = parseFloat(editForm.value.data[i])
+          }
+        }
+      }
       //提交窗口数据给父组件
       emit("edit", editForm.value.data);
       //清空原窗口
@@ -429,6 +491,7 @@ async function submitEditForm(form){
   })
 }
 function edit(row){
+  console.log("edit", row)
   editForm.value.data[prop.keyData] = row[prop.keyData]
   for(const item in editForm.value.item){
     const i = editForm.value.item[item].dataName
@@ -516,13 +579,18 @@ function downloadTemplate(){
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
 }
 
-//通过name找到指定外键数据列表
-const getFK = (arr, name) => {
-  return arr.filter(item => item.name === name);
-}
-
-
 </script>
 
 <style scoped>
+.single-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.multi-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
 </style>

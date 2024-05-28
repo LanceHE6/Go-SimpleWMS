@@ -2,19 +2,23 @@
   <my-table
       ref="myTable"
       :table-col-list="tableColList"
-      :default-data="state.dataArray"
+      :default-data="state.currentDataArray"
       :search-data="searchData"
       :add-data-template="addForm"
       :edit-data-template="editForm"
       :loading="state.isLoading"
-      :add-f-k-list="state.addFKList"
-      :edit-f-k-list="state.editFKList"
-      :show-f-k-list="state.showFKList"
+      :add-f-k-map="state.addFKMap"
+      :edit-f-k-map="state.editFKMap"
+      :show-f-k-map="state.showFKMap"
       :key-data="keyData"
+      :page-count="state.pageCount"
+      :large="large"
       @add="add"
       @upload="upload"
       @del="del"
       @edit="edit"
+      @update="update"
+      @search="startSearch"
   >
   </my-table>
 </template>
@@ -22,10 +26,17 @@
 <script setup>
 import axios from "axios";
 import {ElMessage, ElNotification} from "element-plus";
-import MyTable from "@/components/MyTable.vue";
 import {onMounted, reactive} from "vue";
+import MyTable from "@/components/MyTable.vue";
+
+const PAGE_SIZE = 10 //每页展示多少个数据
 
 const prop = defineProps({
+  large:{
+    type: Boolean,
+    default: () => false,
+    description: '是否启用大数据表格(由后端分页的数据)'
+  },
   tableColList:{
     type: Array,
     default: () => [],
@@ -63,59 +74,127 @@ const prop = defineProps({
   }
 });
 
-
 //初始化函数
 onMounted(async () => {
-  state.dataArray = await getData()
   await getFKList()
+  if(!prop.large) {
+    state.allDataArray = await getData()
+  }
+  await update(state.currentPage)
 })
 
 //获取外键列表
 async function getFKList() {
-  const addFormItem = prop.addForm.item
-  let addUrl = ''
-  let editUrl = ''
-  let showUrl = ''
+  const addFormItem = prop.addForm.item  //添加窗口外键数据
+  const editFormItem = prop.editForm.item  //编辑窗口外键数据
+  const tableColItem = prop.tableColList  //表格显示外键映射
+  const urlList = []  //外键url列表
+  const FKDataMap = new Map()  //当前已获取外键, 避免重复请求
+
+  //添加窗口外键获取
   for (const i in addFormItem) {
     if (addFormItem[i].isFK === true) {
-      // state.addFKList.push({
-      //   name: addFormItem[i].FKData.property,
-      //   data: await getData(addFormItem[i].FKData.url)
-      // })
-      addUrl = addFormItem[i].FKData.url
-      state.addFKList = await getData(addUrl)
+      const addUrl = addFormItem[i].FKData.url  //外键url
+      const addProp = addFormItem[i].FKData.property  //外键名
+
+      //如果外键url不在列表中, 说明还没有请求过该外键
+      if(!urlList.includes(addUrl)){
+        urlList.push(addUrl)
+        const data = await getData(addUrl)
+        state.addFKMap.set(addProp, data)
+        FKDataMap.set(addProp, data)
+      }
+      //第一个for循环不需要else判断
+
     }
   }
-  const editFormItem = prop.editForm.item
+
+  //编辑窗口外键获取
   for (const i in editFormItem) {
     if (editFormItem[i].isFK === true) {
-      // state.editFKList.push({
-      //   name: editFormItem[i].FKData.property,
-      //   data: await getData(editFormItem[i].FKData.url)
-      // })
-      editUrl = editFormItem[i].FKData.url
-      if(editUrl === addUrl) {
-        state.editFKList = state.addFKList
+      const editUrl = editFormItem[i].FKData.url
+      const editProp = editFormItem[i].FKData.property
+
+      //如果外键url不在列表中, 说明还没有请求过该外键
+      if(!urlList.includes(editUrl)){
+        urlList.push(editUrl)
+        const data = await getData(editUrl)
+        state.editFKMap.set(editProp, data)
+        FKDataMap.set(editProp, data)
       }
+      //如果已经请求过该外键, 则在已获取外键中取值, 无需反复请求
       else{
-        state.editFKList = await getData(editUrl)
+        state.editFKMap.set(editProp, FKDataMap.get(editProp))
       }
+
     }
   }
-  for (const i in prop.tableColList){
-    if(prop.tableColList[i].isFK === true){
-      showUrl = prop.tableColList[i].FKData.url
-      if(showUrl === addUrl) {
-        state.showFKList = state.addFKList
+
+  //表格显示外键映射
+  for (const i in tableColItem){
+    if (tableColItem[i].isFK === true) {
+      const showUrl = tableColItem[i].FKData.url
+      const showProp = tableColItem[i].FKData.property
+
+      if(!urlList.includes(showUrl)){
+        urlList.push(showUrl)
+        const data = await getData(showUrl)
+        state.showFKMap.set(showProp, data)
+        FKDataMap.set(showProp, data)
       }
-      else if(showUrl === editUrl) {
-        state.showFKList = state.editFKList
-      }
+      //如果已经请求过该外键, 则在已获取外键中取值, 无需反复请求
       else{
-        state.showFKList = await getData(showUrl)
+        state.showFKMap.set(showProp, FKDataMap.get(showProp))
       }
+
     }
   }
+}
+
+//页数更新时更新数据
+async function update(currentPage) {
+  if (!prop.large) {  //前端分页
+    //获取数据总数
+    const dataSize = state.allDataArray.length
+
+    // 计算总页数
+    state.pageCount = Math.max(Math.ceil(dataSize / PAGE_SIZE), 1);
+
+    //判断数据更新后当前页数是否大于总页数
+    if (currentPage > state.pageCount) {
+      currentPage = state.pageCount
+    }
+    state.currentPage = currentPage
+
+    // 计算当前页的第一个元素和最后一个元素在 allDataArray 中的索引
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = Math.min(startIndex + PAGE_SIZE, dataSize);
+
+    // 使用这些索引来获取对应的元素
+    state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
+  } else {  //后端分页
+    state.currentDataArray = await getData(undefined, {
+      page: currentPage,
+      page_size: PAGE_SIZE,
+      keyword: state.searchWord
+    })
+    //判断数据更新后当前页数是否大于总页数
+    if (currentPage > state.pageCount) {
+      currentPage = state.pageCount
+    }
+    state.currentPage = currentPage
+  }
+}
+
+//后端查询
+async function startSearch(s) {
+  state.isLoading = true
+  state.searchWord = s
+  state.currentDataArray = await getData(undefined, {
+    page_size: PAGE_SIZE,
+    keyword: s
+  })
+  state.isLoading = false
 }
 
 //点击子组件的添加按钮, 子组件处理完返回的可提交表单
@@ -141,11 +220,15 @@ function edit(form){
 }
 
 const state =  reactive({
+  pageCount: 1, //数据总页数
+  currentPage: 1, //当前页数
+  searchWord: '',  //后端查询关键词
   isLoading: true,  //数据是否正在加载
-  dataArray: [],  //接收用户对象的列表
-  addFKList: [],  //添加窗口外键列表
-  editFKList: [],  //编辑窗口外键列表
-  showFKList: [],  //显示映射外键列表
+  allDataArray: [],  //所有表格展示数据列表
+  currentDataArray: [], //当前表格展示数据列表
+  addFKMap: new Map(),  //添加窗口外键
+  editFKMap: new Map(),  //编辑窗口外键
+  showFKMap: new Map(),  //显示映射外键
 })
 
 
@@ -158,13 +241,14 @@ const token="bearer "+localStorage.getItem("token");
  * 结果：dataArray中包含一到多个data对象
  * */
 
-const getData = async (url = prop.urls.getData) => {
+const getData = async (url = prop.urls.getData, params = {}) => {
   state.isLoading = true
   let resultList = []
   await axios.get(url, {
     headers: {
       'Authorization': token
-    }
+    },
+    params: params
   })
       .then(result => {
         console.log("getData:", result)
@@ -173,6 +257,9 @@ const getData = async (url = prop.urls.getData) => {
             result.data.rows[i].created_at = new Date(result.data.rows[i].created_at).toLocaleString()
           }
           resultList = result.data.rows;
+          if(prop.large){
+            state.pageCount = Math.max(result.data.total_pages, 1)
+          }
         }
       })
       .catch(error => {
@@ -199,12 +286,13 @@ const deleteData=async (data) => {
       .then( async message => {
         ElMessage.success("数据已被删除！")
         console.log("deleteData:", message)
-        state.dataArray = await getData()
+        state.allDataArray = await getData()
       })
       .catch( error => {
         ElMessage.error("网络请求出错了！")
         console.error("deleteData:", error)
       })
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -213,7 +301,6 @@ const deleteData=async (data) => {
  * 新增数据 param: newData对象
  * */
 const addData=async (newData) => {
-  console.log("sss",newData)
   state.isLoading = true
   await axios.post(prop.urls.addData, newData, {
     headers: {
@@ -223,12 +310,13 @@ const addData=async (newData) => {
       .then( async message => {
         ElMessage.success("数据添加成功！")
         console.log("addData:", message)
-        state.dataArray = await getData()
+        state.allDataArray = await getData()
       })
       .catch( error => {
-        ElMessage.error("网络请求出错了！该数据是否已被添加？")
+        ElMessage.error("网络请求出错了！")
         console.error("addData:", error)
       })
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -246,12 +334,13 @@ const updateData=async (newData) => {
   ).then( async message => {
     ElMessage.success("数据修改成功！")
     console.log("updateData:", message)
-    state.dataArray = await getData()
+    state.allDataArray = await getData()
   })
       .catch( error => {
         ElMessage.error("网络请求出错了！")
         console.error("updateData:", error)
       })
+  await update(state.currentPage)
   state.isLoading = false
 }
 
@@ -275,6 +364,7 @@ const uploadData=async (list) => {
         else if(message.status === 217){
           ElMessage.warning("部分导入成功")
           let errMessage = ""
+          let offset = 0
           for(const item in message.data.detail){
             if(message.data.detail[item].code === 402){
               errMessage += (message.data.detail[item].message + "\n")
@@ -282,18 +372,21 @@ const uploadData=async (list) => {
                 title: '失败信息',
                 message: message.data.detail[item].message,
                 type: 'error',
-                duration: 30000,
+                duration: 10000,
+                offset: offset,
               })
+              offset += 100
             }
           }
         }
         console.log("uploadData:", message)
-        state.dataArray = await getData()
+        state.allDataArray = await getData()
       })
       .catch( error => {
         ElMessage.error("网络请求出错了！数据是否已被添加过？")
         console.error("uploadData:", error)
       })
+  await update(state.currentPage)
   state.isLoading = false
 }
 </script>
