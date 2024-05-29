@@ -13,10 +13,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v4
+          with:
+            context: ./vue-web
         - name: install dependencies
           run: npm install
-          with:
-            working-directory: ./vue-web
         - name: build
           run: npm run build
         - name: deploy
