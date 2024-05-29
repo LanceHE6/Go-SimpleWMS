@@ -39,6 +39,7 @@
         <el-form-item>
           <br>
           <el-checkbox v-model="state.remember" @change="!state.remember">记住密码</el-checkbox>
+          <el-button type="primary" text style="margin-left: 140px" @click="state.settingFormVisible = true">url设置</el-button>
           <el-button style="width: 100%; margin-top: 20px" type="primary" @click="submitForm(loginForm)" :loading="state.loading" round>
             <el-text style="color: white">立即登录</el-text>
           </el-button>
@@ -47,6 +48,37 @@
       </el-form>
     </div>
   </div>
+  <el-dialog
+      v-model="state.settingFormVisible"
+      title="url设置"
+      width="500"
+      center
+  >
+
+    <el-form :model="state.settingForm" :rules="state.rules" ref="mySettingForm" label-position="top" status-icon>
+
+      <el-form-item
+          label="url"
+          prop="url"
+      >
+        <el-input
+            v-model.trim="state.settingForm.url"
+            autocomplete="off"
+        />
+
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="state.settingFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitSettingForm">
+          确定
+        </el-button>
+      </div>
+    </template>
+
+  </el-dialog>
 </template>
 
 <script setup>
@@ -65,14 +97,21 @@ const state = reactive({
     account: '',
     password: ''
   },
+  settingForm:{
+    url: axios.defaults.baseURL
+  },
   remember: false,
   loading: false,
+  settingFormVisible: false,
   rules: {
     account: [
       { required: 'true', message: '账户不能为空', trigger: 'blur' }
     ],
     password: [
       { required: 'true', message: '密码不能为空', trigger: 'blur' }
+    ],
+    url: [
+      { required: 'true', message: 'url不能为空', trigger: 'blur' }
     ]
   }
 })
@@ -91,6 +130,11 @@ function initialize(){
   }
 }
 
+function submitSettingForm(){
+  state.settingFormVisible = false
+  localStorage.setItem("url", state.settingForm.url)
+  ElMessage.success("url设置成功!")
+}
 
 const submitForm = async (form) => {
   form.validate(async (valid) => {
@@ -152,7 +196,7 @@ const submitForm = async (form) => {
   min-width: 100vh;
   min-height: 100vh;
   background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("../res/login-background.jpeg") no-repeat center;
-  background-size: contain;
+  background-size: cover;
 }
 .login-container {
   width: 420px;
