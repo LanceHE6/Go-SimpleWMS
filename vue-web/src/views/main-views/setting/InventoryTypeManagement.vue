@@ -19,6 +19,11 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "name", label: "出入库类型名", sortable: false},
   {property: "type_code", label: "出入库类型编号", sortable: true},
+  {property: "type", label: "类型", sortable: false, isMapping: true,
+    mappingList:[
+      {label: "入库", value: 1},
+      {label: "出库", value: 2},
+    ]},
   {property: "created_at", label: "创建时间", sortable: true},
   {property: "itid", label: "出入库类型ID", sortable: true, width: 140},
 ]
@@ -55,21 +60,31 @@ const editForm = {
 const addForm = {
   data :{
     name:'',
-    type_code:''
+    type_code:'',
+    type:'',
   },
   dataType:{
     name:'String',
-    type_code:'String'
+    type_code:'String',
+    type:'Int',
   },
-  dataNum: 2,
+  dataNum: 3,
   rules: {
     name:[
       { required: 'true', message: '请输入出入库类型名', trigger: 'blur' }
+    ],
+    type:[
+      { required: 'true', message: '请选择出入库类型', trigger: 'blur' }
     ]
   },
   item:[
     {label: '出入库类型名', prop: 'name', dataName: 'name', isInput: true},
     {label: '出入库类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
+    {label: '出入库类型', prop: 'type', dataName: 'type', isSelect: true,
+      selectOptions: [
+        {label: '入库', value: 1},
+        {label: '出库', value: 2},
+      ]},
   ],
 }
 

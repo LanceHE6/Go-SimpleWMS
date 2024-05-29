@@ -36,10 +36,11 @@ onMounted(init)
 
 //侧边菜单内容
 const sideMenu = [
-  {label: "全部货品", path: "/home/productManagement/allProduction", icon: "Box"},
+  {name: 'AllProduction', label: "全部货品", path: "/home/productManagement/allProduction", icon: "Box"},
 ];
 //初始tab内容
 const defaultTab = {
+  name: 'AllProduction',
   label: "全部货品",
   path: "/home/productManagement/allProduction"
 }
@@ -51,7 +52,7 @@ function init(){}
 
 //点击侧边栏菜单
 function handleSelect(menu){
-  myTab.value.addTab(menu.name, menu.key)
+  myTab.value.addTab(menu.name, menu.label, menu.path)
 }
 </script>
 
