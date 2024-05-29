@@ -11,14 +11,12 @@ permissions:
 jobs:
     build:
         runs-on: ubuntu-latest
-
         steps:
-
         - uses: actions/checkout@v4
         - name: install dependencies
+          run: npm install
           with:
             working-directory: ./vue-web
-          run: npm install
         - name: build
           run: npm run build
         - name: deploy
