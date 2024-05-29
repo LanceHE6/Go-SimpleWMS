@@ -12,9 +12,10 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-        - run: |
-          working-directory: ./vue-web
         - uses: actions/checkout@v4
+        - name: change working directory
+          run: |
+          working-directory: ./vue-web
         - name: install dependencies
           run: npm install
         - name: build
