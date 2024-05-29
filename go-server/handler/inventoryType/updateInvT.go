@@ -13,6 +13,7 @@ type updateInventoryTypeRequest struct {
 	ITid     string `json:"itid" form:"itid" binding:"required"`
 	Name     string `json:"name" form:"name"`
 	TypeCode string `json:"type_code" form:"type_code"`
+	Type     int    `json:"type" form:"type"`
 }
 
 func UpdateInventoryType(context *gin.Context) {
@@ -28,6 +29,7 @@ func UpdateInventoryType(context *gin.Context) {
 	ITid := data.ITid
 	ITName := data.Name
 	typeCode := data.TypeCode
+	typeNum := data.Type
 
 	//if ITName == "" && typeCode == "" {
 	//	context.JSON(http.StatusBadRequest, gin.H{
@@ -42,6 +44,7 @@ func UpdateInventoryType(context *gin.Context) {
 	var updateData = map[string]interface{}{
 		"name":      ITName,
 		"type_code": typeCode,
+		"type":      typeNum,
 	}
 
 	// 判断该类型是否已存在

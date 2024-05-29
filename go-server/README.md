@@ -1248,10 +1248,11 @@ headers:{
 
 **请求参数**：
 
-| 参数名    | 参数类型 | 是否必填 | 参数说明       |
-| --------- | -------- | -------- | -------------- |
-| name      | String   | 是       | 出入库类型名称 |
-| type_code | string   | 否       | 类型编码       |
+| 参数名    | 参数类型 | 是否必填 | 参数说明        |
+| --------- | -------- | -------- | --------------- |
+| name      | String   | 是       | 出入库类型名称  |
+| type_code | string   | 否       | 类型编码        |
+| type      | int      | 是       | 1为入库 2为出库 |
 
 **返回结果示例**：
 
@@ -1609,6 +1610,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 是       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 **返回结果示例**：
 
@@ -1663,6 +1665,7 @@ headers:{
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
 | quantity     | int      | 否       | 数量               |
+| unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
 
@@ -1763,6 +1766,7 @@ headers:{
 | warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
 | manufacturer | string   | 否       | 依货品所属生产厂商查询      |
 | quantity     | int      | 否       | 依货品数量查询              |
+| unit_price   | float    | 否       | 依单价查询                  |
 | keyword      | string   | 否       | 关键字模糊查询              |
 
 **返回结果示例**：
@@ -1897,6 +1901,65 @@ headers:{
 |  200   |         OK          |     修改成功     |
 |  400   |     BadRequest      |   请求参数不全   |
 |  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
+
+## 出入库
+
+### 添加
+
+**请求路径**：/api/inv/add
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明          |
+| -------------- | -------- | -------- | ----------------- |
+| gid            | String   | 否       | 货品id            |
+| name           | String   | 否       | 货品名称          |
+| amount         | int      | 是       | 数量              |
+| unit_price     | float    | 否       | 单价              |
+| inventory_type | String   | 是       | 出入库类型(itid)  |
+| warehouse      | String   | 是       | 所属仓库id（wid） |
+| manufacturer   | String   | 否       | 制造商            |
+| operator       | String   | 是       | 操作员(sid)       |
+| comment        | String   | 否       | 备注              |
+| manufacturer   | String   | 否       | 制造商            |
+
+*注：当gid为空时且为入库类型时会根据name创建货品并添加出入库记录*
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Inventory added successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
 |  500   | InternalServerError | 后端服务内部错误 |
 
 

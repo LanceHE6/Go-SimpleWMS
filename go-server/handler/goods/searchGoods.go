@@ -19,6 +19,7 @@ func SearchGoods(context *gin.Context) {
 	warehouse := context.Query("warehouse")
 	manufacturer := context.Query("manufacturer")
 	quantity, _ := strconv.Atoi(context.DefaultQuery("quantity", "0"))
+	unitPrice, _ := strconv.ParseFloat(context.DefaultQuery("unit_price", "0"), 64)
 	keyword := context.Query("keyword")
 
 	query := myDb.GetMyDbConnection()
@@ -42,6 +43,9 @@ func SearchGoods(context *gin.Context) {
 	}
 	if quantity != 0 {
 		query = query.Where("quantity = ?", quantity)
+	}
+	if unitPrice != 0 {
+		query = query.Where("unit_price = ?", unitPrice)
 	}
 	if keyword != "" {
 		query = query.Where("name LIKE ? OR model LIKE ? OR goods_type LIKE ? OR warehouse LIKE ? OR manufacturer LIKE ? OR quantity LIKE ?",
@@ -98,6 +102,7 @@ func SearchGoods(context *gin.Context) {
 			"manufacturer": g.Manufacturer,
 			"unit":         g.Unit,
 			"quantity":     g.Quantity,
+			"unit_price":   g.UnitPrice,
 			"image":        g.Image,
 		}
 		goodsRes = append(goodsRes, goodsMeta)
