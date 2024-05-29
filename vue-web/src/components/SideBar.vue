@@ -41,7 +41,7 @@ import {reactive} from "vue";
       type: Array,
       default: () => [],
       description: '侧边栏的菜单列表，该组件通过v-for遍历这个列表来绘制侧边栏。' +
-          '\n列表子元素格式为：{name: "菜单对应vue文件名称", label: "子菜单名称", path: "路由地址", icon: "图标名称(参考el-plus文档)"}'
+          '\n列表子元素格式为：{label: "子菜单名称", path: "路由地址", icon: "图标名称(参考el-plus文档)"}'
     }
   });
 
@@ -61,7 +61,7 @@ import {reactive} from "vue";
 
     const item = prop.menuList.find(menu => menu.path === path)
     const menu = {
-      name: item.name,
+      name: item.name,    //组件名
       label: item.label,  //菜单名字
       path: path,  //路由
     }
