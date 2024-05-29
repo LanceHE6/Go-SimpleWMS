@@ -14,7 +14,7 @@ jobs:
         steps:
         - uses: actions/checkout@v4
         - name: change to web directory
-          run: cd vue-web
+          run: cd ./vue-web && ls
         - name: install dependencies
           run: npm install
         - name: build
