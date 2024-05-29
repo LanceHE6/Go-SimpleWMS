@@ -13,13 +13,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v4
-        - name: change working directory
-          run: |
-          working-directory: ./vue-web
         - name: install dependencies
-          run: npm install
+          run: | 
+            npm install
+          working-directory: ./vue-web
         - name: build
-          run: npm run build
+          run: |
+            npm run build
+          working-directory: ./vue-web
         - name: deploy
           uses: JamesIves/github-pages-deploy-action@4.1.5
           with:
