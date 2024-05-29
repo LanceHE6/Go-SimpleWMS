@@ -7,8 +7,24 @@ import config from '../config.json';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import "element-plus/theme-chalk/el-message.css";
+import * as path from "path";
+import * as fs from "fs";
 
+// 定义默认配置
+const defaultConfig = {
+    host: "47.236.80.244",
+    port: "6007",
+    path: "api"
+};
 
+// 定义配置文件的路径
+const configPath = path.resolve(__dirname, '../config.json');
+
+// 检查文件是否存在
+if (!fs.existsSync(configPath)) {
+    // 如果文件不存在，写入默认配置
+    fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+}
 axios.defaults.baseURL = "http://" + config.host + ":" + config.port + "/" + config.path;
 
 const app = createApp(App)
