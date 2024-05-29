@@ -3,11 +3,13 @@ import { router } from './router/index'
 import App from './App.vue'
 import ElementUI from 'element-plus'
 import axios from "axios"
+import config from './config.json';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import "element-plus/theme-chalk/el-message.css";
 
-axios.defaults.baseURL = "http://26.107.171.13:8080/api"
+
+axios.defaults.baseURL = "http://" + config.host + ":" + config.port + "/" + config.path;
 
 const app = createApp(App)
 
