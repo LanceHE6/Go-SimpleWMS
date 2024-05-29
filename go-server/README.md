@@ -1962,6 +1962,122 @@ headers:{
 |  403   |      Forbidden      |    类型已存在    |
 |  500   | InternalServerError | 后端服务内部错误 |
 
+----
+
+
+
+### 查询
+
+**请求路径**：/api/inv/search
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+**请求参数**：None
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明                    |
+| -------------- | -------- | -------- | --------------------------- |
+| page           | int      | 否       | 页数，默认为1               |
+| page_size      | int      | 否       | 单页大小，默认为10          |
+| goods          | string   | 否       | 依货品id(gid)查询           |
+| number         | string   | 否       | 依订单编号查询              |
+| amount         | int      | 否       | 依订单数量查询              |
+| warehouse      | string   | 否       | 依货品所属仓库id（wid）查询 |
+| manufacturer   | string   | 否       | 依货品所属生产厂商查询      |
+| inventory_type | string   | 否       | 依出入库类型查询            |
+| operator       | string   | 否       | 依操作员查询                |
+| comment        | string   | 否       | 依备注查询                  |
+| keyword        | string   | 否       | 关键字模糊查询              |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "keyword": "",
+    "message": "Query successfully",
+    "page": 0,
+    "page_size": 10,
+    "rows": [
+        {
+            "amount": 20,
+            "comment": "",
+            "created_at": "2024-05-21T10:47:35+08:00",
+            "goods": "g07a99cb7",
+            "iid": "ic42f28df",
+            "inventory_type": "it2e9fc181",
+            "manufacturer": "",
+            "number": "0001-01-01 00:00:00 +0000 UTCXJ001",
+            "operator": "s5fe40179",
+            "update_at": "2024-05-21T10:47:35+08:00",
+            "warehouse": "w6ab2494d"
+        },
+        {
+            "amount": 20,
+            "comment": "test",
+            "created_at": "2024-05-21T10:54:53+08:00",
+            "goods": "g14ec4a2a",
+            "iid": "idfae1f52",
+            "inventory_type": "_default1_",
+            "manufacturer": "",
+            "number": "0001-01-01 00:00:00 +0000 UTCG282e",
+            "operator": "_default_",
+            "update_at": "2024-05-21T10:54:53+08:00",
+            "warehouse": "w6ab2494d"
+        },
+        {
+            "amount": 20,
+            "comment": "test",
+            "created_at": "2024-05-21T11:51:01+08:00",
+            "goods": "g07a99cb7",
+            "iid": "i2a19882e",
+            "inventory_type": "_default1_",
+            "manufacturer": "",
+            "number": "202405211151XJ001",
+            "operator": "_default_",
+            "update_at": "2024-05-21T11:51:01+08:00",
+            "warehouse": "w6ab2494d"
+        },
+        {
+            "amount": 20,
+            "comment": "test",
+            "created_at": "2024-05-21T11:56:21+08:00",
+            "goods": "g07a99cb7",
+            "iid": "i5070d024",
+            "inventory_type": "_default1_",
+            "manufacturer": "",
+            "number": "I202405211156XJ001",
+            "operator": "_default_",
+            "update_at": "2024-05-21T11:56:21+08:00",
+            "warehouse": "w6ab2494d"
+        }
+    ],
+    "total": 4,
+    "total_pages": 1
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  rows   | array[]  |   仓库信息数组   |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
 
 
 # 数据库建表示例
@@ -2036,7 +2152,7 @@ headers:{
 
 ## inventories表
 
-| 字段 | id             |          iid           |    number    |   inventory_type   |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
-| :--: | -------------- | :--------------------: | :----------: | :----------------: | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
-| 类型 | int            |      varchar(20)       | varchar(255) |    varchar(255)    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
-| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 出入库类型id(外键) | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       | 创建时间   | 更新时间   |
+| 字段 | id             |          iid           |    number    | goods        |   inventory_type   | amount |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | ------------ | :----------------: | ------ | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |    varchar(255)    | int    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 货品id(外键) | 出入库类型id(外键) | 数量   | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       | 创建时间   | 更新时间   |
