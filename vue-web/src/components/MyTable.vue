@@ -12,6 +12,7 @@
           @download="download"
           @upload="upload"
           @search="searchChange"
+          @print="print"
       />
 
       <table-header
@@ -21,6 +22,7 @@
           @download="download"
           @upload="upload"
           @search="searchChange"
+          @print="print"
       />
 
     </el-header>
@@ -424,6 +426,10 @@ function searchChange(s){
 
 function pageChange(){
   emit("update", currentPage.value);
+}
+
+function print(){
+
 }
 
 function add(){
