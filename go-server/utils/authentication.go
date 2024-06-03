@@ -45,7 +45,7 @@ func GenerateToken(id string, permission int, createdAt string) (string, error) 
 	return tokenString, nil
 }
 
-// AuthMiddleware 是一个用于鉴权的中间件
+// AuthMiddleware 基础鉴权的中间件
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -130,6 +130,34 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+// IsAdminMiddleware 管理员鉴权中间件 >=2
+func IsAdminMiddleware() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		// 根据token判断permission是否大于等于2
+		_, permission, _, err := GetUserInfoByContext(context)
+		if err != nil {
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Invalid token",
+				"code":    108,
+			})
+			context.Abort()
+			return
+		}
+
+		if permission >= 2 {
+			context.Next()
+		} else {
+			context.JSON(http.StatusForbidden, gin.H{
+				"message": "Permission denied",
+				"code":    110,
+			})
+			context.Abort()
+			return
+		}
+	}
+}
+
+// IsSuperAdminMiddleware 超级管理员鉴权的中间件 ==3
 func IsSuperAdminMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// 根据token判断permission是否为3
