@@ -7,6 +7,8 @@
       :delete-data-body="deleteDataBody"
       :urls="urls"
       large
+      download
+      print
   />
 </template>
 
@@ -38,11 +40,12 @@ const tableColList = [
       label: "name"
     }},
   {property: "quantity", label: "单位数", sortable: true},
+  {property: "unit_price", label: "单价", sortable: true},
   {property: "manufacturer", label: "生产厂商", sortable: false, width: 150},
 ]
 
 /**
- * 编辑仓库时所用到的表单对象
+ * 编辑数据时所用到的表单对象
  * */
 const editForm = reactive({
   data : {
@@ -54,7 +57,8 @@ const editForm = reactive({
     warehouse:'',
     manufacturer:'',
     unit:'',
-    quantity:''
+    quantity:'',
+    unit_price:''
   },
   dataType:{
     gid:'String',
@@ -65,7 +69,8 @@ const editForm = reactive({
     warehouse:'String',
     manufacturer:'String',
     unit:'String',
-    quantity:'Int'
+    quantity:'Int',
+    unit_price:'Float'
   },
   dataNum: 9,
   rules: {
@@ -94,12 +99,13 @@ const editForm = reactive({
         label: "name"
       }},
     {label: '单位数', prop: 'quantity', dataName: 'quantity', isInput: true, type: 'number'},
-    {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true,},
+    {label: '单价', prop: 'unit_price', dataName: 'unit_price', isInput: true},
+    {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true},
   ],
 })
 
 /**
- * 添加仓库时所用到的对象
+ * 添加数据时所用到的对象
  * */
 const addForm = reactive({
   data : {
@@ -110,7 +116,8 @@ const addForm = reactive({
     warehouse:'',
     manufacturer:'',
     unit:'',
-    quantity:''
+    quantity:'',
+    unit_price:''
   },
   dataType:{
     name:'String',
@@ -120,9 +127,10 @@ const addForm = reactive({
     warehouse:'String',
     manufacturer:'String',
     unit:'String',
-    quantity:'Int'
+    quantity:'Int',
+    unit_price:'Float'
   },
-  dataNum: 8,
+  dataNum: 9,
   rules: {
     name:[
       { required: 'true', message: '请输入货品名称', trigger: 'blur' }
@@ -160,6 +168,7 @@ const addForm = reactive({
         label: "name"
       }},
     {label: '单位数', prop: 'quantity', dataName: 'quantity', isInput: true, type: 'number'},
+    {label: '单价', prop: 'unit_price', dataName: 'unit_price', isInput: true},
     {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true,},
   ],
 })
@@ -179,7 +188,6 @@ const urls = {
   deleteData: "/goods/delete",
   addData: "/goods/add",
   updateData: "/goods/update",
-  uploadData: "/goods/upload",
 }
 </script>
 
