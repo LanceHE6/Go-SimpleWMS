@@ -7,6 +7,7 @@
     >
       <large-table-header
           v-if="large"
+          :operations="operations"
           @add="add"
           @download="download"
           @upload="upload"
@@ -15,6 +16,7 @@
 
       <table-header
           v-else
+          :operations="operations"
           @add="add"
           @download="download"
           @upload="upload"
@@ -43,15 +45,20 @@
 
         </el-table-column>
 
-        <el-table-column width="135" label="操作">
+        <el-table-column
+            v-if="operations.edit || operations.del"
+            width="135"
+            label="操作">
           <template #default="scope">
             <el-button
+                v-if="operations.edit"
                 size="small"
                 type="success"
                 @click="edit(scope.row)"
                 plain
             >编辑</el-button>
             <el-button
+                v-if="operations.del"
                 size="small"
                 type="warning"
                 @click="confirmDel(scope.row)"
@@ -305,6 +312,11 @@ const prop = defineProps({
     description: '显示外键数据'+
         '\n其中key为外键名, data为外键对象'
   },
+  operations:{
+    type: Object,
+    default: () => null,
+    description: '表格支持的操作, 包含增删查改以及导入导出等等(通常无需手动配置)'
+  }
 });
 
 //对外事件列表
@@ -328,17 +340,17 @@ const tableHead = prop.tableColList.map( item => {
 //编辑表单
 const myEditForm = ref(null)
 //编辑表单是否可见
-const editFormVisible = ref(false)
+let editFormVisible = ref(false)
 
 //新增表单
 const myAddForm = ref(null)
 //新增表单是否可见
-const addFormVisible = ref(false)
+let addFormVisible = ref(false)
 
 //上传窗口组件
 const myUploadForm = ref(null)
 //上传表单是否可见
-const uploadFormVisible = ref(false)
+let uploadFormVisible = ref(false)
 
 //监听数据变化并实时更新表格
 watch(() => prop.defaultData, (newValue) => {
@@ -359,8 +371,16 @@ const filterTableData = computed(() =>
 
 //输入元素超过4个的窗口分列显示
 const DIALOG_COL = 4
-const addDialogClass = ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
-const editDialogClass = ref(prop.editDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+console.log("table:", prop.operations)
+let addDialogClass = ''
+let editDialogClass = ''
+if(prop.operations.add){
+  addDialogClass = ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+}
+if(prop.operations.edit){
+  editDialogClass = ref(prop.editDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+}
+
 
 // 数据显示转换(映射)
 function mapping(property){
