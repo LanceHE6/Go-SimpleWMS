@@ -10,7 +10,7 @@ import (
 func ListInventoryType(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var invTs []model.InventoryType
-	err := db.Select([]string{"itid", "name", "type_code", "created_at"}).Find(&invTs).Error
+	err := db.Select([]string{"itid", "name", "type_code", "type", "created_at"}).Find(&invTs).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
