@@ -132,6 +132,7 @@ function initialize(){
 
 function submitSettingForm(){
   state.settingFormVisible = false
+  axios.defaults.baseURL = state.settingForm.url
   localStorage.setItem("url", state.settingForm.url)
   ElMessage.success("url设置成功!")
 }
@@ -194,7 +195,7 @@ const submitForm = async (form) => {
   justify-content: center;
   align-items: center;
   min-width: 100vh;
-  min-height: 100vh;
+  min-height: 97vh;
   background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("../res/login-background.jpeg") no-repeat center;
   background-size: cover;
 }
