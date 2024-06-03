@@ -37,7 +37,7 @@
         </el-menu-item>
 
         <el-menu-item
-            index="/home/productManagement"
+            index="/home/productManagement/allProduction"
 
         >
           货品管理
@@ -180,7 +180,7 @@ async function initialize(){
   display: flex;
   justify-content: center;
   min-width: 100vh;
-  min-height: 100vh;
+  min-height: 97vh;
   background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) no-repeat center;
   background-size: contain;
 }
