@@ -70,7 +70,7 @@ type GoodsType struct {
 type Goods struct {
 	MyModel
 	Gid          string `gorm:"primary_key;index"`
-	GoodsCode    string `gorm:"unique"`
+	GoodsCode    string
 	Name         string
 	Model        string
 	GoodsType    string `gorm:"default:''"`
