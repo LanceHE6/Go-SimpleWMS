@@ -19,7 +19,7 @@ func SearchInv(context *gin.Context) {
 	warehouse := context.Query("warehouse")
 	manufacturer := context.Query("manufacturer")
 	amount, _ := strconv.Atoi(context.DefaultQuery("amount", "0"))
-	inventory_type := context.Query("inventory_type")
+	inventoryType := context.Query("inventory_type")
 	iType, _ := strconv.Atoi(context.DefaultQuery("type", "0"))
 	operator := context.Query("operator")
 	comment := context.Query("comment")
@@ -44,8 +44,8 @@ func SearchInv(context *gin.Context) {
 	if amount != 0 {
 		query = query.Where("inventories.amount = ?", amount)
 	}
-	if inventory_type != "" {
-		query = query.Where("inventories.inventory_type = ?", inventory_type)
+	if inventoryType != "" {
+		query = query.Where("inventories.inventory_type = ?", inventoryType)
 	}
 	if iType != 0 {
 		query = query.Where("inventory_types.type = ?", iType)
