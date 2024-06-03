@@ -13,6 +13,7 @@
       :key-data="keyData"
       :page-count="state.pageCount"
       :large="large"
+      :operations="state.operations"
       @add="add"
       @upload="upload"
       @del="del"
@@ -54,24 +55,44 @@ const prop = defineProps({
   },
   addForm:{
     type: Object,
-    default: () => {},
+    default: () => null,
     description: '添加界面数据'
   },
   editForm:{
     type: Object,
-    default: () => {},
+    default: () => null,
     description: '编辑界面数据'
   },
   deleteDataBody:{
     type: Object,
-    default: () => {},
+    default: () => null,
     description: '删除请求体'
   },
   urls:{
     type: Object,
     default: () => {},
     description: '请求url'
-  }
+  },
+  extraParams:{
+    type: Object,
+    default: () => {},
+    description: '数据获取请求体中的额外参数'
+  },
+  upload:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持上传功能'
+  },
+  download:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持下载功能'
+  },
+  print:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持打印功能'
+  },
 });
 
 //初始化函数
@@ -85,8 +106,8 @@ onMounted(async () => {
 
 //获取外键列表
 async function getFKList() {
-  const addFormItem = prop.addForm.item  //添加窗口外键数据
-  const editFormItem = prop.editForm.item  //编辑窗口外键数据
+  const addFormItem = prop.addForm && prop.addForm.item  //添加窗口外键数据
+  const editFormItem = prop.editForm && prop.editForm.item  //编辑窗口外键数据
   const tableColItem = prop.tableColList  //表格显示外键映射
   const urlList = []  //外键url列表
   const FKDataMap = new Map()  //当前已获取外键, 避免重复请求
@@ -173,11 +194,12 @@ async function update(currentPage) {
     // 使用这些索引来获取对应的元素
     state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
   } else {  //后端分页
-    state.currentDataArray = await getData(undefined, {
+    const defaultParams = {
       page: currentPage,
       page_size: PAGE_SIZE,
       keyword: state.searchWord
-    })
+    }
+    state.currentDataArray = await getData(undefined, {...defaultParams, ...prop.extraParams})
     //判断数据更新后当前页数是否大于总页数
     if (currentPage > state.pageCount) {
       currentPage = state.pageCount
@@ -186,14 +208,17 @@ async function update(currentPage) {
   }
 }
 
-//后端查询
+//后端分页时点击查询按钮回调此函数
 async function startSearch(s) {
   state.isLoading = true
   state.searchWord = s
-  state.currentDataArray = await getData(undefined, {
+  state.currentPage = 1
+  const defaultParams = {
+    page: state.currentPage,
     page_size: PAGE_SIZE,
-    keyword: s
-  })
+    keyword: state.searchWord
+  }
+  state.currentDataArray = await getData(undefined, {...defaultParams, ...prop.extraParams})
   state.isLoading = false
 }
 
@@ -229,6 +254,14 @@ const state =  reactive({
   addFKMap: new Map(),  //添加窗口外键
   editFKMap: new Map(),  //编辑窗口外键
   showFKMap: new Map(),  //显示映射外键
+  operations: {
+    add: prop.addForm !== null,
+    del: prop.deleteDataBody !== null,
+    edit: prop.editForm !== null,
+    upload: prop.upload,
+    download: prop.download,
+    print: prop.print
+  }
 })
 
 
