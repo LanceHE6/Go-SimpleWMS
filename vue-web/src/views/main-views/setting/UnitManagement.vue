@@ -7,6 +7,7 @@
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
       :urls="urls"
+      download
   />
 </template>
 
@@ -22,7 +23,7 @@ const tableColList = [
 ]
 
 /**
- * 编辑用户时所用到的表单对象
+ * 编辑数据时所用到的表单对象
  * */
 const editForm = {
   data :{
@@ -42,7 +43,7 @@ const editForm = {
 }
 
 /**
- * 注册用户时所用到的对象
+ * 添加数据时所用到的对象
  * */
 const addForm = {
   data :{

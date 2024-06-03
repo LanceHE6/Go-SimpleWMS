@@ -7,6 +7,7 @@
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
       :urls="urls"
+      download
   />
 </template>
 
@@ -66,7 +67,7 @@ const editForm = {
 }
 
 /**
- * 注册员工时所用到的对象
+ * 添加员工时所用到的对象
  * */
 const addForm = {
   data :{

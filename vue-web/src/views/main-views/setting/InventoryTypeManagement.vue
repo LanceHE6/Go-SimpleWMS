@@ -7,6 +7,7 @@
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
       :urls="urls"
+      download
   />
 </template>
 
@@ -29,20 +30,22 @@ const tableColList = [
 ]
 
 /**
- * 编辑用户时所用到的表单对象
+ * 编辑数据时所用到的表单对象
  * */
 const editForm = {
   data :{
     itid:'',
     name:'',
-    type_code:''
+    type_code:'',
+    type:'',
   },
   dataType:{
     gtid:'String',
     name:'String',
-    type_code:'String'
+    type_code:'String',
+    type:'Int',
   },
-  dataNum: 3,
+  dataNum: 4,
   rules: {
     name:[
       { required: 'true', message: '请输入货品类型名', trigger: 'blur' }
@@ -51,11 +54,16 @@ const editForm = {
   item:[
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
     {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
+    {label: '出入库类型', prop: 'type', dataName: 'type', isSelect: true,
+      selectOptions: [
+        {label: '入库', value: 1},
+        {label: '出库', value: 2},
+      ]},
   ],
 }
 
 /**
- * 注册用户时所用到的对象
+ * 添加数据时所用到的对象
  * */
 const addForm = {
   data :{

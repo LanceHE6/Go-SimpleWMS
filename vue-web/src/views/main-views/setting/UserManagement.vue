@@ -7,6 +7,8 @@
     :edit-form="editForm"
     :delete-data-body="deleteDataBody"
     :urls="urls"
+    upload
+    download
   />
 </template>
 
