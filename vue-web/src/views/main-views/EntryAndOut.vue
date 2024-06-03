@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-
 import {onMounted, ref} from "vue";
 import SideBar from "@/components/SideBar.vue";
 import MyTab from "@/components/MyTab.vue";
@@ -36,13 +35,14 @@ onMounted(init)
 
 //侧边菜单内容
 const sideMenu = [
-  {label: "入库单", path: "/home/entryAndOut/entry", icon: "FolderAdd"},
-  {label: "出库单", path: "/home/entryAndOut/out", icon: "FolderRemove"},
-  {label: "盘点单", path: "/home/entryAndOut/check", icon: "FolderChecked"},
-  {label: "调拨单", path: "/home/entryAndOut/allocate", icon: "Folder"},
+  {name: 'Entry', label: "入库单", path: "/home/entryAndOut/entry", icon: "FolderAdd"},
+  {name: 'Out', label: "出库单", path: "/home/entryAndOut/out", icon: "FolderRemove"},
+  {name: 'Check', label: "盘点单", path: "/home/entryAndOut/check", icon: "FolderChecked"},
+  {name: 'Allocate', label: "调拨单", path: "/home/entryAndOut/allocate", icon: "Folder"},
 ];
 //初始tab内容
 const defaultTab = {
+    name: 'Entry',
     label: '入库单',
     path: '/home/entryAndOut/entry',
   }
@@ -50,11 +50,11 @@ const defaultTab = {
 let myTab = ref(null);
 
 //初始化函数
-function init(){}
+function init() {}
 
 //点击侧边栏菜单
 function handleSelect(menu){
-  myTab.value.addTab(menu.name, menu.key)
+  myTab.value.addTab(menu.name, menu.label, menu.path)
 }
 </script>
 
