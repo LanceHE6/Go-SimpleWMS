@@ -28,8 +28,8 @@
 
 
 <script setup>
-import SideBar from "@/components/SideBar.vue";
 import {onMounted, ref} from "vue";
+import SideBar from "@/components/SideBar.vue";
 import MyTab from "@/components/MyTab.vue";
 
 onMounted(init)
@@ -61,7 +61,6 @@ function init() {}
 function handleSelect(menu){
   myTab.value.addTab(menu.name, menu.label, menu.path)
 }
-
 </script>
 
 <style scoped>
