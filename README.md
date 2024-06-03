@@ -1,9 +1,12 @@
 <p align="center">
-	<img alt="logo" src="./imgs/WMS-Logo.png">
+<img alt="logo" src="./imgs/WMS-Logo.png">
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Go-SimpleWMS</h1>
-<h4 align="center">基于gin+Vue3前后端分离的仓库管理系统</h4>
+<div align="center"> 
 
+简体中文/[English](./README-EN.md) 
+</div>
+<h4 align="center">基于gin+Vue3前后端分离的仓库管理系统</h4>
 <div align="center">
 
 ![Static Badge](https://img.shields.io/badge/Licence-MIT-blue)
@@ -11,10 +14,6 @@
 ![Static Badge](https://img.shields.io/badge/后端-gin-green)
 
 </div>
-
-
-
-
 
 
 ## 平台简介
