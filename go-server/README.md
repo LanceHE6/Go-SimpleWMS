@@ -2,7 +2,12 @@
 
 
 
-*测试地址：`http://47.236.80.244:6007`* 
+*测试环境后台地址：*
+
+```
+http://47.236.80.244:6007
+https://api.simplewms.hycerlance.fun/api
+```
 
 
 
@@ -20,9 +25,8 @@ headers:{
 
 
 
-## 鉴权说明
 
-### 鉴权方式：
+### 鉴权：
 
 请求头携带鉴权JWT token
 
@@ -1294,11 +1298,12 @@ headers:{
 
 **请求参数**：
 
-| 参数名    | 参数类型 | 是否必填 | 参数说明 |
-| --------- | -------- | -------- | -------- |
-| itid      | String   | 是       | 类型id   |
-| name      | String   | 否       | 类型名称 |
-| type_code | string   | 否       | 类型编码 |
+| 参数名    | 参数类型 | 是否必填 | 参数说明   |
+| --------- | -------- | -------- | ---------- |
+| itid      | String   | 是       | 类型id     |
+| name      | String   | 否       | 类型名称   |
+| type_code | string   | 否       | 类型编码   |
+| type      | int      | 否       | 出入库标识 |
 
 *注:name，type_code2个可选参数至少需提供一个*
 
@@ -1930,7 +1935,6 @@ headers:{
 | manufacturer   | String   | 否       | 制造商            |
 | operator       | String   | 是       | 操作员(sid)       |
 | comment        | String   | 否       | 备注              |
-| manufacturer   | String   | 否       | 制造商            |
 
 *注：当gid为空时且为入库类型时会根据name创建货品并添加出入库记录*
 
