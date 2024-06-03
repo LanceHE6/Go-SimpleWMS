@@ -29,6 +29,7 @@ func ListInventoryType(context *gin.Context) {
 			"name":       invT.Name,
 			"type_code":  invT.TypeCode,
 			"created_at": invT.CreatedAt,
+			"type":       invT.Type,
 		}
 		invTsRes = append(invTsRes, invTRes)
 	}

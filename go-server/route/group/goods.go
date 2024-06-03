@@ -8,10 +8,10 @@ import (
 
 func GoodsGroup(ginApi *gin.RouterGroup) {
 	goodsGroup := ginApi.Group("/goods", utils.AuthMiddleware())
-	goodsGroup.POST("/add", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+	goodsGroup.POST("/add", utils.IsAdminMiddleware(), func(c *gin.Context) {
 		goods.AddGoods(c)
 	})
-	goodsGroup.PUT("/update", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+	goodsGroup.PUT("/update", utils.IsAdminMiddleware(), func(c *gin.Context) {
 		goods.UpdateGoods(c)
 	})
 	goodsGroup.DELETE("/delete", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
