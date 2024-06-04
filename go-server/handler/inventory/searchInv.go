@@ -102,27 +102,19 @@ func SearchInv(context *gin.Context) {
 
 	var invsRes []gin.H
 	for _, g := range invs {
-		var inventoryType model.InventoryType
-		// 查询对应的 InventoryType 信息
-		myDb.GetMyDbConnection().Where("itid = ?", g.InventoryType).First(&inventoryType)
 
 		goodsMeta := gin.H{
-			"created_at": g.CreatedAt,
-			"update_at":  g.UpdatedAt,
-			"iid":        g.Iid,
-			"number":     g.Number,
-			"goods":      g.Goods,
-			"inventory_type": gin.H{
-				"itid":      inventoryType.Itid,
-				"name":      inventoryType.Name,
-				"type":      inventoryType.Type,
-				"type_code": inventoryType.TypeCode,
-			},
-			"warehouse":    g.Warehouse,
-			"manufacturer": g.Manufacturer,
-			"amount":       g.Amount,
-			"operator":     g.Operator,
-			"comment":      g.Comment,
+			"created_at":     g.CreatedAt,
+			"update_at":      g.UpdatedAt,
+			"iid":            g.Iid,
+			"number":         g.Number,
+			"goods":          g.Goods,
+			"inventory_type": g.InventoryType,
+			"warehouse":      g.Warehouse,
+			"manufacturer":   g.Manufacturer,
+			"amount":         g.Amount,
+			"operator":       g.Operator,
+			"comment":        g.Comment,
 		}
 		invsRes = append(invsRes, goodsMeta)
 	}
