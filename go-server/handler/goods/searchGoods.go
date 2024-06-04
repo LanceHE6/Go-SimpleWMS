@@ -22,33 +22,34 @@ func SearchGoods(context *gin.Context) {
 	unitPrice, _ := strconv.ParseFloat(context.DefaultQuery("unit_price", "0"), 64)
 	keyword := context.Query("keyword")
 
-	query := myDb.GetMyDbConnection()
+	query := myDb.GetMyDbConnection().Table("goods").Joins("left join warehouses on goods.warehouse = warehouses.wid").Where("warehouses.status = 1")
+
 	// 计算偏移量
 	offset := (page - 1) * limit
 
 	if name != "" {
-		query = query.Where("name = ?", name)
+		query = query.Where("goods.name = ?", name)
 	}
 	if gModel != "" {
-		query = query.Where("model = ?", gModel)
+		query = query.Where("goods.model = ?", gModel)
 	}
 	if goodsType != "" {
-		query = query.Where("goods_type = ?", goodsType)
+		query = query.Where("goods.goods_type = ?", goodsType)
 	}
 	if warehouse != "" {
-		query = query.Where("warehouse = ?", warehouse)
+		query = query.Where("goods.warehouse = ?", warehouse)
 	}
 	if manufacturer != "" {
-		query = query.Where("manufacturer = ?", manufacturer)
+		query = query.Where("goods.manufacturer = ?", manufacturer)
 	}
 	if quantity != 0 {
-		query = query.Where("quantity = ?", quantity)
+		query = query.Where("goods.quantity = ?", quantity)
 	}
 	if unitPrice != 0 {
-		query = query.Where("unit_price = ?", unitPrice)
+		query = query.Where("goods.unit_price = ?", unitPrice)
 	}
 	if keyword != "" {
-		query = query.Where("name LIKE ? OR model LIKE ? OR goods_type LIKE ? OR warehouse LIKE ? OR manufacturer LIKE ? OR quantity LIKE ?",
+		query = query.Where("goods.name LIKE ? OR goods.model LIKE ? OR goods.goods_type LIKE ? OR goods.warehouse LIKE ? OR goods.manufacturer LIKE ? OR goods.quantity LIKE ?",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
