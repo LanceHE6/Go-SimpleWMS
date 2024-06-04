@@ -123,6 +123,7 @@
         >
           <el-option
               v-for="i in Array.from(editFKMap.get(item.FKData.property))"
+              :disabled="'status' in i && i['status'] === 0"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -181,6 +182,7 @@
         >
           <el-option
               v-for="i in Array.from(addFKMap.get(item.FKData.property))"
+              :disabled="'status' in i && i['status'] === 0"
               :label="i[item.FKData.label]"
               :value="i[item.FKData.property]"
           />
@@ -320,7 +322,6 @@ const prop = defineProps({
     description: '表格支持的操作, 包含增删查改以及导入导出等等(通常无需手动配置)'
   }
 });
-
 //对外事件列表
 const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search"]);
 

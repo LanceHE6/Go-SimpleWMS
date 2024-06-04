@@ -30,46 +30,48 @@
 
 <script setup>
 import {reactive} from "vue";
-  import {DArrowLeft, DArrowRight} from "@element-plus/icons-vue";
+import {DArrowLeft, DArrowRight} from "@element-plus/icons-vue";
 
-  const state = reactive({
-    isCollapse: false,  //侧边栏是否折叠
-  })
+const state = reactive({
+  isCollapse: false,  //侧边栏是否折叠
+})
 
-  const prop = defineProps({
-    menuList: {
-      type: Array,
-      default: () => [],
-      description: '侧边栏的菜单列表，该组件通过v-for遍历这个列表来绘制侧边栏。' +
-          '\n列表子元素格式为：{label: "子菜单名称", path: "路由地址", icon: "图标名称(参考el-plus文档)"}'
-    }
-  });
+const prop = defineProps({
+  menuList: {
+    type: Array,
+    default: () => [],
+    description: '侧边栏的菜单列表，该组件通过v-for遍历这个列表来绘制侧边栏。' +
+        '\n列表子元素格式为：{label: "子菜单名称", path: "路由地址", icon: "图标名称(参考el-plus文档)"}'
+  }
+});
 
 
-  function collapse() {
-    state.isCollapse = !state.isCollapse
+function collapse() {
+  state.isCollapse = !state.isCollapse
+}
+
+const emit = defineEmits(["selectMenu"]);
+
+//点击侧边栏, 返回menu, 包含菜单的显示名以及路由
+const handleSideMenu = (path) => {
+  //如果点到折叠按钮则不触发
+  if(path === ""){
+    return;
   }
 
-  const emit = defineEmits(["selectMenu"]);
-
-  //点击侧边栏, 返回menu, 包含菜单的显示名以及路由
-  const handleSideMenu = (path) => {
-    //如果点到折叠按钮则不触发
-    if(path === ""){
-      return;
-    }
-
-    const item = prop.menuList.find(menu => menu.path === path)
-    const menu = {
-      name: item.name,    //组件名
-      label: item.label,  //菜单名字
-      path: path,  //路由
-    }
-    emit("selectMenu", menu);
+  const item = prop.menuList.find(menu => menu.path === path)
+  const menu = {
+    name: item.name,    //组件名
+    label: item.label,  //菜单名字
+    path: path,  //路由
   }
+  emit("selectMenu", menu);
+}
 
 </script>
 
 <style scoped>
-
+.side-menu{
+  height: 100%;
+}
 </style>
