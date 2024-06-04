@@ -3,6 +3,7 @@ server:
     mode: "debug" # 输出模式 debug/release
     log:
         path: "logs"
+        max_files: 15
     secretKey: "simple_wms" # 用于token签名的密钥
 db:
   mysql:
