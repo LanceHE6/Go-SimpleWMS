@@ -6,6 +6,8 @@ import axios from "axios"
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import "element-plus/theme-chalk/el-message.css";
+import ECharts from 'vue-echarts'
+import 'echarts'
 
 axios.defaults.baseURL = localStorage.getItem("url") || "http://47.236.80.244:6007/api";
 
@@ -16,6 +18,7 @@ app.provide("axios", axios)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
+app.component('v-chart', ECharts)
 
 app.use(ElementUI)
     .use(router)
