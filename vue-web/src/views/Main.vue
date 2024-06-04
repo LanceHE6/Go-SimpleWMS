@@ -1,103 +1,105 @@
 <template>
 
 <div class="main-body">
+  <el-backtop :right="10" :bottom="50" />
   <!--总容器-->
   <el-container>
     <!--头部-->
     <el-header class="head-container">
       <el-menu
-          :router="true"
-          :ellipsis="false"
-          class="head-menu"
-          mode="horizontal"
-          @select="handleSelect"
-          background-color="#545c64"
-          text-color="#fff"
-          active-text-color="#ffd04b"
+        :router="true"
+        :ellipsis="false"
+        class="head-menu"
+        mode="horizontal"
+        @select="handleSelect"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b"
+    >
+      <!--左侧头部-->
+      <a href="https://ys.mihoyo.com/" title="进入官网" target="_blank">
+        <img
+            class="main-logo"
+            src="../res/WMS-Logo.png"
+            alt="Logo"
+        />
+      </a>
+      <el-text size="large" style="color: white; margin-right: 10px;">
+        SimpleWMS
+      </el-text>
+
+      <el-menu-item
+          index="/home/homePage"
       >
-        <!--左侧头部-->
-        <a href="https://ys.mihoyo.com/" title="进入官网" target="_blank">
-          <img
-              class="main-logo"
-              src="../res/WMS-Logo.png"
-              alt="Logo"
-          />
-        </a>
-        <el-text size="large" style="color: white; margin-right: 10px;">
-          SimpleWMS
-        </el-text>
+        <el-icon>
+          <home-filled />
+        </el-icon>
+        首页
+      </el-menu-item>
 
-        <el-menu-item
-            index="/home/homePage"
-        >
+      <el-menu-item
+          index="/home/productManagement/allProduction"
+
+      >
+        货品管理
+      </el-menu-item>
+
+      <el-menu-item
+          index="/home/entryAndOut/entry"
+      >
+        出入库管理
+      </el-menu-item>
+
+      <el-menu-item
+          index="/home"
+      >
+        订单管理
+      </el-menu-item>
+
+      <el-menu-item
+          index="/home"
+      >
+        往来单位
+      </el-menu-item>
+
+      <el-menu-item
+          index="/home"
+      >
+        分析统计
+      </el-menu-item>
+
+      <el-menu-item
+          index="/home/setting/userManagement"
+      >
+        系统设置
+      </el-menu-item>
+
+      <!--右侧头部-->
+      <div class="head-container-right"/>
+
+      <el-button
+          style="margin-top: 18px; margin-left: 15px"
+          size="small"
+          :disabled="true"
+          round
+      >
+        白金典藏版
+      </el-button>
+      <el-sub-menu
+          index="/"
+      >
+        <template #title>
           <el-icon>
-            <home-filled />
+            <user />
           </el-icon>
-          首页
-        </el-menu-item>
+          用户
+        </template>
+        <el-menu-item @click="help">帮助中心</el-menu-item>
+        <el-menu-item @click="about">关于</el-menu-item>
+        <el-menu-item @click="logout">退出登录</el-menu-item>
+      </el-sub-menu>
+    </el-menu>
 
-        <el-menu-item
-            index="/home/productManagement/allProduction"
-
-        >
-          货品管理
-        </el-menu-item>
-
-        <el-menu-item
-            index="/home/entryAndOut/entry"
-        >
-          出入库管理
-        </el-menu-item>
-
-        <el-menu-item
-            index="/home"
-        >
-          订单管理
-        </el-menu-item>
-
-        <el-menu-item
-            index="/home"
-        >
-          往来单位
-        </el-menu-item>
-
-        <el-menu-item
-            index="/home"
-        >
-          分析统计
-        </el-menu-item>
-
-        <el-menu-item
-            index="/home/setting/userManagement"
-        >
-          系统设置
-        </el-menu-item>
-
-        <!--右侧头部-->
-        <div class="head-container-right"/>
-
-        <el-button
-            style="margin-top: 18px; margin-left: 15px"
-            size="small"
-            :disabled="true"
-            round
-        >
-          白金典藏版
-        </el-button>
-        <el-sub-menu
-            index="/"
-        >
-          <template #title>
-            <el-icon>
-              <user />
-            </el-icon>
-            用户
-          </template>
-          <el-menu-item @click="help">帮助中心</el-menu-item>
-          <el-menu-item @click="about">关于</el-menu-item>
-          <el-menu-item @click="logout">退出登录</el-menu-item>
-        </el-sub-menu>
-      </el-menu>
     </el-header>
       <!--主体-->
       <el-main
