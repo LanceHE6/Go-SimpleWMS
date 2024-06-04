@@ -2,7 +2,12 @@
 
 
 
-*测试地址：`http://47.236.80.244:6007`* 
+*测试环境后台地址：*
+
+```
+http://47.236.80.244:6007
+https://api.simplewms.hycerlance.fun/api
+```
 
 
 
@@ -20,9 +25,8 @@ headers:{
 
 
 
-## 鉴权说明
 
-### 鉴权方式：
+### 鉴权：
 
 请求头携带鉴权JWT token
 
@@ -1294,11 +1298,12 @@ headers:{
 
 **请求参数**：
 
-| 参数名    | 参数类型 | 是否必填 | 参数说明 |
-| --------- | -------- | -------- | -------- |
-| itid      | String   | 是       | 类型id   |
-| name      | String   | 否       | 类型名称 |
-| type_code | string   | 否       | 类型编码 |
+| 参数名    | 参数类型 | 是否必填 | 参数说明   |
+| --------- | -------- | -------- | ---------- |
+| itid      | String   | 是       | 类型id     |
+| name      | String   | 否       | 类型名称   |
+| type_code | string   | 否       | 类型编码   |
+| type      | int      | 否       | 出入库标识 |
 
 *注:name，type_code2个可选参数至少需提供一个*
 
@@ -1930,7 +1935,6 @@ headers:{
 | manufacturer   | String   | 否       | 制造商            |
 | operator       | String   | 是       | 操作员(sid)       |
 | comment        | String   | 否       | 备注              |
-| manufacturer   | String   | 否       | 制造商            |
 
 *注：当gid为空时且为入库类型时会根据name创建货品并添加出入库记录*
 
@@ -1986,6 +1990,7 @@ headers:{
 | warehouse      | string   | 否       | 依货品所属仓库id（wid）查询 |
 | manufacturer   | string   | 否       | 依货品所属生产厂商查询      |
 | inventory_type | string   | 否       | 依出入库类型查询            |
+| type           | int      | 否       | 依出入库类型标识查询        |
 | operator       | string   | 否       | 依操作员查询                |
 | comment        | string   | 否       | 依备注查询                  |
 | keyword        | string   | 否       | 关键字模糊查询              |
@@ -2001,59 +2006,61 @@ headers:{
     "page_size": 10,
     "rows": [
         {
-            "amount": 20,
-            "comment": "",
-            "created_at": "2024-05-21T10:47:35+08:00",
-            "goods": "g07a99cb7",
-            "iid": "ic42f28df",
-            "inventory_type": "it2e9fc181",
+            "amount": 120,
+            "comment": "test",
+            "created_at": "2024-06-03T10:10:35+08:00",
+            "goods": "g4c182157",
+            "iid": "i45f1b28a",
+            "inventory_type": {
+                "itid": "_default1_",
+                "name": "默认入库",
+                "type": 1,
+                "type_code": "default_in"
+            },
             "manufacturer": "",
-            "number": "0001-01-01 00:00:00 +0000 UTCXJ001",
-            "operator": "s5fe40179",
-            "update_at": "2024-05-21T10:47:35+08:00",
-            "warehouse": "w6ab2494d"
+            "number": "I202406031010G1103",
+            "operator": "_default_",
+            "update_at": "2024-06-03T10:10:35+08:00",
+            "warehouse": "_default_"
         },
         {
-            "amount": 20,
+            "amount": 120,
             "comment": "test",
-            "created_at": "2024-05-21T10:54:53+08:00",
-            "goods": "g14ec4a2a",
-            "iid": "idfae1f52",
-            "inventory_type": "_default1_",
+            "created_at": "2024-06-03T11:24:17+08:00",
+            "goods": "g2f9e1971",
+            "iid": "ib672ae1b",
+            "inventory_type": {
+                "itid": "_default1_",
+                "name": "默认入库",
+                "type": 1,
+                "type_code": "default_in"
+            },
             "manufacturer": "",
-            "number": "0001-01-01 00:00:00 +0000 UTCG282e",
+            "number": "I202406031124G898e",
             "operator": "_default_",
-            "update_at": "2024-05-21T10:54:53+08:00",
-            "warehouse": "w6ab2494d"
+            "update_at": "2024-06-03T11:24:17+08:00",
+            "warehouse": "_default_"
         },
         {
-            "amount": 20,
+            "amount": 120,
             "comment": "test",
-            "created_at": "2024-05-21T11:51:01+08:00",
-            "goods": "g07a99cb7",
-            "iid": "i2a19882e",
-            "inventory_type": "_default1_",
+            "created_at": "2024-06-03T11:26:07+08:00",
+            "goods": "gb003821b",
+            "iid": "i211bb1ee",
+            "inventory_type": {
+                "itid": "_default1_",
+                "name": "默认入库",
+                "type": 1,
+                "type_code": "default_in"
+            },
             "manufacturer": "",
-            "number": "202405211151XJ001",
+            "number": "I202406031126G323a",
             "operator": "_default_",
-            "update_at": "2024-05-21T11:51:01+08:00",
-            "warehouse": "w6ab2494d"
-        },
-        {
-            "amount": 20,
-            "comment": "test",
-            "created_at": "2024-05-21T11:56:21+08:00",
-            "goods": "g07a99cb7",
-            "iid": "i5070d024",
-            "inventory_type": "_default1_",
-            "manufacturer": "",
-            "number": "I202405211156XJ001",
-            "operator": "_default_",
-            "update_at": "2024-05-21T11:56:21+08:00",
-            "warehouse": "w6ab2494d"
+            "update_at": "2024-06-03T11:26:07+08:00",
+            "warehouse": "_default_"
         }
     ],
-    "total": 4,
+    "total": 3,
     "total_pages": 1
 }
 ```
