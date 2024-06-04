@@ -14,7 +14,8 @@ type Config struct {
 		PORT string `yaml:"port"`
 		MODE string `yaml:"mode"`
 		LOG  struct {
-			PATH string `yaml:"path"`
+			PATH      string `yaml:"path"`
+			MAX_FILES int    `yaml:"max_files"`
 		} `yaml:"log"`
 		SECRET_KEY string `yaml:"secretKey"`
 	} `yaml:"server"`
@@ -42,19 +43,30 @@ func init() {
 				PORT string `yaml:"port"`
 				MODE string `yaml:"mode"`
 				LOG  struct {
-					PATH string `yaml:"path"`
+					PATH      string `yaml:"path"`
+					MAX_FILES int    `yaml:"max_files"`
+				} `yaml:"log"`
+				SECRET_KEY string `yaml:"secretKey"`
+			}(struct {
+				PORT string `yaml:"port"`
+				MODE string `yaml:"mode"`
+				LOG  struct {
+					PATH      string `yaml:"path"`
+					MAX_FILES int    `yaml:"max_file"`
 				} `yaml:"log"`
 				SECRET_KEY string `yaml:"secretKey"`
 			}{
 				PORT: "8080",
 				MODE: "debug",
 				LOG: struct {
-					PATH string `yaml:"path"`
+					PATH      string `yaml:"path"`
+					MAX_FILES int    `yaml:"max_file"`
 				}{
-					PATH: "logs",
+					PATH:      "logs",
+					MAX_FILES: 15,
 				},
 				SECRET_KEY: "simple_wms_secret_key",
-			},
+			}),
 			DB: struct {
 				MYSQL struct {
 					HOST     string `yaml:"host"`
