@@ -101,14 +101,30 @@ func SearchInv(context *gin.Context) {
 	}
 
 	var invsRes []gin.H
+	db := myDb.GetMyDbConnection()
 	for _, g := range invs {
+		var goods model.Goods
+		db.Model(model.Goods{}).Where("gid = ?", g.Goods).First(&goods)
 
 		goodsMeta := gin.H{
-			"created_at":     g.CreatedAt,
-			"update_at":      g.UpdatedAt,
-			"iid":            g.Iid,
-			"number":         g.Number,
-			"goods":          g.Goods,
+			"created_at": g.CreatedAt,
+			"update_at":  g.UpdatedAt,
+			"iid":        g.Iid,
+			"number":     g.Number,
+			"goods": gin.H{
+				"created_at":   goods.CreatedAt,
+				"updated_at":   goods.UpdatedAt,
+				"gid":          goods.Gid,
+				"goods_code":   goods.GoodsCode,
+				"name":         goods.Name,
+				"model":        goods.Model,
+				"goods_type":   goods.GoodsType,
+				"manufacturer": goods.Manufacturer,
+				"unit":         goods.Unit,
+				"image":        goods.Image,
+				"quantity":     goods.Quantity,
+				"unit_price":   goods.UnitPrice,
+			},
 			"inventory_type": g.InventoryType,
 			"warehouse":      g.Warehouse,
 			"manufacturer":   g.Manufacturer,
