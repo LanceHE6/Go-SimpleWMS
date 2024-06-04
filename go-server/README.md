@@ -1765,6 +1765,7 @@ headers:{
 | ------------ | -------- | -------- | --------------------------- |
 | page         | int      | 否       | 页数，默认为1               |
 | page_size    | int      | 否       | 单页大小，默认为10          |
+| gid          | string   | 否       | 依据gid查询                 |
 | name         | string   | 否       | 依货品名称查询              |
 | model        | string   | 否       | 依货品规格类型查询          |
 | goods_type   | string   | 否       | 依货品类型id（gtid）查询    |
@@ -2011,12 +2012,7 @@ headers:{
             "created_at": "2024-06-03T10:10:35+08:00",
             "goods": "g4c182157",
             "iid": "i45f1b28a",
-            "inventory_type": {
-                "itid": "_default1_",
-                "name": "默认入库",
-                "type": 1,
-                "type_code": "default_in"
-            },
+            "inventory_type": "_default1_",
             "manufacturer": "",
             "number": "I202406031010G1103",
             "operator": "_default_",
@@ -2029,12 +2025,7 @@ headers:{
             "created_at": "2024-06-03T11:24:17+08:00",
             "goods": "g2f9e1971",
             "iid": "ib672ae1b",
-            "inventory_type": {
-                "itid": "_default1_",
-                "name": "默认入库",
-                "type": 1,
-                "type_code": "default_in"
-            },
+            "inventory_type": "_default1_",
             "manufacturer": "",
             "number": "I202406031124G898e",
             "operator": "_default_",
@@ -2047,12 +2038,7 @@ headers:{
             "created_at": "2024-06-03T11:26:07+08:00",
             "goods": "gb003821b",
             "iid": "i211bb1ee",
-            "inventory_type": {
-                "itid": "_default1_",
-                "name": "默认入库",
-                "type": 1,
-                "type_code": "default_in"
-            },
+            "inventory_type": "_default1_",
             "manufacturer": "",
             "number": "I202406031126G323a",
             "operator": "_default_",
