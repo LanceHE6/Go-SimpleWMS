@@ -24,10 +24,9 @@ func SearchInv(context *gin.Context) {
 	operator := context.Query("operator")
 	comment := context.Query("comment")
 	keyword := context.Query("keyword")
+	createdAt := context.Query("created_at")
 
 	query := myDb.GetMyDbConnection().Table("inventories").Joins("left join inventory_types on inventories.inventory_type = inventory_types.itid")
-	// 计算偏移量
-	offset := (page - 1) * limit
 
 	if goods != "" {
 		query = query.Where("inventories.goods = ?", goods)
@@ -56,8 +55,12 @@ func SearchInv(context *gin.Context) {
 	if comment != "" {
 		query = query.Where("inventories.comment = ?", comment)
 	}
+	if createdAt != "" {
+		query = query.Where("inventories.created_at = ?", createdAt)
+	}
 	if keyword != "" {
-		query = query.Where("inventories.goods LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.amount LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ?",
+		query = query.Where("inventories.goods LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.amount LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.created_at LIKE ?",
+			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
@@ -71,11 +74,17 @@ func SearchInv(context *gin.Context) {
 	// 获取总记录数
 	query.Count(&total)
 
-	// 计算总页数
-	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+	var totalPages = 0
 
-	// 设置分页参数
-	query = query.Offset(offset).Limit(limit)
+	// page 为-1不分页
+	if page != -1 {
+		// 计算总页数
+		totalPages = int(math.Ceil(float64(total) / float64(limit)))
+		// 计算偏移量
+		offset := (page - 1) * limit
+		// 设置分页参数
+		query = query.Offset(offset).Limit(limit)
+	}
 
 	// 执行查询
 	result := query.Find(&invs)
