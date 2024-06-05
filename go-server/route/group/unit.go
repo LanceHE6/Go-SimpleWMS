@@ -17,4 +17,7 @@ func UnitGroup(ginApi *gin.RouterGroup) {
 	unitGroup.GET("/list", func(c *gin.Context) {
 		unit.ListUnit(c)
 	})
+	unitGroup.PUT("/update", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+		unit.UpdateUnit(c)
+	})
 }

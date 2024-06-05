@@ -1489,6 +1489,55 @@ headers:{
 
 ----
 
+
+
+### 更新
+
+**请求路径**：/api/unit/update
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| unid   | String   | 是       | 单位id   |
+| name   | String   | 是       | 单位名称 |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "unit type updated successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |            说明             |
+| :----: | :-----------------: | :-------------------------: |
+|  200   |         OK          |          修改成功           |
+|  400   |     BadRequest      |        请求参数不全         |
+|  401   |    Unauthorized     |         鉴权未通过          |
+|  403   |      Forbidden      | 类型名已经存在/该类型不存在 |
+|  500   | InternalServerError |      后端服务内部错误       |
+
+----
+
+### 
+
 ### 删除
 
 **请求路径**：/api/unit/delete
@@ -2004,61 +2053,9 @@ headers:{
     "code": 201,
     "keyword": "",
     "message": "Query successfully",
-    "page": 0,
-    "page_size": 10,
+    "page": 1,
+    "page_size": 2,
     "rows": [
-        {
-            "amount": 120,
-            "comment": "test",
-            "created_at": "2024-06-03T10:10:35+08:00",
-            "goods": {
-                "created_at": "2024-06-03T10:10:35+08:00",
-                "gid": "g4c182157",
-                "goods_code": "",
-                "goods_type": "_default_",
-                "image": "",
-                "manufacturer": "",
-                "model": "",
-                "name": "水果",
-                "quantity": 120,
-                "unit": "_default_",
-                "unit_price": 0,
-                "updated_at": "2024-06-03T10:10:35+08:00"
-            },
-            "iid": "i45f1b28a",
-            "inventory_type": "_default1_",
-            "manufacturer": "",
-            "number": "I202406031010G1103",
-            "operator": "_default_",
-            "update_at": "2024-06-03T10:10:35+08:00",
-            "warehouse": "_default_"
-        },
-        {
-            "amount": 120,
-            "comment": "test",
-            "created_at": "2024-06-03T11:24:17+08:00",
-            "goods": {
-                "created_at": "2024-06-03T11:24:17+08:00",
-                "gid": "g2f9e1971",
-                "goods_code": "",
-                "goods_type": "_default_",
-                "image": "",
-                "manufacturer": "",
-                "model": "",
-                "name": "水果",
-                "quantity": 120,
-                "unit": "_default_",
-                "unit_price": 0,
-                "updated_at": "2024-06-03T11:24:17+08:00"
-            },
-            "iid": "ib672ae1b",
-            "inventory_type": "_default1_",
-            "manufacturer": "",
-            "number": "I202406031124G898e",
-            "operator": "_default_",
-            "update_at": "2024-06-03T11:24:17+08:00",
-            "warehouse": "_default_"
-        },
         {
             "amount": 120,
             "comment": "test",
@@ -2086,7 +2083,7 @@ headers:{
             "warehouse": "_default_"
         }
     ],
-    "total": 3,
+    "total": 1,
     "total_pages": 1
 }
 ```
