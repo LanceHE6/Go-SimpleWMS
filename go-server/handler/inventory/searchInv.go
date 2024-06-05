@@ -3,10 +3,12 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"math"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func SearchInv(context *gin.Context) {
@@ -56,7 +58,16 @@ func SearchInv(context *gin.Context) {
 		query = query.Where("inventories.comment = ?", comment)
 	}
 	if createdAt != "" {
-		query = query.Where("inventories.created_at = ?", createdAt)
+		// 将 created_at 转换为日期格式，并过滤出当天的记录
+		parsedDate, err := time.Parse("2006-01-02", createdAt)
+		fmt.Println(parsedDate)
+		if err == nil {
+			startOfDay := parsedDate.Format("2006-01-02 00:00:00")
+			endOfDay := parsedDate.Add(24 * time.Hour).Format("2006-01-02 15:04:05")
+			fmt.Println(startOfDay)
+			fmt.Println(endOfDay)
+			query = query.Where("inventories.created_at BETWEEN ? AND ?", startOfDay, endOfDay)
+		}
 	}
 	if keyword != "" {
 		query = query.Where("inventories.goods LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.amount LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.created_at LIKE ?",
