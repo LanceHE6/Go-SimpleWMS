@@ -18,7 +18,10 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "goods", label: "货品名称", sortable: false},
+  {property: "goods", label: "货品名称", sortable: false, isParent: true, child:{
+      property: "name",
+      isParent: false
+    }},
   {property: "amount", label: "数量", sortable: true},
   {property: "manufacturer", label: "生产厂商", sortable: false, width: 150},
   {property: "warehouse", label: "所属仓库", sortable: false, isFK: true, FKData:{
