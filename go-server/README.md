@@ -1996,19 +1996,35 @@ headers:{
 
 **请求参数**：
 
-| 参数名         | 参数类型 | 是否必填 | 参数说明          |
-| -------------- | -------- | -------- | ----------------- |
-| gid            | String   | 否       | 货品id            |
-| name           | String   | 否       | 货品名称          |
-| amount         | int      | 是       | 数量              |
-| unit_price     | float    | 否       | 单价              |
-| inventory_type | String   | 是       | 出入库类型(itid)  |
-| warehouse      | String   | 是       | 所属仓库id（wid） |
-| manufacturer   | String   | 否       | 制造商            |
-| operator       | String   | 是       | 操作员(sid)       |
-| comment        | String   | 否       | 备注              |
+| 参数名         | 参数类型 | 是否必填 | 参数说明                          |
+| -------------- | -------- | -------- | --------------------------------- |
+| date           | String   | 否       | 单据日期 格式:2006-01-02 15:04:05 |
+| number         | String   | 否       | 单号                              |
+| department     | String   | 否       | 所属部门id(did)                   |
+| goods_list     | String   | 是       | 货品数组 格式见下                 |
+| inventory_type | String   | 是       | 出入库类型(itid)                  |
+| warehouse      | String   | 是       | 所属仓库id（wid）                 |
+| manufacturer   | String   | 否       | 制造商                            |
+| operator       | String   | 是       | 操作员(sid)                       |
+| comment        | String   | 否       | 备注                              |
 
-*注：当gid为空时且为入库类型时会根据name创建货品并添加出入库记录*
+** goods_list数据结构*：
+
+```json
+[
+    {"goods": "g4c182157", "amount":26,"comment":"test"},
+    {"goods": "g08943f59", "amount":23,"comment":"test"}
+]
+```
+
+**参数说明**
+
+| 字段 | goods       | amount | comment |
+| ---- | ----------- | ------ | ------- |
+| 类型 | string      | float  | string  |
+| 说明 | 货品id(gid) | 数量   | 备注    |
+
+
 
 **返回结果示例**：
 
