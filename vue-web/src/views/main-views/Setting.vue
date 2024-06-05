@@ -42,7 +42,7 @@ const sideMenu = [
   {name: 'WarehouseManagement', label: "仓库管理", path: "/home/setting/warehouseManagement", icon: "PriceTag"},
   {name: 'GoodsTypeManagement', label: "货品类型管理", path: "/home/setting/goodsTypeManagement", icon: "Box"},
   {name: 'InventoryTypeManagement', label: "出入库类型管理", path: "/home/setting/inventoryTypeManagement", icon: "Van"},
-  {name: 'UnitTypeManagement', label: "计量单位管理", path: "/home/setting/unitManagement", icon: "Filter"},
+  {name: 'UnitManagement', label: "计量单位管理", path: "/home/setting/unitManagement", icon: "Filter"},
 ];
 
 //初始tab内容
