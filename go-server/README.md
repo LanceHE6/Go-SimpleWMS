@@ -23,6 +23,28 @@ headers:{
 }
 ```
 
+----
+
+### 版本信息：
+
+**请求路径**：/api/ping
+
+**请求方法**：GET
+
+**返回示例：**
+
+```json
+{
+    "code": 200,
+    "data": {
+        "version": "v0.0.1.20240605_Alpha"
+    },
+    "message": "Hello Go-SimpleWMS"
+}
+```
+
+----
+
 
 
 
