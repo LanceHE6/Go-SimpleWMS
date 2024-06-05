@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// TODO 重构出入库单search接口
+
 func SearchInv(context *gin.Context) {
 	var invs []model.Inventory
 	var total int64
@@ -26,12 +28,12 @@ func SearchInv(context *gin.Context) {
 	operator := context.Query("operator")
 	comment := context.Query("comment")
 	keyword := context.Query("keyword")
-	createdAt := context.Query("created_at")
+	date := context.Query("date")
 
 	query := myDb.GetMyDbConnection().Table("inventories").Joins("left join inventory_types on inventories.inventory_type = inventory_types.itid")
 
 	if goods != "" {
-		query = query.Where("inventories.goods = ?", goods)
+		query = query.Where("inventories.goods_order_list LIKE ?", goods)
 	}
 	if number != "" {
 		query = query.Where("inventories.number = ?", number)
@@ -43,7 +45,7 @@ func SearchInv(context *gin.Context) {
 		query = query.Where("inventories.manufacturer = ?", manufacturer)
 	}
 	if amount != 0 {
-		query = query.Where("inventories.amount = ?", amount)
+		query = query.Where("inventories.goods_order_list LIKE ?", amount)
 	}
 	if inventoryType != "" {
 		query = query.Where("inventories.inventory_type = ?", inventoryType)
@@ -57,20 +59,18 @@ func SearchInv(context *gin.Context) {
 	if comment != "" {
 		query = query.Where("inventories.comment = ?", comment)
 	}
-	if createdAt != "" {
+	if date != "" {
 		// 将 created_at 转换为日期格式，并过滤出当天的记录
-		parsedDate, err := time.Parse("2006-01-02", createdAt)
+		parsedDate, err := time.Parse("2006-01-02", date)
 		fmt.Println(parsedDate)
 		if err == nil {
 			startOfDay := parsedDate.Format("2006-01-02 00:00:00")
 			endOfDay := parsedDate.Add(24 * time.Hour).Format("2006-01-02 15:04:05")
-			fmt.Println(startOfDay)
-			fmt.Println(endOfDay)
-			query = query.Where("inventories.created_at BETWEEN ? AND ?", startOfDay, endOfDay)
+			query = query.Where("inventories.date BETWEEN ? AND ?", startOfDay, endOfDay)
 		}
 	}
 	if keyword != "" {
-		query = query.Where("inventories.goods LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.amount LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.created_at LIKE ?",
+		query = query.Where("inventories.goods_order_list LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.date LIKE ?",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
@@ -121,34 +121,43 @@ func SearchInv(context *gin.Context) {
 	}
 
 	var invsRes []gin.H
-	db := myDb.GetMyDbConnection()
+	// db := myDb.GetMyDbConnection()
 	for _, g := range invs {
-		var goods model.Goods
-		db.Model(model.Goods{}).Where("gid = ?", g.Goods).First(&goods)
+		//var goods model.Goods
+		//db.Model(model.Goods{}).Where("gid = ?", g.GoodsList).First(&goods)
 
+		//var goodsList model.GoodsList
+		//err := g.GoodsList.Scan(goodsList)
+		//if err != nil {
+		//	context.JSON(http.StatusOK, gin.H{
+		//		"code":    501,
+		//		"message": "err",
+		//		"detail":  err.Error(),
+		//	})
+		//}
 		goodsMeta := gin.H{
 			"created_at": g.CreatedAt,
 			"update_at":  g.UpdatedAt,
 			"iid":        g.Iid,
 			"number":     g.Number,
-			"goods": gin.H{
-				"created_at":   goods.CreatedAt,
-				"updated_at":   goods.UpdatedAt,
-				"gid":          goods.Gid,
-				"goods_code":   goods.GoodsCode,
-				"name":         goods.Name,
-				"model":        goods.Model,
-				"goods_type":   goods.GoodsType,
-				"manufacturer": goods.Manufacturer,
-				"unit":         goods.Unit,
-				"image":        goods.Image,
-				"quantity":     goods.Quantity,
-				"unit_price":   goods.UnitPrice,
-			},
+			"goods_list": g.GoodsList,
+			//"goods": gin.H{
+			//	"created_at":   goods.CreatedAt,
+			//	"updated_at":   goods.UpdatedAt,
+			//	"gid":          goods.Gid,
+			//	"goods_code":   goods.GoodsCode,
+			//	"name":         goods.Name,
+			//	"model":        goods.Model,
+			//	"goods_type":   goods.GoodsType,
+			//	"manufacturer": goods.Manufacturer,
+			//	"unit":         goods.Unit,
+			//	"image":        goods.Image,
+			//	"quantity":     goods.Quantity,
+			//	"unit_price":   goods.UnitPrice,
+			//},
 			"inventory_type": g.InventoryType,
 			"warehouse":      g.Warehouse,
 			"manufacturer":   g.Manufacturer,
-			"amount":         g.Amount,
 			"operator":       g.Operator,
 			"comment":        g.Comment,
 		}
