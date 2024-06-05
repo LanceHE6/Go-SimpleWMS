@@ -363,7 +363,7 @@ watch(() => prop.defaultData, (newValue) => {
 //搜索栏文字
 const search = ref('')
 
-//筛选函数, 根据搜索框来做筛选
+//筛选函数, 根据搜索框来做筛选(仅对前端分页生效)
 const filterTableData = computed(() =>
     tableData.value.filter(
         (data) =>
@@ -388,36 +388,46 @@ if(prop.operations.edit){
 // 数据显示转换(映射)
 function mapping(property){
   return (row) => {
+    //遍历每一个属性
     for(const i in prop.tableColList){
-      const item = prop.tableColList[i]
+      let item = prop.tableColList[i]
       if(item.property === property){
-        if(item.isMapping){
-          for(const j in item.mappingList){
-            const item2 = item.mappingList[j]
-            // 映射
-            if(row[property] === item2.value){
-              return item2.label
-            }
-          }
-          return "unknown"
+        //多层对象, 一层层解开
+        while(item.isParent){
+          row = row[item.property]
+          item = item['child']
         }
-        else if(item.isFK){
+        //外键映射
+        if(item.isFK){
+          //从外键map中获取对应的外键表
           const fkList = prop.showFKMap.get(item.FKData.property)
-          for(const j in fkList){
-            const item2 = fkList[j]
+          for(const item2 of fkList){
             // 映射
             if(row[property] === item2[item.FKData.property]){
               return item2[item.FKData.label]
             }
           }
-          return "unknown"
         }
+        //普通映射
+        else if(item.isMapping){
+          //从映射表获取映射对象
+          for(const j of item.mappingList){
+            const item2 = j
+            // 映射
+            if(row[property] === item2.value){
+              return item2.label
+            }
+          }
+        }
+
+        //不需要映射或者没有匹配的映射则返回原值
+        return row[item.property]
       }
     }
-    return row[property]
   }
 }
 
+//搜索
 function searchChange(s){
   search.value = s
   if(prop.large){
@@ -448,10 +458,10 @@ async function submitAddForm(form) {
             addForm.value.data[i] = addForm.value.data[i].toString()
           }
           else if (prop.addDataTemplate.dataType[i] === "Int") {
-            addForm.value.data[i] = parseInt(addForm.value.data[i])
+            addForm.value.data[i] = addForm.value.data[i] !== '' ? parseInt(addForm.value.data[i]) : 0
           }
           else if (prop.addDataTemplate.dataType[i] === "Float") {
-            addForm.value.data[i] = parseFloat(addForm.value.data[i])
+            addForm.value.data[i] = addForm.value.data[i] !== '' ? parseFloat(addForm.value.data[i]) : 0.0
           }
         }
       }
@@ -499,10 +509,10 @@ async function submitEditForm(form){
             editForm.value.data[i] = editForm.value.data[i].toString()
           }
           else if (prop.editDataTemplate.dataType[i] === "Int") {
-            editForm.value.data[i] = parseInt(editForm.value.data[i])
+            editForm.value.data[i] = editForm.value.data[i] !== '' ? parseInt(editForm.value.data[i]) : 0
           }
           else if (prop.editDataTemplate.dataType[i] === "Float") {
-            editForm.value.data[i] = parseFloat(editForm.value.data[i])
+            editForm.value.data[i] = editForm.value.data[i] !== '' ? parseFloat(editForm.value.data[i]) : 0.0
           }
         }
       }
@@ -578,10 +588,10 @@ function excelToJson(e){
               data[i] = data[i].toString()
             }
             else if(prop.addDataTemplate.dataType[i] === "Int"){
-              data[i] = parseInt(data[i])
+              data[i] = data[i] !== '' ? parseInt(data[i]) : 0
             }
             else if(prop.addDataTemplate.dataType[i] === "Float"){
-              data[i] = parseFloat(data[i])
+              data[i] = data[i] !== '' ? parseFloat(data[i]) : 0.0
             }
           }
           dataList.push(data)
@@ -589,7 +599,6 @@ function excelToJson(e){
       }
       dataList = Array.from(new Set(dataList))
       emit("upload", dataList)
-      // document.getElementsByName('file')[0].value = '' // 根据自己需求，可重置上传value为空，允许重复上传同一文件
     } catch (error) {
       console.error("excelToJson:", error)
       return false

@@ -97,11 +97,13 @@ const prop = defineProps({
 
 //初始化函数
 onMounted(async () => {
+  state.isLoading = true
   await getFKList()
   if(!prop.large) {
     state.allDataArray = await getData()
   }
   await update(state.currentPage)
+  state.isLoading = false
 })
 
 //获取外键列表
@@ -275,7 +277,6 @@ const token="bearer "+localStorage.getItem("token");
  * */
 
 const getData = async (url = prop.urls.getData, params = {}) => {
-  state.isLoading = true
   let resultList = []
   await axios.get(url, {
     headers: {
@@ -299,7 +300,6 @@ const getData = async (url = prop.urls.getData, params = {}) => {
         ElMessage.error("网络请求出错了！")
         console.error("getData:", error)
       })
-  state.isLoading = false
   return resultList
 }
 

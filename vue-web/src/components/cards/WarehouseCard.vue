@@ -127,7 +127,6 @@ const prop = defineProps({
 import { useTransition } from '@vueuse/core'
 import {ref} from "vue";
 
-
 const eq = ref(0)
 const eqv = useTransition(eq, {
   duration: 420,
@@ -157,7 +156,7 @@ y_oq.value = prop.yOutQuantity
 <style scoped>
 .card{
   width: 340px;
-  height: 260px;
+  height: 300px;
   margin-bottom: 10px;
   margin-right: 15px;
   --el-card-padding: 10px

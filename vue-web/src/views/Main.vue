@@ -9,6 +9,7 @@
       <el-menu
         :router="true"
         :ellipsis="false"
+        :default-active="state.defaultPage"
         class="head-menu"
         mode="horizontal"
         @select="handleSelect"
@@ -117,7 +118,7 @@
 
 
 <script setup>
-import {onMounted, reactive} from 'vue'
+import {h, onMounted, reactive} from 'vue'
 import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
 import axios from "axios";
@@ -126,16 +127,45 @@ import {ElMessage, ElMessageBox} from "element-plus";
 onMounted(initialize)
 
 const state = reactive({
-  nowMenuActive: '/home/homePage',  //当前首部栏界面
+  nowMenuActive: '',  //当前首部栏界面
+  defaultPage: ''  //当前路由界面
 })
 
 function help(){
   window.open('https://sr.mihoyo.com/', '_blank');
 }
 
-function about(){
-  ElMessageBox.alert('Go-SimpleWMS v1.0.0', '关于', {
-    autofocus: false,
+async function about(){
+  let go_simpleWMS_version = 'unknown'
+  let go_server_version = 'unknown'
+  let vue_web_version = 'v0.0.1.20240605_Alpha'
+  await axios.get('/ping')
+      .then(result => {
+        console.log("ping:", result)
+        if(result.status === 200){
+          go_server_version = result.data.data.version
+        }
+      })
+      .catch(error => {
+        ElMessage.error("获取后端版本号失败！")
+        console.error("ping:", error.message)
+      })
+  await ElMessageBox({
+    title: '关于',
+    message: h('p', null, [
+        h('div', null,[
+          h('span', null, 'Go-SimpleWMS '),
+          h('b', {style: 'color: teal'}, go_simpleWMS_version)
+        ]),
+        h('div', null,[
+          h('span', null, 'Vue-Web '),
+          h('b', {style: 'color: teal'}, vue_web_version)
+        ]),
+        h('div', null,[
+          h('span', null, 'Go-Server '),
+          h('b', {style: 'color: teal'}, go_server_version)
+        ])
+    ]),
     confirmButtonText: '确定',
   })
 }
@@ -152,6 +182,12 @@ const handleSelect = (key) => {
 
 //初始化
 async function initialize(){
+  const CURRENT_PATH = window.location.hash  // 获取当前路径，例如 "#/page/subpage"
+  const pageList = CURRENT_PATH.split('#')
+  state.defaultPage = pageList[pageList.length - 1]
+  state.nowMenuActive = state.defaultPage
+  console.log('page', state.defaultPage)
+
   const token="bearer "+localStorage.getItem("token");
   await axios.get('/auth', {
     headers: {
