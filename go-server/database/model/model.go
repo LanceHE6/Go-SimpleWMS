@@ -73,7 +73,7 @@ type GoodsType struct {
 type Goods struct {
 	MyModel
 	Gid          string `gorm:"primary_key;index"`
-	GoodsCode    string
+	GoodsCode    string `gorm:"unique"`
 	Name         string
 	Model        string
 	GoodsType    string `gorm:"default:''"`
@@ -126,7 +126,6 @@ type Inventory struct {
 	Date          time.Time
 	GoodsList     GoodsList `gorm:"type:json"`
 	InventoryType string
-	Warehouse     string
 	Department    string `gorm:"default:''"`
 	Operator      string
 	Comment       string `gorm:"default:''"`
