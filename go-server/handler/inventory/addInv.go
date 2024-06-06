@@ -5,7 +5,6 @@ import (
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -17,7 +16,6 @@ type addInvRequest struct {
 	Department   string `json:"department" form:"department"`                            // 单据所属部门
 	GoodsList    string `json:"goods_list" form:"goods_list" binding:"required"`         // 单据包含的货品
 	InventoryTpe string `json:"inventory_type" form:"inventory_type" binding:"required"` // 出入库类型
-	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`           // 所属仓库
 	Operator     string `json:"operator" form:"operator" binding:"required"`             // 经办人
 	Comment      string `json:"comment" form:"comment"`                                  // 备注
 	Manufacturer string `json:"manufacturer" form:"manufacturer"`                        // 制造商
@@ -37,7 +35,6 @@ func AddInv(context *gin.Context) {
 	Number := data.Number
 	Department := data.Department
 	var GoodsList model.GoodsList
-	fmt.Println(data.GoodsList)
 	err := json.Unmarshal([]byte(data.GoodsList), &GoodsList)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -48,7 +45,6 @@ func AddInv(context *gin.Context) {
 		return
 	}
 	InventoryType := data.InventoryTpe
-	Wid := data.Warehouse
 	Sid := data.Operator
 	Comment := data.Comment
 	Manufacturer := data.Manufacturer
@@ -102,7 +98,6 @@ func AddInv(context *gin.Context) {
 		GoodsList:     GoodsList,
 		Number:        Number,
 		InventoryType: InventoryType,
-		Warehouse:     Wid,
 		Operator:      Sid,
 		Comment:       Comment,
 		Manufacturer:  Manufacturer,
