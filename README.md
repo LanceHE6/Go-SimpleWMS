@@ -6,7 +6,7 @@
 
 简体中文/[English](./README-EN.md) 
 </div>
-<h4 align="center">基于gin+Vue3前后端分离的仓库管理系统</h4>
+<h4 align="center">基于gin+Vue3前后端分离式仓库管理系统</h4>
 <div align="center">
 
 ![Static Badge](https://img.shields.io/badge/Licence-MIT-blue)
@@ -94,9 +94,13 @@ go build -o main .
 
 
 
-## 后端接口文档
+## 文档
 
-[接口文档](./go-server/README.md)
+[前端文档](./vue-web/README.md)
+
+[后端文档](./go-server/README.md)
+
+[接口文档](./go-server/api.md)
 
 
 ## 在线预览

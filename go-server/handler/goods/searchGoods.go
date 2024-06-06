@@ -13,6 +13,7 @@ func SearchGoods(context *gin.Context) {
 	var goods []model.Goods
 	page, _ := strconv.Atoi(context.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(context.DefaultQuery("page_size", "10"))
+	gid := context.Query("gid")
 	name := context.Query("name")
 	gModel := context.Query("model")
 	goodsType := context.Query("goods_type")
@@ -27,6 +28,9 @@ func SearchGoods(context *gin.Context) {
 	// 计算偏移量
 	offset := (page - 1) * limit
 
+	if gid != "" {
+		query = query.Where("goods.gid = ?", gid)
+	}
 	if name != "" {
 		query = query.Where("goods.name = ?", name)
 	}
