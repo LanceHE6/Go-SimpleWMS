@@ -13,7 +13,7 @@ import (
 type addGoodsRequest struct {
 	Name         string  `json:"name" form:"name" binding:"required"`
 	Model        string  `json:"model" form:"model"`
-	GoodsCode    string  `json:"goods_code" form:"goods_code"`
+	GoodsCode    string  `json:"goods_code" form:"goods_code" binding:"required"`
 	GoodsType    string  `json:"goods_type" form:"goods_type" binding:"required"`
 	Warehouse    string  `json:"warehouse" form:"warehouse" binding:"required"`
 	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
@@ -44,7 +44,7 @@ func AddGoods(context *gin.Context) {
 
 	db := myDb.GetMyDbConnection()
 
-	// 判断该仓库是否已存在
+	// 判断该物品是否已存在
 	var goods model.Goods
 	if GCode != "" {
 		err := db.Model(&model.Goods{}).Where("goods_code=?", GCode).First(&goods).Error
