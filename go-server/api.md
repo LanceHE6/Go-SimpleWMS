@@ -1740,7 +1740,7 @@ headers:{
 | warehouse    | String   | 否       | 所属仓库id（wid）  |
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
-| quantity     | int      | 否       | 数量               |
+| quantity     | float    | 否       | 数量               |
 | unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
@@ -2003,7 +2003,6 @@ headers:{
 | department     | String   | 否       | 所属部门id(did)                   |
 | goods_list     | String   | 是       | 货品数组 格式见下                 |
 | inventory_type | String   | 是       | 出入库类型(itid)                  |
-| warehouse      | String   | 是       | 所属仓库id（wid）                 |
 | manufacturer   | String   | 否       | 制造商                            |
 | operator       | String   | 是       | 操作员(sid)                       |
 | comment        | String   | 否       | 备注                              |
@@ -2053,6 +2052,80 @@ headers:{
 |  401   |    Unauthorized     |    鉴权未通过    |
 |  403   |      Forbidden      |    类型已存在    |
 |  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+### 更新
+
+**请求路径**：/api/inv/update
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明                          |
+| -------------- | -------- | -------- | --------------------------------- |
+| iid            | String   | 是       | 出入库单id                        |
+| date           | String   | 否       | 单据日期 格式:2006-01-02 15:04:05 |
+| number         | String   | 否       | 单号                              |
+| department     | String   | 否       | 所属部门id(did)                   |
+| goods_list     | String   | 是       | 货品数组 格式见下                 |
+| inventory_type | String   | 是       | 出入库类型(itid)                  |
+| manufacturer   | String   | 否       | 制造商                            |
+| operator       | String   | 是       | 操作员(sid)                       |
+| comment        | String   | 否       | 备注                              |
+
+** goods_list数据结构*：
+
+```json
+[
+    {"goods": "g4c182157", "amount":26,"comment":"test"},
+    {"goods": "g08943f59", "amount":23,"comment":"test"}
+]
+```
+
+**参数说明**
+
+| 字段 | goods       | amount | comment |
+| ---- | ----------- | ------ | ------- |
+| 类型 | string      | float  | string  |
+| 说明 | 货品id(gid) | 数量   | 备注    |
+
+
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Inventory added successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
 
 ----
 
@@ -2143,5 +2216,4 @@ headers:{
 |  500   | InternalServerError | 后端服务内部错误 |
 
 ----
-
 
