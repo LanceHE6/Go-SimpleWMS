@@ -86,6 +86,10 @@ db:
 
 # 数据库建表示例
 
+## 数据库建模
+
+![image-20240606163507642](..\imgs\DBModel.png)
+
 ## users表
 
 | 字段 | id             |          uid           |   account    |   password   |  nick_name   |   permission    | created_at | updated_at |     token      |    phone     |
