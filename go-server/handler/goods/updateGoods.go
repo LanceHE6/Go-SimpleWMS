@@ -67,7 +67,7 @@ func UpdateGoods(context *gin.Context) {
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			context.JSON(http.StatusBadRequest, gin.H{
-				"error":  "The name is already exists",
+				"error":  "The code of the goods is already exists",
 				"detail": err.Error(),
 				"code":   404,
 			})
