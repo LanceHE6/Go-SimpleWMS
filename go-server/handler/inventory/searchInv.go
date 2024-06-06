@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// TODO 重构出入库单search接口
-
 func SearchInv(context *gin.Context) {
 	var invs []model.Inventory
 	var total int64
@@ -31,9 +29,9 @@ func SearchInv(context *gin.Context) {
 	date := context.Query("date")
 
 	query := myDb.GetMyDbConnection().Table("inventories").Joins("left join inventory_types on inventories.inventory_type = inventory_types.itid")
-
+	// 依据参数构造查询
 	if goods != "" {
-		query = query.Where("inventories.goods_order_list LIKE ?", goods)
+		query = query.Where(query.Where("JSON_CONTAINS(inventories.goods_list, JSON_OBJECT('Goods', ?))", goods))
 	}
 	if number != "" {
 		query = query.Where("inventories.number = ?", number)
@@ -45,7 +43,7 @@ func SearchInv(context *gin.Context) {
 		query = query.Where("inventories.manufacturer = ?", manufacturer)
 	}
 	if amount != 0 {
-		query = query.Where("inventories.goods_order_list LIKE ?", amount)
+		query = query.Where("JSON_CONTAINS(inventories.goods_list, JSON_OBJECT('Amount', ?))", amount)
 	}
 	if inventoryType != "" {
 		query = query.Where("inventories.inventory_type = ?", inventoryType)
@@ -57,7 +55,7 @@ func SearchInv(context *gin.Context) {
 		query = query.Where("inventories.operator = ?", operator)
 	}
 	if comment != "" {
-		query = query.Where("inventories.comment = ?", comment)
+		query = query.Where("inventories.comment = ? OR JSON_CONTAINS(inventories.goods_list, JSON_OBJECT('Comment', ?))", comment, comment)
 	}
 	if date != "" {
 		// 将 created_at 转换为日期格式，并过滤出当天的记录
@@ -70,8 +68,7 @@ func SearchInv(context *gin.Context) {
 		}
 	}
 	if keyword != "" {
-		query = query.Where("inventories.goods_order_list LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.date LIKE ?",
-			"%"+keyword+"%",
+		query = query.Where("inventories.goods_list LIKE ? OR inventories.number LIKE ? OR inventories.warehouse LIKE ? OR inventories.manufacturer LIKE ? OR inventories.inventory_type LIKE ? OR inventories.operator LIKE ? OR inventories.comment LIKE ? OR inventories.date LIKE ?",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
@@ -107,6 +104,7 @@ func SearchInv(context *gin.Context) {
 		return
 	}
 
+	// 查询结果数量为0
 	if len(invs) == 0 {
 		context.JSON(http.StatusOK, gin.H{
 			"code":        202,
@@ -121,40 +119,40 @@ func SearchInv(context *gin.Context) {
 	}
 
 	var invsRes []gin.H
-	// db := myDb.GetMyDbConnection()
+	db := myDb.GetMyDbConnection()
 	for _, g := range invs {
-		//var goods model.Goods
-		//db.Model(model.Goods{}).Where("gid = ?", g.GoodsList).First(&goods)
-
-		//var goodsList model.GoodsList
-		//err := g.GoodsList.Scan(goodsList)
-		//if err != nil {
-		//	context.JSON(http.StatusOK, gin.H{
-		//		"code":    501,
-		//		"message": "err",
-		//		"detail":  err.Error(),
-		//	})
-		//}
+		fmt.Println(g.GoodsList)
+		var goodsList []gin.H
+		// 构造货品清单返回体
+		for _, goodsInfo := range g.GoodsList {
+			var goods model.Goods
+			db.Model(model.Goods{}).Where("gid = ?", goodsInfo.Goods).First(&goods)
+			goodsList = append(goodsList, gin.H{
+				"goods": gin.H{
+					"created_at":   goods.CreatedAt,
+					"updated_at":   goods.UpdatedAt,
+					"gid":          goods.Gid,
+					"goods_code":   goods.GoodsCode,
+					"name":         goods.Name,
+					"model":        goods.Model,
+					"goods_type":   goods.GoodsType,
+					"manufacturer": goods.Manufacturer,
+					"unit":         goods.Unit,
+					"image":        goods.Image,
+					"quantity":     goods.Quantity,
+					"unit_price":   goods.UnitPrice,
+				},
+				"amount":  goodsInfo.Amount,
+				"comment": goodsInfo.Comment,
+			})
+		}
+		// 构造单个出入库单返回体
 		goodsMeta := gin.H{
-			"created_at": g.CreatedAt,
-			"update_at":  g.UpdatedAt,
-			"iid":        g.Iid,
-			"number":     g.Number,
-			"goods_list": g.GoodsList,
-			//"goods": gin.H{
-			//	"created_at":   goods.CreatedAt,
-			//	"updated_at":   goods.UpdatedAt,
-			//	"gid":          goods.Gid,
-			//	"goods_code":   goods.GoodsCode,
-			//	"name":         goods.Name,
-			//	"model":        goods.Model,
-			//	"goods_type":   goods.GoodsType,
-			//	"manufacturer": goods.Manufacturer,
-			//	"unit":         goods.Unit,
-			//	"image":        goods.Image,
-			//	"quantity":     goods.Quantity,
-			//	"unit_price":   goods.UnitPrice,
-			//},
+			"created_at":     g.CreatedAt,
+			"update_at":      g.UpdatedAt,
+			"iid":            g.Iid,
+			"number":         g.Number,
+			"goods_list":     goodsList,
 			"inventory_type": g.InventoryType,
 			"warehouse":      g.Warehouse,
 			"manufacturer":   g.Manufacturer,

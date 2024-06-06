@@ -1842,7 +1842,7 @@ headers:{
 | goods_type   | string   | 否       | 依货品类型id（gtid）查询    |
 | warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
 | manufacturer | string   | 否       | 依货品所属生产厂商查询      |
-| quantity     | int      | 否       | 依货品数量查询              |
+| quantity     | float    | 否       | 依货品数量查询              |
 | unit_price   | float    | 否       | 依单价查询                  |
 | keyword      | string   | 否       | 关键字模糊查询              |
 
@@ -2066,8 +2066,6 @@ headers:{
 
 **是否需要鉴权：**是
 
-**请求参数**：None
-
 | 参数名         | 参数类型 | 是否必填 | 参数说明                        |
 | -------------- | -------- | -------- | ------------------------------- |
 | page           | int      | 否       | 页数，默认为1 ；为-1时不分页    |
@@ -2079,7 +2077,7 @@ headers:{
 | manufacturer   | string   | 否       | 依货品所属生产厂商查询          |
 | inventory_type | string   | 否       | 依出入库类型查询                |
 | type           | int      | 否       | 依出入库类型标识查询            |
-| operator       | string   | 否       | 依操作员查询                    |
+| operator       | string   | 否       | 依操作员查询(sid)               |
 | comment        | string   | 否       | 依备注查询                      |
 | created_at     | string   | 否       | 依创建日期查询 格式：2024-06-03 |
 | keyword        | string   | 否       | 关键字模糊查询                  |
