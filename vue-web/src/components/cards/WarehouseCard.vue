@@ -129,25 +129,25 @@ import {ref} from "vue";
 
 const eq = ref(0)
 const eqv = useTransition(eq, {
-  duration: 420,
+  duration: 800,
 })
 eq.value = prop.entryQuantity
 
 const oq = ref(0)
 const oqv = useTransition(oq, {
-  duration: 340,
+  duration: 720,
 })
 oq.value = prop.outQuantity
 
 const y_eq = ref(0)
 const y_eqv = useTransition(y_eq, {
-  duration: 500,
+  duration: 760,
 })
 y_eq.value = prop.yEntryQuantity
 
 const y_oq = ref(0)
 const y_oqv = useTransition(y_oq, {
-  duration: 450,
+  duration: 700,
 })
 y_oq.value = prop.yOutQuantity
 
