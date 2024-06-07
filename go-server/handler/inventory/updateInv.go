@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -33,6 +34,7 @@ func UpdateInv(context *gin.Context) {
 		})
 		return
 	}
+
 	// 获取请求参数
 	iid := data.Iid
 	date := data.Date
@@ -69,70 +71,145 @@ func UpdateInv(context *gin.Context) {
 	}
 
 	db := myDb.GetMyDbConnection()
+	// 开始事务
+	tx := db.Begin()
+	if tx.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to start transaction",
+			"code":    501,
+			"detail":  tx.Error.Error(),
+		})
+		return
+	}
+
 	// 获取原来的出入库单
 	var oldInv model.Inventory
-	db.Where("iid = ?", iid).First(&oldInv)
+	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).First(&oldInv).Error; err != nil {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get original inventory record",
+			"code":    502,
+			"detail":  err.Error(),
+		})
+		return
+	}
 
-	// 更新出入库单
-	err = db.Model(&model.Inventory{}).Where("iid = ?", iid).Updates(inv).Error
-	// 单号重复判断
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
+	// 获取出入库类型
+	itid := oldInv.InventoryType
+	var inventoryType model.InventoryType
+	if err := tx.Model(&model.InventoryType{}).Where("itid = ?", itid).First(&inventoryType).Error; err != nil {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get inventory type",
+			"code":    503,
+			"detail":  err.Error(),
+		})
+		return
+	}
+
+	// 根据原来的出入库单回退对应的货品数量
+	for _, goodsInfo := range oldInv.GoodsList {
+		var oldStock = model.Stock{
+			Goods:     goodsInfo.Goods,
+			Warehouse: warehouse,
+		}
+		notExist := tx.Model(&model.Stock{}).Where("goods = ? AND warehouse = ?", oldStock.Goods, oldInv.Warehouse).First(&oldStock).RecordNotFound()
+		if notExist {
+			tx.Rollback()
 			context.JSON(http.StatusBadRequest, gin.H{
-				"error":  "The Number is already exists",
-				"detail": err.Error(),
-				"code":   404,
+				"message": "Contains invalid Stock records",
+				"code":    403,
+			})
+			return
+		}
+		// 根据出入库类型回退数量
+		if inventoryType.Type == 1 {
+			oldStock.Quantity -= goodsInfo.Amount
+		} else {
+			oldStock.Quantity += goodsInfo.Amount
+		}
+		var updateData = map[string]interface{}{
+			"quantity": oldStock.Quantity,
+		}
+		fmt.Println("old:", oldStock)
+		if err := tx.Model(&model.Stock{}).Where("goods = ? AND warehouse = ?", oldStock.Goods, oldStock.Warehouse).Updates(updateData).Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to update stock",
+				"code":    504,
+				"detail":  err.Error(),
 			})
 			return
 		}
 	}
 
-	// 根据原来的出入库单回退对应的货品数量
-	for _, goodsInfo := range oldInv.GoodsList {
-		var goods = model.Goods{
-			Gid: goodsInfo.Goods,
-		}
-		db.Where("gid = ?", goodsInfo.Goods).First(&goods)
-		// 获取出入库类型
-		itid := oldInv.InventoryType
-		var inventoryType model.InventoryType
-		db.Where("itid = ?", itid).First(&inventoryType)
-		// 根据出入库类型回退数量
-		if inventoryType.Type == 1 {
-			goods.Quantity -= goodsInfo.Amount
+	// 更新出入库单
+	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).Updates(inv).Error; err != nil {
+		tx.Rollback()
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error":  "The Number already exists",
+				"detail": err.Error(),
+				"code":   404,
+			})
+			return
 		} else {
-			goods.Quantity += goodsInfo.Amount
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to update inventory record",
+				"code":    505,
+				"detail":  err.Error(),
+			})
+			return
 		}
-		db.Model(model.Goods{}).Where("gid=?", goods.Gid).Update(&goods)
 	}
 
-	// 获取新的出入单
+	// 获取新的出入库单
 	var newInv model.Inventory
-	db.Where("iid = ?", iid).First(&newInv)
+	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).First(&newInv).Error; err != nil {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get updated inventory record",
+			"code":    506,
+			"detail":  err.Error(),
+		})
+		return
+	}
+
+	// 获取出入库类型
+	itid = newInv.InventoryType
+	var newInventoryType model.InventoryType
+	if err := tx.Model(&model.InventoryType{}).Where("itid = ?", itid).First(&newInventoryType).Error; err != nil {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get updated inventory type",
+			"code":    507,
+			"detail":  err.Error(),
+		})
+		return
+	}
 
 	// 更新货品数量
-	for _, goodsInfo := range newInv.GoodsList {
-		var goods = model.Goods{
-			Gid: goodsInfo.Goods,
-		}
-		db.Where("gid = ?", goodsInfo.Goods).First(&goods)
-		// 获取出入库类型
-		itid := newInv.InventoryType
-		var inventoryType model.InventoryType
-		db.Where("itid = ?", itid).First(&inventoryType)
-		// 根据出入库类型更新数量
-		if inventoryType.Type == 1 {
-			goods.Quantity += goodsInfo.Amount
-
-		} else {
-			goods.Quantity -= goodsInfo.Amount
+	if UpdateStocks(newInv.GoodsList, newInv.Warehouse, newInventoryType, context, tx) == 0 {
+		// 提交事务
+		if err := tx.Commit().Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to commit transaction",
+				"code":    508,
+				"detail":  err.Error(),
+			})
+			return
 		}
 
-		db.Model(model.Goods{}).Where("gid=?", goods.Gid).Update(&goods)
+		context.JSON(http.StatusOK, gin.H{
+			"message": "Inventory updated successfully",
+			"code":    201,
+		})
+	} else {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to update stock quantities",
+			"code":    509,
+		})
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Inventory updated successfully",
-		"code":    201,
-	})
-
 }
