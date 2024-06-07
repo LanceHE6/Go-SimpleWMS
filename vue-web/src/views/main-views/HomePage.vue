@@ -20,6 +20,8 @@
           />
           <warehouse-card
               v-for="item in state.warehouseCardDataList"
+              :wid="item.wid"
+              :selected="item.selected"
               :name="item.name"
               :typeQuantity ="item.typeQuantity"
               :entry-quantity="item.entryQuantity"
@@ -30,6 +32,7 @@
               :y-out-quantity="item.yOutQuantity"
               :y-entry-price-quantity="item.yEntryPriceQuantity"
               :y-out-price-quantity="item.yOutPriceQuantity"
+              @select="onWarehouseCardSelect"
           />
         </div>
       </el-collapse-item>
@@ -58,6 +61,7 @@ const data = ref(getRandomData());
 const activeNames = ref(['1','2'])  // 初始化时的活动界面
 
 const state =  reactive({
+  selectWid: '0',  //选中的仓库id(如果是所有仓库则为0)
   isLoading: false,  //数据是否正在加载
   warehouseCardDataList:[],  //仓库信息卡片数据列表
   hasExtraWarehouse: false,  //是否还有仓库卡片未显示
@@ -122,6 +126,8 @@ onMounted(async () => {
   }
 
   warehouseCardDataList.push({
+    wid: '0',
+    selected: true,
     name: '所有仓库',
     typeQuantity: typeQuantity.total,
     entryQuantity: entry.total,
@@ -134,9 +140,9 @@ onMounted(async () => {
     yOutPriceQuantity: yOutPrice,
   })
 
-  let i = 0  //限制显示个数
+  let i = 1  //限制显示个数
   for(const item of warehouseList){
-    if(i >= 3){
+    if(i > 3){
       break
     }
     else{
@@ -186,6 +192,8 @@ onMounted(async () => {
     }
 
     warehouseCardDataList.push({
+      wid: wid,
+      selected: false,
       name: item.name,
       typeQuantity: itemTypeQuantity.total,
       entryQuantity: itemEntry.total,
@@ -201,6 +209,13 @@ onMounted(async () => {
   state.warehouseCardDataList = warehouseCardDataList
   console.log("total", state.warehouseCardDataList)
 });
+
+const onWarehouseCardSelect = (wid) =>{
+  state.selectWid = wid
+  for(const item of state.warehouseCardDataList){
+    item.selected = item.wid === wid
+  }
+}
 
 // 定义方法
 function getRandomData() {
