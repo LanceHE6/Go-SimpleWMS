@@ -14,10 +14,8 @@ type updateGoodsRequest struct {
 	Model        string  `json:"model" form:"model"`
 	GoodsCode    string  `json:"goods_code" form:"goods_code"`
 	GoodsType    string  `json:"goods_type" form:"goods_type"`
-	Warehouse    string  `json:"warehouse" form:"warehouse"`
 	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
 	Unit         string  `json:"unit" form:"unit"`
-	Quantity     int     `json:"quantity" form:"quantity"`
 	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 
@@ -36,10 +34,8 @@ func UpdateGoods(context *gin.Context) {
 	GModel := data.Model
 	GCode := data.GoodsCode
 	GType := data.GoodsType
-	GWarehouse := data.Warehouse
 	GManufacturer := data.Manufacturer
 	GUnit := data.Unit
-	GQuantity := data.Quantity
 
 	//if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
 	//	context.JSON(http.StatusBadRequest, gin.H{
@@ -54,10 +50,8 @@ func UpdateGoods(context *gin.Context) {
 		"model":        GModel,
 		"goods_code":   GCode,
 		"goods_type":   GType,
-		"warehouse":    GWarehouse,
 		"manufacturer": GManufacturer,
 		"unit":         GUnit,
-		"quantity":     GQuantity,
 		"unit_price":   data.UnitPrice,
 	}
 
