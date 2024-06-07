@@ -7,10 +7,13 @@ import (
 	"time"
 )
 
-type MyModel struct {
-	ID        uint      `gorm:"primary_key;"`
+type Time struct {
 	CreatedAt time.Time `gorm:"autoCreateTime:milli"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli"`
+}
+type MyModel struct {
+	ID uint `gorm:"primary_key;"`
+	Time
 }
 
 // 数据表模型
@@ -77,13 +80,13 @@ type Goods struct {
 	Name         string
 	Model        string
 	GoodsType    string `gorm:"default:''"`
-	Warehouse    string
 	Manufacturer string `gorm:"default:''"`
 	Unit         string
 	Image        string  `gorm:"default:''"`
-	Quantity     float64 `gorm:"default:0"`
 	UnitPrice    float64 `gorm:"default:0"`
 }
+
+// GoodsOrder 非建表数据结构
 type GoodsOrder struct {
 	Goods   string
 	Amount  float64
@@ -125,9 +128,19 @@ type Inventory struct {
 	Number        string `gorm:"unique"`
 	Date          time.Time
 	GoodsList     GoodsList `gorm:"type:json"`
+	OldGoodsList  GoodsList `gorm:"type:json"` // 更新前的库存信息
+	NewGoodsList  GoodsList `gorm:"type:json"` // 更新后的库存信息
+	Warehouse     string
 	InventoryType string
 	Department    string `gorm:"default:''"`
 	Operator      string
 	Comment       string `gorm:"default:''"`
 	Manufacturer  string `gorm:"default:''"`
+}
+
+type Stock struct {
+	Time
+	Goods     string
+	Warehouse string
+	Quantity  float64
 }
