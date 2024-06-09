@@ -3,9 +3,7 @@ package staff
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
-	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -41,8 +39,9 @@ func UpdateStaff(context *gin.Context) {
 
 	db := myDb.GetMyDbConnection()
 	// 判断该员工是否已存在
-	err := db.Model(&model.Staff{}).Where("sid=?", sid).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	var staff model.Staff
+	notFound := db.Model(&model.Staff{}).Where("sid=?", sid).First(&staff).RecordNotFound()
+	if notFound {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The staff does not exist",
 			"code":    403,
@@ -68,7 +67,7 @@ func UpdateStaff(context *gin.Context) {
 		"phone":      phone,
 		"department": deptId,
 	}
-	err = db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
+	err := db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot update staff",

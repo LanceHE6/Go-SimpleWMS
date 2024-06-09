@@ -18,7 +18,7 @@ type addGoodsRequest struct {
 	Warehouse    string  `json:"warehouse" form:"warehouse" binding:"required"`
 	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
 	Unit         string  `json:"unit" form:"unit" binding:"required"`
-	Quantity     int     `json:"quantity" form:"quantity"`
+	Quantity     float64 `json:"quantity" form:"quantity"`
 	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 

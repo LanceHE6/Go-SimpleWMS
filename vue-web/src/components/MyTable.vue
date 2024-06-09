@@ -32,7 +32,7 @@
           :data="filterTableData"
           :border="true"
           :stripe="true"
-          height="60vh"
+          height="64vh"
           style="width: 100%"
       >
         <el-table-column type="selection" width="55" />
@@ -71,7 +71,9 @@
       </el-table>
     </el-main>
 
-    <el-footer>
+    <el-footer
+        style="margin-top: 5px"
+    >
       <el-pagination
           v-model:current-page="currentPage"
           :page-count="pageCount"
@@ -375,22 +377,20 @@ const filterTableData = computed(() =>
 //输入元素超过4个的窗口分列显示
 const DIALOG_COL = 4
 console.log("table:", prop.operations)
-let addDialogClass = ''
-let editDialogClass = ''
-if(prop.operations.add){
-  addDialogClass = ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
-}
-if(prop.operations.edit){
-  editDialogClass = ref(prop.editDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
-}
+let addDialogClass = prop.operations.add
+    ? ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+    : null
+let editDialogClass = prop.operations.edit
+    ? ref(prop.editDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
+    : null
 
 
 // 数据显示转换(映射)
 function mapping(property){
   return (row) => {
     //遍历每一个属性
-    for(const i in prop.tableColList){
-      let item = prop.tableColList[i]
+    for(const i of prop.tableColList){
+      let item = i
       if(item.property === property){
         //多层对象, 一层层解开
         while(item.isParent){

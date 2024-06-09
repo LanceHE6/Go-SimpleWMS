@@ -1,8 +1,8 @@
 package route
 
 import (
+	"Go_simpleWMS/handler"
 	"Go_simpleWMS/handler/auth"
-	"Go_simpleWMS/handler/test"
 	"Go_simpleWMS/handler/upload"
 	"Go_simpleWMS/route/group"
 	"Go_simpleWMS/utils"
@@ -17,7 +17,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	ginApi := ginServer.Group("/api", utils.SemaphoreMiddleware(sem))
 
 	ginApi.GET("/ping", utils.SemaphoreMiddleware(sem), func(c *gin.Context) {
-		test.Ping(c)
+		handler.GetVersion(c)
 	})
 	//鉴权接口
 	ginApi.GET("/auth", func(c *gin.Context) {

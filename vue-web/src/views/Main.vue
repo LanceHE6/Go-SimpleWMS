@@ -6,100 +6,104 @@
   <el-container>
     <!--头部-->
     <el-header class="head-container">
-      <el-menu
-        :router="true"
-        :ellipsis="false"
-        :default-active="state.defaultPage"
-        class="head-menu"
-        mode="horizontal"
-        @select="handleSelect"
-        background-color="#545c64"
-        text-color="#fff"
-        active-text-color="#ffd04b"
-    >
-      <!--左侧头部-->
-      <a href="https://ys.mihoyo.com/" title="进入官网" target="_blank">
-        <img
-            class="main-logo"
-            src="../res/WMS-Logo.png"
-            alt="Logo"
-        />
-      </a>
-      <el-text size="large" style="color: white; margin-right: 10px;">
-        SimpleWMS
-      </el-text>
-
-      <el-menu-item
-          index="/home/homePage"
+      <el-affix
+          :offset="state.headMenuOffset"
       >
-        <el-icon>
-          <home-filled />
-        </el-icon>
-        首页
-      </el-menu-item>
-
-      <el-menu-item
-          index="/home/productManagement/allProduction"
-
+        <el-menu
+          :router="true"
+          :ellipsis="false"
+          :default-active="state.defaultPage"
+          class="head-menu"
+          mode="horizontal"
+          @select="handleSelect"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
       >
-        货品管理
-      </el-menu-item>
+        <!--左侧头部-->
+        <a href="https://ys.mihoyo.com/" title="进入官网" target="_blank">
+          <img
+              class="main-logo"
+              src="../res/WMS-Logo.png"
+              alt="Logo"
+          />
+        </a>
+        <el-text size="large" style="color: white; margin-right: 10px;">
+          SimpleWMS
+        </el-text>
 
-      <el-menu-item
-          index="/home/entryAndOut/entry"
-      >
-        出入库管理
-      </el-menu-item>
-
-      <el-menu-item
-          index="/home"
-      >
-        订单管理
-      </el-menu-item>
-
-      <el-menu-item
-          index="/home"
-      >
-        往来单位
-      </el-menu-item>
-
-      <el-menu-item
-          index="/home"
-      >
-        分析统计
-      </el-menu-item>
-
-      <el-menu-item
-          index="/home/setting/userManagement"
-      >
-        系统设置
-      </el-menu-item>
-
-      <!--右侧头部-->
-      <div class="head-container-right"/>
-
-      <el-button
-          style="margin-top: 18px; margin-left: 15px"
-          size="small"
-          :disabled="true"
-          round
-      >
-        白金典藏版
-      </el-button>
-      <el-sub-menu
-          index="/"
-      >
-        <template #title>
+        <el-menu-item
+            index="/home/homePage"
+        >
           <el-icon>
-            <user />
+            <home-filled />
           </el-icon>
-          用户
-        </template>
-        <el-menu-item @click="help">帮助中心</el-menu-item>
-        <el-menu-item @click="about">关于</el-menu-item>
-        <el-menu-item @click="logout">退出登录</el-menu-item>
-      </el-sub-menu>
-    </el-menu>
+          首页
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home/productManagement/allProduction"
+
+        >
+          货品管理
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home/entryAndOut/entry"
+        >
+          出入库管理
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home"
+        >
+          订单管理
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home"
+        >
+          往来单位
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home"
+        >
+          分析统计
+        </el-menu-item>
+
+        <el-menu-item
+            index="/home/setting/userManagement"
+        >
+          系统设置
+        </el-menu-item>
+
+        <!--右侧头部-->
+        <div class="head-container-right"/>
+
+        <el-button
+            style="margin-top: 18px; margin-left: 15px"
+            size="small"
+            :disabled="true"
+            round
+        >
+          白金典藏版
+        </el-button>
+        <el-sub-menu
+            index="/"
+        >
+          <template #title>
+            <el-icon>
+              <user />
+            </el-icon>
+            用户
+          </template>
+          <el-menu-item @click="help">帮助中心</el-menu-item>
+          <el-menu-item @click="about">关于</el-menu-item>
+          <el-menu-item @click="logout">退出登录</el-menu-item>
+        </el-sub-menu>
+      </el-menu>
+    </el-affix>
 
     </el-header>
       <!--主体-->
@@ -128,7 +132,8 @@ onMounted(initialize)
 
 const state = reactive({
   nowMenuActive: '',  //当前首部栏界面
-  defaultPage: ''  //当前路由界面
+  defaultPage: '',  //当前路由界面
+  headMenuOffset: 0,  //首部菜单锚点偏移量
 })
 
 function help(){
@@ -178,15 +183,27 @@ function logout(){
 //点击首部菜单
 const handleSelect = (key) => {
   state.nowMenuActive = key;
+  pageChange(key)
+}
+
+const pageChange = (key = '') => {
+  if(key === ''){
+    const CURRENT_PATH = window.location.hash  // 获取当前路径，例如 "#/page/subpage"
+    const pageList = CURRENT_PATH.split('#')
+    state.defaultPage = pageList[pageList.length - 1]
+    state.nowMenuActive = state.defaultPage
+  }
+  else{
+    state.nowMenuActive = key
+  }
+  //homePage中的首部菜单固定在首部, 其他界面不固定
+  state.headMenuOffset = state.nowMenuActive === '/home/homePage' ? 0 : -65535
+  console.log('pageChange', state.nowMenuActive)
 }
 
 //初始化
 async function initialize(){
-  const CURRENT_PATH = window.location.hash  // 获取当前路径，例如 "#/page/subpage"
-  const pageList = CURRENT_PATH.split('#')
-  state.defaultPage = pageList[pageList.length - 1]
-  state.nowMenuActive = state.defaultPage
-  console.log('page', state.defaultPage)
+  pageChange()
 
   const token="bearer "+localStorage.getItem("token");
   await axios.get('/auth', {
@@ -219,7 +236,7 @@ async function initialize(){
   justify-content: center;
   min-width: 100vh;
   min-height: 97vh;
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) no-repeat center;
+  background: rgb(255, 255, 255);
   background-size: contain;
 }
 .head-container{

@@ -1,6 +1,9 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -78,18 +81,53 @@ type Goods struct {
 	Manufacturer string `gorm:"default:''"`
 	Unit         string
 	Image        string  `gorm:"default:''"`
-	Quantity     int     `gorm:"default:0"`
+	Quantity     float64 `gorm:"default:0"`
 	UnitPrice    float64 `gorm:"default:0"`
+}
+type GoodsOrder struct {
+	Goods   string
+	Amount  float64
+	Comment string
+}
+
+// GoodsList 定义自定义类型 GoodsList
+type GoodsList []GoodsOrder
+
+func (gol *GoodsList) Scan(value interface{}) error {
+	// 假设value是一个[]byte（从数据库读取的JSON数据）
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed to cast value to []byte")
+	}
+
+	// 将JSON数据解码到gol指向的GoodsList实例中
+	err := json.Unmarshal(bytes, gol)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gol GoodsList) Value() (driver.Value, error) {
+	// 将GoodsList编码为JSON格式的[]byte
+	bytes, err := json.Marshal(gol)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }
 
 type Inventory struct {
 	MyModel
 	Iid           string `gorm:"primary_key;index"`
 	Number        string `gorm:"unique"`
-	Goods         string
-	Amount        int
+	Date          time.Time
+	GoodsList     GoodsList `gorm:"type:json"`
 	InventoryType string
 	Warehouse     string
+	Department    string `gorm:"default:''"`
 	Operator      string
 	Comment       string `gorm:"default:''"`
 	Manufacturer  string `gorm:"default:''"`
