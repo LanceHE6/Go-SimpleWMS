@@ -14,4 +14,7 @@ func InventoryGroup(ginApi *gin.RouterGroup) {
 	inventoryGroup.GET("/search", func(c *gin.Context) {
 		inventory.SearchInv(c)
 	})
+	inventoryGroup.PUT("/update", utils.IsAdminMiddleware(), func(c *gin.Context) {
+		inventory.UpdateInv(c)
+	})
 }

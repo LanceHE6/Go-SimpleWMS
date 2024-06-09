@@ -73,9 +73,20 @@ headers:{
 ### 鉴权相关返回示例
 
 ```json
+// 无token 400
 {
     "code": 401,
 	"message": "No Authorization header provided"
+}
+// 无效token 400
+{
+    "message": "Invalid token",
+	"code":    401,
+}
+// 鉴权通过 200
+{
+    "code": 201,
+	"uid":  uid,
 }
 ```
 
@@ -132,10 +143,28 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 注册成功 200
 {
     "code": 201,
     "message": "User registered successfully",
     "uid": "00000002"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 账号已被注册 403
+{
+    "message": "The account '%s' has been registered",
+	"code":    402,
+}
+// 无法注册新用户 500
+{
+    "error":  "Cannot insert new user",
+	"detail": err.Error(),
+	"code":   505,
 }
 ```
 
@@ -187,6 +216,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 部分导入失败 217
 {
     "code": 403,
     "detail": [
@@ -197,7 +227,7 @@ headers:{
     ],
     "message": "Some users failed to register; 1/2"
 }
-
+// 全部导入失败 400
 {
     "code": 402,
     "detail": [
@@ -211,6 +241,17 @@ headers:{
         }
     ],
     "message": "All users failed to register"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 全部导入成功 200
+{
+    "code":    201,
+	"message": "All users have completed registration",
 }
 ```
 
@@ -255,10 +296,29 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 登录成功 200
 {
     "code": 201,
     "message": "Login successfully",
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDk1NTUxMjEsInN1YiI6IjAwMDAwMDAyIn0.hvz-Xp9kfhVNsCy6Q9nhS9wM8-c-DgJJ8PLcME17Fto"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法生成token 500
+{
+    "error":  "Cannot generate token",
+	"detail": err.Error(),
+	"code":   501,
+}
+// 无法更新token 500
+{
+    "error":  "Cannot update token",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
@@ -302,9 +362,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "User deleted successfully"
+}
+// 参数有误 400 
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 非法删除对象 403
+{
+    "message": "Invalid target uid",
+	"code":    402,
+}
+// 无法删除用户 500
+{
+    "error":  "Cannot delete user",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -353,9 +431,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "User updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 用户不存在 403
+{
+    "message": "The user does not exist",
+	"code":    403,
+}
+// 无法更新用户 500
+{
+    "error":  "Cannot update user",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -396,6 +492,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get user list successfully",
@@ -441,6 +538,12 @@ headers:{
             "uid": "00000005"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Cannot get the list of users",
+	"detail": err.Error(),
+	"code":   "501",
 }
 ```
 
@@ -490,9 +593,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Warehouse added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 该仓库已存在 409
+{
+    "message": "The warehouse already exists",
+	"code":    402,
+}
+// 无法插入新仓库 500
+{
+    "error":  "Cannot insert the warehouse",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -534,9 +655,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Warehouse deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除仓库 500
+{
+    "error":  "Cannot delete the warehouse",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -583,9 +717,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Warehouse updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 该仓库不存在 403
+{
+    "message": "The department does not exist",
+	"code":    403,
+}
+// 无法更新仓库 500
+{
+    "error":  "Cannot update the warehouse",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -627,6 +779,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get warehouse list successfully",
@@ -648,6 +801,12 @@ headers:{
             "wid": "000002"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Cannot get the list of warehouses",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -693,9 +852,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Goods type added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 该类型已存在 403
+{
+    "message": "The type name already exists",
+	"code":    402,
+}
+// 无法插入新类型 500
+{
+    "error":  "Cannot insert the goods type",
+	"detail": err.Error(),
+	"code":   505,
 }
 ```
 
@@ -741,9 +918,33 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Goods type updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标类型不存在 403 
+{
+    "message": "The goods type does not exist",
+	"code":    403,
+}
+// 该类型名已存在 400
+{
+    "error":  "The name is already exists",
+	"detail": err.Error(),
+	"code":   404,
+}
+// 无法更新类型 500
+{
+    "error":  "Cannot update the goods type",
+	"detail": err.Error(),
+	"code":   504,
 }
 ```
 
@@ -785,9 +986,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Goods type deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除 500
+{
+    "error":  "Cannot delete the Goods type",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
@@ -828,6 +1042,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get user list successfully",
@@ -845,6 +1060,12 @@ headers:{
             "type_code": "yzl"
         }
     ]
+}
+// 无法获取列表 500
+{
+	"error":  "Cannot get the list of goods type",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -889,9 +1110,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Department added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 该部门已经存在
+{
+    "message": "The department name already exists",
+	"code":    402,
+}
+// 无法插入新部门 500
+{
+    "error":  "Cannot insert new department",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -934,9 +1173,33 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Department updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标部门不存在 403
+{
+    "message": "The department does not exist",
+	"code":    403,
+}
+// 部门已存在 400
+{
+    "error":  "The name is already exists",
+	"detail": err.Error(),
+	"code":   402,
+}
+// 无法更新 500
+{
+    "error":  "Cannot update department",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -978,9 +1241,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Department deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除 500
+{
+    "error":  "Cannot delete department",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1021,6 +1297,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get departments list successfully",
@@ -1031,6 +1308,12 @@ headers:{
             "name": "生产"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Can not get the list of departments",
+	"detail": err.Error(),
+	"code":   201,
 }
 ```
 
@@ -1077,9 +1360,32 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Staff added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 员工已存在 403
+{
+    "message": "The staff already exists",
+	"code":    402,
+}
+// 员工所属部门不存在 403
+{
+    "message": "The staff's department does not exist",
+	"code":    403,
+}
+// 无法插入新员工 500
+{
+    "error":  "Cannot insert the staff",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1124,9 +1430,32 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Staff updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标员工不存在 403
+{
+    "message": "The staff does not exist",
+	"code":    403,
+}
+// 员工所属部门不存在 403
+{
+    "message": "The staff's department does not exist",
+	"code":    404,
+}
+// 无法更新员工 500
+{
+    "error":  "Cannot update staff",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1168,9 +1497,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Staff deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除 500
+{
+    "error":  "Cannot delete staff",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1211,6 +1553,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get staffs list successfully",
@@ -1237,6 +1580,12 @@ headers:{
             "sid": "s00000004"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Cannot get the list of staffs",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
@@ -1283,9 +1632,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Inventory type added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 该类型已存在 403
+{
+    "message": "The type name already exists",
+	"code":    401,
+}
+// 无法插入新类型 500
+{
+    "error":  "Cannot insert the inventory type",
+	"detail": err.Error(),
+	"code":   505,
 }
 ```
 
@@ -1332,9 +1699,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Inventory type updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标类型不存在 403
+{
+    "message": "The inventory type does not exist",
+	"code":    403,
+}
+// 更新失败 500
+{
+    "error":  "Cannot get the number of inventory type for this itid",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
@@ -1376,9 +1761,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Inventory type deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除 500
+{
+    "error":  "Cannot delete the inventory type",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1421,6 +1819,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get inventory type list successfully",
@@ -1438,6 +1837,12 @@ headers:{
             "type_code": "sc"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Cannot get the list of inventory type",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1482,9 +1887,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Unit added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 单位已存在 403
+{
+    "message": "The unit already exists",
+	"code":    402,
+}
+// 无法插入新单位 500
+{
+    "error":  "Cannot insert new unit",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1531,9 +1954,27 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "unit type updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标单位不存在 403
+{
+    "message": "The unit does not exist",
+	"code":    403,
+}
+// 无法更新 500
+{
+    "error":  "Cannot update unit",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1558,7 +1999,7 @@ headers:{
 
 ----
 
-### 
+
 
 ### 删除
 
@@ -1622,6 +2063,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 查询成功 200
 {
     "code": 201,
     "message": "Get inventory type list successfully",
@@ -1639,6 +2081,12 @@ headers:{
             "unid": "un0004"
         }
     ]
+}
+// 无法获取列表 500
+{
+    "error":  "Can not get the list of units",
+	"detail": err.Error(),
+	"code":   201,
 }
 ```
 
@@ -1680,20 +2128,36 @@ headers:{
 | ------------ | -------- | -------- | ------------------ |
 | name         | String   | 是       | 货品名称           |
 | model        | String   | 否       | 类型规格           |
-| goods_code   | String   | 否       | 货品编码           |
+| goods_code   | String   | 是       | 货品编码           |
 | goods_type   | String   | 是       | 货品类型id（gtid） |
-| warehouse    | String   | 是       | 所属仓库id（wid）  |
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 是       | 单位id（unid）     |
-| quantity     | int      | 否       | 数量               |
 | unit_price   | float    | 否       | 单价               |
 
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Goods added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 已存在该编码的货品 403
+{
+    "message": "The goods with this code already exists",
+	"code":    402,
+}
+// 无法插入新货品 500
+{
+    "error":  "Cannot insert the goods",
+	"detail": err.Error(),
+	"code":   501,
 }
 ```
 
@@ -1737,10 +2201,8 @@ headers:{
 | model        | String   | 否       | 规格类型           |
 | goods_code   | String   | 否       | 货品编码           |
 | goods_type   | String   | 否       | 货品类型id（gtid） |
-| warehouse    | String   | 否       | 所属仓库id（wid）  |
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
-| quantity     | int      | 否       | 数量               |
 | unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
@@ -1748,9 +2210,28 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 更新成功 200
 {
     "code": 201,
     "message": "Goods updated successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 已存在该编码的货品 400
+{
+    "error":  "The code of the goods is already exists",
+	"detail": err.Error(),
+	"code":   404,
+}
+// 无法更新货品 500
+{
+    "message": "Update goods failed",
+	"code":    403,
+	"detail":  err.Error(),
 }
 ```
 
@@ -1794,9 +2275,22 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 删除成功 200
 {
     "code": 201,
     "message": "Goods deleted successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法删除 500
+{
+    "error":  "Cannot delete the Goods",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
@@ -1832,23 +2326,22 @@ headers:{
 
 **请求参数**：None
 
-| 参数名       | 参数类型 | 是否必填 | 参数说明                    |
-| ------------ | -------- | -------- | --------------------------- |
-| page         | int      | 否       | 页数，默认为1               |
-| page_size    | int      | 否       | 单页大小，默认为10          |
-| gid          | string   | 否       | 依据gid查询                 |
-| name         | string   | 否       | 依货品名称查询              |
-| model        | string   | 否       | 依货品规格类型查询          |
-| goods_type   | string   | 否       | 依货品类型id（gtid）查询    |
-| warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
-| manufacturer | string   | 否       | 依货品所属生产厂商查询      |
-| quantity     | float    | 否       | 依货品数量查询              |
-| unit_price   | float    | 否       | 依单价查询                  |
-| keyword      | string   | 否       | 关键字模糊查询              |
+| 参数名       | 参数类型 | 是否必填 | 参数说明                 |
+| ------------ | -------- | -------- | ------------------------ |
+| page         | int      | 否       | 页数，默认为1            |
+| page_size    | int      | 否       | 单页大小，默认为10       |
+| gid          | string   | 否       | 依据gid查询              |
+| name         | string   | 否       | 依货品名称查询           |
+| model        | string   | 否       | 依货品规格类型查询       |
+| goods_type   | string   | 否       | 依货品类型id（gtid）查询 |
+| manufacturer | string   | 否       | 依货品所属生产厂商查询   |
+| unit_price   | float    | 否       | 依单价查询               |
+| keyword      | string   | 否       | 关键字模糊查询           |
 
 **返回结果示例**：
 
 ```json
+// 查询成功（有数据） 200
 {
     "code": 201,
     "keyword": "重",
@@ -1905,6 +2398,16 @@ headers:{
     "total": 3,
     "total_pages": 1
 }
+// 查询成功（无数据） 200
+{
+   "code":        202,
+	"message":     "No data",
+	"page":        1,
+	"page_size":   10,
+	"total":       0,
+	"total_pages": 0,
+	"rows":        [], 
+}
 ```
 
 **返回数据说明**
@@ -1947,6 +2450,7 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 上传成功 200
 {
     "code": 201,
     "data": {
@@ -1955,6 +2459,53 @@ headers:{
         "image_path": "static/res/goodsImage/goods_1716190218.png"
     },
     "message": "Upload successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法创建文件夹 500
+{
+    "error":  "Upload failed",
+	"detail": err.Error(),
+	"code":   501,
+}
+// 图片格式不支持 400
+{
+    "message": "Unsupported image format",
+	"code":    402,
+}
+// 货品不存在 400
+{
+    "error":  "The goods does not exist",
+	"detail": err.Error(),
+	"code":   403,
+}
+// 无法更新货品表 500
+{
+    "error":  "Updating database failed",
+	"detail": err.Error(),
+	"code":   504,
+}
+// 保存图片失败 500
+{
+    "error":  "Upload failed",
+	"detail": ioErr.Error(),
+	"code":   501,
+}
+// 无法创建图片文件 500
+{
+    "error":  "Upload failed",
+	"detail": err.Error(),
+	"code":   502,
+}
+// 无法从请求中读取图片文件 500
+{
+    "error":  "Upload failed",
+	"detail": err.Error(),
+	"code":   503,
 }
 ```
 
@@ -2002,8 +2553,8 @@ headers:{
 | number         | String   | 否       | 单号                              |
 | department     | String   | 否       | 所属部门id(did)                   |
 | goods_list     | String   | 是       | 货品数组 格式见下                 |
+| warehouse      | String   | 是       | 所属仓库(wid)                     |
 | inventory_type | String   | 是       | 出入库类型(itid)                  |
-| warehouse      | String   | 是       | 所属仓库id（wid）                 |
 | manufacturer   | String   | 否       | 制造商                            |
 | operator       | String   | 是       | 操作员(sid)                       |
 | comment        | String   | 否       | 备注                              |
@@ -2029,9 +2580,187 @@ headers:{
 **返回结果示例**：
 
 ```json
+// 添加成功 200
 {
     "code": 201,
     "message": "Inventory added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 货品列表参数格式错误 400
+{
+    "message": "The format of the goods_list is incorrect",
+	"code":    402,
+	"detail":  err.Error(),
+}
+// 出入库类型不存在 400
+{
+    "message": "The inventory type does not exist",
+	"code":    402,
+}
+// 日期格式错误 400
+{
+    "message": "The format of the date is incorrect",
+	"code":    403,
+	"detail":  err.Error(),
+}
+// 无法插入新单据 500
+{
+    "error":  "Cannot insert new inventory",
+	"code":   501,
+	"detail": err.Error(),
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+### 更新
+
+**请求路径**：/api/inv/update
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明                          |
+| -------------- | -------- | -------- | --------------------------------- |
+| iid            | String   | 是       | 出入库单id                        |
+| date           | String   | 否       | 单据日期 格式:2006-01-02 15:04:05 |
+| number         | String   | 否       | 单号                              |
+| department     | String   | 否       | 所属部门id(did)                   |
+| goods_list     | String   | 是       | 货品数组 格式见下                 |
+| warehouse      | String   | 是       | 所属仓库(wid)                     |
+| inventory_type | String   | 是       | 出入库类型(itid)                  |
+| manufacturer   | String   | 否       | 制造商                            |
+| operator       | String   | 是       | 操作员(sid)                       |
+| comment        | String   | 否       | 备注                              |
+
+** goods_list数据结构*：
+
+```json
+[
+    {"goods": "g4c182157", "amount":26,"comment":"test"},
+    {"goods": "g08943f59", "amount":23,"comment":"test"}
+]
+```
+
+**参数说明**
+
+| 字段 | goods       | amount | comment |
+| ---- | ----------- | ------ | ------- |
+| 类型 | string      | float  | string  |
+| 说明 | 货品id(gid) | 数量   | 备注    |
+
+
+
+**返回结果示例**：
+
+```json
+// 更新成功 200
+{
+    "code": 201,
+    "message": "Inventory added successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 货品列表参数格式错误 400
+{
+    "message": "The format of the goods_list is incorrect",
+	"code":    402,
+	"detail":  err.Error(),
+}
+// 启动数据库事务失败 500
+{
+    "message": "Failed to start transaction",
+	"code":    501,
+	"detail":  tx.Error.Error(),
+}
+// 无法获取旧单据记录 500
+{
+    "message": "Failed to get original inventory record",
+	"code":    502,
+	"detail":  err.Error(),
+}
+// 无法获取单据对应的出入库类型 500
+{
+    "message": "Failed to get inventory type",
+	"code":    503,
+	"detail":  err.Error(),
+}
+// 原库存数据不存在 500
+{
+    "message": "Contains invalid Stock records",
+	"code":    403,
+}
+// 无法更新库存 500
+{
+    "message": "Failed to update stock",
+	"code":    504,
+	"detail":  err.Error(),
+}
+// 无法获取新单据出入库类型 500
+{
+    "message": "Failed to get new inventory type",
+	"code":    505,
+	"detail":  err.Error(),
+}
+// 新库存数据造成库存不足 400
+{
+    "message": "Contains invalid Stock records",
+	"code":    405,
+}
+// 单号已存在 400
+{
+    "error":  "The Number already exists",
+	"detail": err.Error(),
+	"code":   404,
+}
+// 更新失败 500
+{
+    "message": "Failed to update inventory record",
+	"code":    505,
+	"detail":  err.Error(),
+}
+// 无法获取新单据记录 500
+{
+    "message": "Failed to get updated inventory record",
+	"code":    506,
+	"detail":  err.Error(),
+}
+// 提交数据库事务失败 500
+{
+    "message": "Failed to commit transaction",
+	"code":    508,
+	"detail":  err.Error(),
 }
 ```
 
@@ -2058,6 +2787,10 @@ headers:{
 
 
 
+----
+
+
+
 ### 查询
 
 **请求路径**：/api/inv/search
@@ -2079,12 +2812,13 @@ headers:{
 | type           | int      | 否       | 依出入库类型标识查询            |
 | operator       | string   | 否       | 依操作员查询(sid)               |
 | comment        | string   | 否       | 依备注查询                      |
-| created_at     | string   | 否       | 依创建日期查询 格式：2024-06-03 |
+| date           | string   | 否       | 依创建日期查询 格式：2024-06-03 |
 | keyword        | string   | 否       | 关键字模糊查询                  |
 
 **返回结果示例**：
 
 ```json
+// 查询成功（有数据） 200
 {
     "code": 201,
     "keyword": "",
@@ -2122,6 +2856,16 @@ headers:{
     "total": 1,
     "total_pages": 1
 }
+// 查询成功（无数据） 200
+{
+    "code":        202,
+	"message":     "No data",
+	"page":        1,
+	"page_size":   10,
+	"total":       0,
+	"total_pages": 0,
+	"rows":        [],
+}
 ```
 
 **返回数据说明**
@@ -2145,3 +2889,74 @@ headers:{
 ----
 
 
+
+## 库存
+
+### 查询
+
+**请求路径**：/api/stock/get
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+| 参数名    | 参数类型 | 是否必填 | 参数说明    |
+| --------- | -------- | -------- | ----------- |
+| warehouse | string   | 是       | 仓库id(wid) |
+| goods     | string   | 否       | 货品id(gid) |
+
+**返回结果示例**：
+
+```json
+// 查询成功（1对1库存） 201
+{
+    "code": 200,
+    "data": {
+        "goods": "g097e2ee2",
+        "quantity": 150,
+        "warehouse": "_default_"
+    },
+    "message": "Get stock success"
+}
+// 查询成功（1对多） 202
+{
+    "code": 202,
+    "message": "Get stock success",
+    "rows": [
+        {
+            "created_at": "2024-06-07T16:59:34+08:00",
+            "updated_at": "2024-06-07T17:00:58+08:00",
+            "goods": "g097e2ee2",
+            "warehouse": "_default_",
+            "quantity": 150
+        }
+    ]
+}
+// 参数缺失 400
+{
+    "message": "Missing parameters",
+	"code":    400,
+}
+// 获取记录失败 500
+{
+    "message": "Get stock failed",
+	"code":    500,
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |   参数说明   |
+| :-----: | :------: | :----------: |
+|  code   |   int    |    业务码    |
+| message |  string  |   返回消息   |
+|  data   |  string  |   返回数据   |
+|  rows   |  string  | 返回数据列表 |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |

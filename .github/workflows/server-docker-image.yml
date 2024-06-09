@@ -1,53 +1,46 @@
-#workflow名称
 name: Build Test Environment Image
-# 触发条件 在backend-dev分支上push时触发
 on:
   push:
     branches:
       - backend-dev
-#变量配置      
+
 env:
-  #dockerHub仓库名称
-  DOCKER_REGISTRY: lancehe/go-simplewms-test
+  # 阿里云镜像仓库地址  
+  DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com/hycer/go-simple-wms-server
 
 jobs:
   build-image:
-    #运行的环境  
     runs-on: ubuntu-latest
     env:
       TZ: Asia/Shanghai
     steps:
-      # 拉取代码
       - uses: actions/checkout@v3
-      # 检查提交信息 当提交信息中包含 #docker-push 时，才构建并推送镜像
+
       - name: Check commit message
         id: check_message
         run: |
-            if echo "${{ github.event.head_commit.message }}" | grep -q "#docker-push"; then
-              echo "::set-output name=RUN_TESTS::true"
-            else
-              echo "::set-output name=RUN_TESTS::false"
-            fi
+          if echo "${{ github.event.head_commit.message }}" | grep -q "#docker-push"; then  
+            echo "::set-output name=RUN_TESTS::true"  
+          else  
+            echo "::set-output name=RUN_TESTS::false"  
+          fi  
 
-      # 登录镜像仓库
-      - name: Login Docker Hub
+      - name: Login to Alibaba Cloud Container Registry
         if: steps.check_message.outputs.RUN_TESTS == 'true'
-        uses: docker/login-action@v2
+        uses: aliyun/acr-login@v1
         with:
-          #这里引用仓库的secrets登录dockerhub
-          username: ${{ secrets.DOCKER_USERNAME }} # dockerhub 用户名
-          password: ${{ secrets.DOCKER_PASSWORD }} # dockerhub 密码
-      # 打包构建并推送
+          # 引用仓库的secrets登录阿里云容器镜像服务  
+          login-server: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ALI_DOCKER_USERNAME }}
+          password: ${{ secrets.ALI_DOCKER_PASSWORD }}
+
       - name: Build and push
         if: steps.check_message.outputs.RUN_TESTS == 'true'
         uses: docker/build-push-action@v4
         with:
           context: ./go-server
           dockerfile: Dockerfile
-          platforms: |
-            linux/amd64
-          #推送到镜像仓库  
+          platforms: linux/amd64
           push: true
-          # 镜像标签， 以commit 的hash 值作为tag like lancehe/go-simplewms-test:2fa54fa5133af
           tags: |
             ${{ env.DOCKER_REGISTRY }}:latest

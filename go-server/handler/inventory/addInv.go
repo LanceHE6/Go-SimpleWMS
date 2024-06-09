@@ -3,9 +3,9 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/handler/stock"
 	"Go_simpleWMS/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -16,8 +16,8 @@ type addInvRequest struct {
 	Number       string `json:"number" form:"number"`                                    // 单号
 	Department   string `json:"department" form:"department"`                            // 单据所属部门
 	GoodsList    string `json:"goods_list" form:"goods_list" binding:"required"`         // 单据包含的货品
+	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`           // 仓库
 	InventoryTpe string `json:"inventory_type" form:"inventory_type" binding:"required"` // 出入库类型
-	Warehouse    string `json:"warehouse" form:"warehouse" binding:"required"`           // 所属仓库
 	Operator     string `json:"operator" form:"operator" binding:"required"`             // 经办人
 	Comment      string `json:"comment" form:"comment"`                                  // 备注
 	Manufacturer string `json:"manufacturer" form:"manufacturer"`                        // 制造商
@@ -36,8 +36,8 @@ func AddInv(context *gin.Context) {
 	Date := data.Date
 	Number := data.Number
 	Department := data.Department
+	Warehouse := data.Warehouse
 	var GoodsList model.GoodsList
-	fmt.Println(data.GoodsList)
 	err := json.Unmarshal([]byte(data.GoodsList), &GoodsList)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -48,7 +48,6 @@ func AddInv(context *gin.Context) {
 		return
 	}
 	InventoryType := data.InventoryTpe
-	Wid := data.Warehouse
 	Sid := data.Operator
 	Comment := data.Comment
 	Manufacturer := data.Manufacturer
@@ -72,9 +71,9 @@ func AddInv(context *gin.Context) {
 	if Number == "" {
 		nowTime := time.Now().Format("200601021504")
 		if iType.Type == 1 {
-			Number = "I" + nowTime
+			Number = "RK" + nowTime + utils.GenerateUuid(4)
 		} else {
-			Number = "O" + nowTime
+			Number = "CK" + nowTime + utils.GenerateUuid(4)
 		}
 	}
 
@@ -94,20 +93,42 @@ func AddInv(context *gin.Context) {
 			return
 		}
 	}
+	// 构造更新前后库存数据
+	var oldGoodsList model.GoodsList
+	var newGoodsList model.GoodsList
+	for _, g := range GoodsList {
+		var oldGoodsOrder model.GoodsOrder
+		var newGoodsOrder model.GoodsOrder
+		oldStock := stock.GetStock(Warehouse, g.Goods)
+		oldGoodsOrder.Goods = g.Goods
+		newGoodsOrder.Goods = g.Goods
+		oldGoodsOrder.Amount = oldStock
+		if iType.Type == 1 {
+			newGoodsOrder.Amount = oldStock + g.Amount
+		} else {
+			newGoodsOrder.Amount = oldStock - g.Amount
+		}
+		oldGoodsList = append(oldGoodsList, oldGoodsOrder)
+		newGoodsList = append(newGoodsList, newGoodsOrder)
+	}
+	// 更新库存
+	UpdateStocks(GoodsList, Warehouse, iType, context, db)
 
 	var inventory = model.Inventory{
 		Iid:           Iid,
 		Date:          parsedDate,
 		Department:    Department,
 		GoodsList:     GoodsList,
+		OldGoodsList:  oldGoodsList,
+		NewGoodsList:  newGoodsList,
+		Warehouse:     Warehouse,
 		Number:        Number,
 		InventoryType: InventoryType,
-		Warehouse:     Wid,
 		Operator:      Sid,
 		Comment:       Comment,
 		Manufacturer:  Manufacturer,
 	}
-
+	// 插入单据
 	err = db.Model(model.Inventory{}).Create(&inventory).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -116,27 +137,6 @@ func AddInv(context *gin.Context) {
 			"detail": err.Error(),
 		})
 		return
-	}
-	// 更新货品表
-	for _, goodsOrder := range GoodsList {
-		var goods model.Goods
-		db.Model(model.Goods{}).Where("gid = ?", goodsOrder.Goods).First(&goods)
-		if iType.Type == 1 {
-			goods.Quantity += goodsOrder.Amount
-		} else {
-			goods.Quantity -= goodsOrder.Amount
-		}
-
-		err = db.Model(model.Goods{}).Where("gid=?", goodsOrder.Goods).Updates(&goods).Error
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot update goods",
-				"code":   502,
-				"detail": err.Error(),
-			})
-			return
-		}
-
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Inventory added successfully",

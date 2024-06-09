@@ -13,12 +13,10 @@ import (
 type addGoodsRequest struct {
 	Name         string  `json:"name" form:"name" binding:"required"`
 	Model        string  `json:"model" form:"model"`
-	GoodsCode    string  `json:"goods_code" form:"goods_code"`
+	GoodsCode    string  `json:"goods_code" form:"goods_code" binding:"required"`
 	GoodsType    string  `json:"goods_type" form:"goods_type" binding:"required"`
-	Warehouse    string  `json:"warehouse" form:"warehouse" binding:"required"`
 	Manufacturer string  `json:"manufacturer" form:"manufacturer"`
 	Unit         string  `json:"unit" form:"unit" binding:"required"`
-	Quantity     float64 `json:"quantity" form:"quantity"`
 	UnitPrice    float64 `json:"unit_price" form:"unit_price"`
 }
 
@@ -36,15 +34,13 @@ func AddGoods(context *gin.Context) {
 	GModel := data.Model
 	GCode := data.GoodsCode
 	GType := data.GoodsType
-	GWarehouse := data.Warehouse
 	GManufacturer := data.Manufacturer
 	GUnit := data.Unit
-	GQuantity := data.Quantity
 	GUnitPrice := data.UnitPrice
 
 	db := myDb.GetMyDbConnection()
 
-	// 判断该仓库是否已存在
+	// 判断该物品是否已存在
 	var goods model.Goods
 	if GCode != "" {
 		err := db.Model(&model.Goods{}).Where("goods_code=?", GCode).First(&goods).Error
@@ -59,17 +55,15 @@ func AddGoods(context *gin.Context) {
 
 	newGid := "g" + utils.GenerateUuid(8) // 转换为 8 位字符串
 
-	// 增加仓库
+	// 增加货品
 	goods = model.Goods{
 		Gid:          newGid,
 		Name:         GName,
 		Model:        GModel,
 		GoodsCode:    GCode,
 		GoodsType:    GType,
-		Warehouse:    GWarehouse,
 		Manufacturer: GManufacturer,
 		Unit:         GUnit,
-		Quantity:     GQuantity,
 		UnitPrice:    GUnitPrice,
 	}
 	err := db.Create(&goods).Error

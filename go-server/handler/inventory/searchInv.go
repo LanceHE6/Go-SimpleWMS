@@ -121,27 +121,14 @@ func SearchInv(context *gin.Context) {
 	var invsRes []gin.H
 	db := myDb.GetMyDbConnection()
 	for _, g := range invs {
-		fmt.Println(g.GoodsList)
+
 		var goodsList []gin.H
 		// 构造货品清单返回体
 		for _, goodsInfo := range g.GoodsList {
 			var goods model.Goods
 			db.Model(model.Goods{}).Where("gid = ?", goodsInfo.Goods).First(&goods)
 			goodsList = append(goodsList, gin.H{
-				"goods": gin.H{
-					"created_at":   goods.CreatedAt,
-					"updated_at":   goods.UpdatedAt,
-					"gid":          goods.Gid,
-					"goods_code":   goods.GoodsCode,
-					"name":         goods.Name,
-					"model":        goods.Model,
-					"goods_type":   goods.GoodsType,
-					"manufacturer": goods.Manufacturer,
-					"unit":         goods.Unit,
-					"image":        goods.Image,
-					"quantity":     goods.Quantity,
-					"unit_price":   goods.UnitPrice,
-				},
+				"goods":   goods,
 				"amount":  goodsInfo.Amount,
 				"comment": goodsInfo.Comment,
 			})
@@ -153,8 +140,10 @@ func SearchInv(context *gin.Context) {
 			"iid":            g.Iid,
 			"number":         g.Number,
 			"goods_list":     goodsList,
-			"inventory_type": g.InventoryType,
+			"old_goods_list": g.OldGoodsList,
+			"new_goods_list": g.NewGoodsList,
 			"warehouse":      g.Warehouse,
+			"inventory_type": g.InventoryType,
 			"manufacturer":   g.Manufacturer,
 			"operator":       g.Operator,
 			"comment":        g.Comment,
