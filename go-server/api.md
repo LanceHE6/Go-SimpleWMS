@@ -1682,10 +1682,8 @@ headers:{
 | model        | String   | 否       | 类型规格           |
 | goods_code   | String   | 否       | 货品编码           |
 | goods_type   | String   | 是       | 货品类型id（gtid） |
-| warehouse    | String   | 是       | 所属仓库id（wid）  |
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 是       | 单位id（unid）     |
-| quantity     | int      | 否       | 数量               |
 | unit_price   | float    | 否       | 单价               |
 
 **返回结果示例**：
@@ -1737,10 +1735,8 @@ headers:{
 | model        | String   | 否       | 规格类型           |
 | goods_code   | String   | 否       | 货品编码           |
 | goods_type   | String   | 否       | 货品类型id（gtid） |
-| warehouse    | String   | 否       | 所属仓库id（wid）  |
 | manufacturer | String   | 否       | 制造商             |
 | unit         | String   | 否       | 单位id（unid）     |
-| quantity     | int      | 否       | 数量               |
 | unit_price   | float    | 否       | 单价               |
 
 *注:8个可选参数至少需提供一个*
@@ -1832,19 +1828,17 @@ headers:{
 
 **请求参数**：None
 
-| 参数名       | 参数类型 | 是否必填 | 参数说明                    |
-| ------------ | -------- | -------- | --------------------------- |
-| page         | int      | 否       | 页数，默认为1               |
-| page_size    | int      | 否       | 单页大小，默认为10          |
-| gid          | string   | 否       | 依据gid查询                 |
-| name         | string   | 否       | 依货品名称查询              |
-| model        | string   | 否       | 依货品规格类型查询          |
-| goods_type   | string   | 否       | 依货品类型id（gtid）查询    |
-| warehouse    | string   | 否       | 依货品所属仓库id（wid）查询 |
-| manufacturer | string   | 否       | 依货品所属生产厂商查询      |
-| quantity     | float    | 否       | 依货品数量查询              |
-| unit_price   | float    | 否       | 依单价查询                  |
-| keyword      | string   | 否       | 关键字模糊查询              |
+| 参数名       | 参数类型 | 是否必填 | 参数说明                 |
+| ------------ | -------- | -------- | ------------------------ |
+| page         | int      | 否       | 页数，默认为1            |
+| page_size    | int      | 否       | 单页大小，默认为10       |
+| gid          | string   | 否       | 依据gid查询              |
+| name         | string   | 否       | 依货品名称查询           |
+| model        | string   | 否       | 依货品规格类型查询       |
+| goods_type   | string   | 否       | 依货品类型id（gtid）查询 |
+| manufacturer | string   | 否       | 依货品所属生产厂商查询   |
+| unit_price   | float    | 否       | 依单价查询               |
+| keyword      | string   | 否       | 关键字模糊查询           |
 
 **返回结果示例**：
 
@@ -2002,8 +1996,79 @@ headers:{
 | number         | String   | 否       | 单号                              |
 | department     | String   | 否       | 所属部门id(did)                   |
 | goods_list     | String   | 是       | 货品数组 格式见下                 |
+| warehouse      | String   | 是       | 所属仓库(wid)                     |
 | inventory_type | String   | 是       | 出入库类型(itid)                  |
-| warehouse      | String   | 是       | 所属仓库id（wid）                 |
+| manufacturer   | String   | 否       | 制造商                            |
+| operator       | String   | 是       | 操作员(sid)                       |
+| comment        | String   | 否       | 备注                              |
+
+** goods_list数据结构*：
+
+```json
+[
+    {"goods": "g4c182157", "amount":26,"comment":"test"},
+    {"goods": "g08943f59", "amount":23,"comment":"test"}
+]
+```
+
+**参数说明**
+
+| 字段 | goods       | amount | comment |
+| ---- | ----------- | ------ | ------- |
+| 类型 | string      | float  | string  |
+| 说明 | 货品id(gid) | 数量   | 备注    |
+
+
+
+**返回结果示例**：
+
+```json
+{
+    "code": 201,
+    "message": "Inventory added successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  403   |      Forbidden      |    类型已存在    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+### 更新
+
+**请求路径**：/api/inv/update
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名         | 参数类型 | 是否必填 | 参数说明                          |
+| -------------- | -------- | -------- | --------------------------------- |
+| iid            | String   | 是       | 出入库单id                        |
+| date           | String   | 否       | 单据日期 格式:2006-01-02 15:04:05 |
+| number         | String   | 否       | 单号                              |
+| department     | String   | 否       | 所属部门id(did)                   |
+| goods_list     | String   | 是       | 货品数组 格式见下                 |
+| warehouse      | String   | 是       | 所属仓库(wid)                     |
+| inventory_type | String   | 是       | 出入库类型(itid)                  |
 | manufacturer   | String   | 否       | 制造商                            |
 | operator       | String   | 是       | 操作员(sid)                       |
 | comment        | String   | 否       | 备注                              |
@@ -2058,6 +2123,10 @@ headers:{
 
 
 
+----
+
+
+
 ### 查询
 
 **请求路径**：/api/inv/search
@@ -2079,7 +2148,7 @@ headers:{
 | type           | int      | 否       | 依出入库类型标识查询            |
 | operator       | string   | 否       | 依操作员查询(sid)               |
 | comment        | string   | 否       | 依备注查询                      |
-| created_at     | string   | 否       | 依创建日期查询 格式：2024-06-03 |
+| date           | string   | 否       | 依创建日期查询 格式：2024-06-03 |
 | keyword        | string   | 否       | 关键字模糊查询                  |
 
 **返回结果示例**：
@@ -2145,3 +2214,48 @@ headers:{
 ----
 
 
+
+## 库存
+
+### 查询
+
+**请求路径**：/api/stock/get
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+| 参数名    | 参数类型 | 是否必填 | 参数说明    |
+| --------- | -------- | -------- | ----------- |
+| warehouse | string   | 是       | 仓库id(wid) |
+| goods     | string   | 是       | 货品id(gid) |
+
+**返回结果示例**：
+
+```json
+{
+    "code": 200,
+    "data": {
+        "goods": "g097e2ee2",
+        "quantity": 150,
+        "warehouse": "_default_"
+    },
+    "message": "Get stock success"
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 | 参数说明 |
+| :-----: | :------: | :------: |
+|  code   |   int    |  业务码  |
+| message |  string  | 返回消息 |
+|  data   |  string  | 返回数据 |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |

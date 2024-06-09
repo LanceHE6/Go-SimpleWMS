@@ -17,13 +17,11 @@ func SearchGoods(context *gin.Context) {
 	name := context.Query("name")
 	gModel := context.Query("model")
 	goodsType := context.Query("goods_type")
-	warehouse := context.Query("warehouse")
 	manufacturer := context.Query("manufacturer")
-	quantity, _ := strconv.Atoi(context.DefaultQuery("quantity", "0"))
 	unitPrice, _ := strconv.ParseFloat(context.DefaultQuery("unit_price", "0"), 64)
 	keyword := context.Query("keyword")
 
-	query := myDb.GetMyDbConnection().Table("goods").Joins("left join warehouses on goods.warehouse = warehouses.wid").Where("warehouses.status = 1")
+	query := myDb.GetMyDbConnection().Table("goods") //.Joins("left join warehouses on goods.warehouse = warehouses.wid").Where("warehouses.status = 1")
 
 	// 计算偏移量
 	offset := (page - 1) * limit
@@ -40,20 +38,14 @@ func SearchGoods(context *gin.Context) {
 	if goodsType != "" {
 		query = query.Where("goods.goods_type = ?", goodsType)
 	}
-	if warehouse != "" {
-		query = query.Where("goods.warehouse = ?", warehouse)
-	}
 	if manufacturer != "" {
 		query = query.Where("goods.manufacturer = ?", manufacturer)
-	}
-	if quantity != 0 {
-		query = query.Where("goods.quantity = ?", quantity)
 	}
 	if unitPrice != 0 {
 		query = query.Where("goods.unit_price = ?", unitPrice)
 	}
 	if keyword != "" {
-		query = query.Where("goods.name LIKE ? OR goods.model LIKE ? OR goods.goods_type LIKE ? OR goods.warehouse LIKE ? OR goods.manufacturer LIKE ? OR goods.quantity LIKE ?",
+		query = query.Where("goods.name LIKE ? OR goods.model LIKE ? OR goods.goods_type LIKE ? OR goods.manufacturer LIKE ?",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
@@ -103,10 +95,8 @@ func SearchGoods(context *gin.Context) {
 			"name":         g.Name,
 			"model":        g.Model,
 			"goods_type":   g.GoodsType,
-			"warehouse":    g.Warehouse,
 			"manufacturer": g.Manufacturer,
 			"unit":         g.Unit,
-			"quantity":     g.Quantity,
 			"unit_price":   g.UnitPrice,
 			"image":        g.Image,
 		}
