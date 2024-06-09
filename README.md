@@ -2,7 +2,9 @@
 <img alt="logo" src="./imgs/WMS-Logo.png">
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Go-SimpleWMS</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">简行云仓库</h1>
 <div align="center"> 
+
 
 简体中文/[English](./README-EN.md) 
 </div>
