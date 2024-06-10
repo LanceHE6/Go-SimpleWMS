@@ -143,7 +143,7 @@ function help(){
 async function about(){
   let go_simpleWMS_version = 'unknown'
   let go_server_version = 'unknown'
-  let vue_web_version = 'v0.0.1.20240605_Alpha'
+  let vue_web_version = 'v0.0.2.20240610_Alpha'
   await axios.get('/ping')
       .then(result => {
         console.log("ping:", result)
