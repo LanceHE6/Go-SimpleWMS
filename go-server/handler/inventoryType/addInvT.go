@@ -31,9 +31,9 @@ func AddInventoryType(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	// 判断该类型是否已存在
 	var invt model.InventoryType
-	err := db.Where(&invt, "name=?", typeName).Error
+	notExist := db.Model(model.InventoryType{}).Where("name=?", typeName).First(&invt).RecordNotFound()
 
-	if err != nil {
+	if !notExist {
 		context.JSON(http.StatusForbidden, gin.H{
 			"message": "The type name already exists",
 			"code":    401,
@@ -49,8 +49,8 @@ func AddInventoryType(context *gin.Context) {
 		TypeCode: typeCode,
 		Type:     typeNum,
 	}
-	// 增加仓库
-	err = db.Create(&invt).Error
+	// 添加
+	err := db.Create(&invt).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
