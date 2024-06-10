@@ -18,14 +18,14 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "员工名", sortable: false},
-  {property: "phone", label: "手机号码", sortable: false},
-  {property: "department", label: "所属部门", sortable: false, isFK: true, FKData: {
+  {property: "name", label: "员工名", sortable: false, width: 120},
+  {property: "phone", label: "手机号码", sortable: false, width: 120},
+  {property: "department", label: "所属部门", sortable: false, width: 180, isFK: true, FKData: {
       url: "/dept/list",
       property: "did",
       label: "name"
     }},
-  {property: "created_at", label: "注册时间", sortable: true},
+  {property: "created_at", label: "注册时间", sortable: true, width: 240},
   {property: "sid", label: "员工ID", sortable: true, width: 120},
 ]
 

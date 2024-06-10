@@ -18,14 +18,14 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "出入库类型名", sortable: false},
-  {property: "type_code", label: "出入库类型编号", sortable: true},
-  {property: "type", label: "类型", sortable: false, isMapping: true,
+  {property: "name", label: "出入库类型名", sortable: false, width: 180},
+  {property: "type_code", label: "出入库类型编号", width: 180, sortable: true},
+  {property: "type", label: "类型", sortable: false, width: 80, isMapping: true,
     mappingList:[
       {label: "入库", value: 1},
       {label: "出库", value: 2},
     ]},
-  {property: "created_at", label: "创建时间", sortable: true},
+  {property: "created_at", label: "创建时间", sortable: true, width: 240},
   {property: "itid", label: "出入库类型ID", sortable: true, width: 140},
 ]
 

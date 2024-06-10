@@ -24,6 +24,10 @@
       @input="searchChange"
       clearable
   />
+
+  <el-button type="primary" icon="Refresh" @click="refresh" plain style="margin-left: 10px">
+    刷新
+  </el-button>
 </template>
 
 <script setup>
@@ -38,7 +42,7 @@ const prop = defineProps({
   }
 })
 
-const emit = defineEmits(["add", "download", "upload", "search", "print"]);
+const emit = defineEmits(["add", "download", "upload", "search", "print", "refresh"]);
 
 //搜索栏文字
 const search = ref('')
@@ -61,6 +65,10 @@ function print(){
 
 function searchChange(){
   emit("search", search.value)
+}
+
+function refresh(){
+  emit("refresh")
 }
 </script>
 

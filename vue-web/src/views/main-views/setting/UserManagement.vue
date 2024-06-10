@@ -19,15 +19,15 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "account", label: "账号", sortable: false},
-  {property: "nickname", label: "昵称", sortable: false},
-  {property: "permission", label: "权限", sortable: true, isMapping: true, mappingList:[
+  {property: "account", label: "账号", sortable: false, width: 180},
+  {property: "nickname", label: "昵称", sortable: false, width: 120},
+  {property: "permission", label: "权限", sortable: true, width: 120, isMapping: true, mappingList:[
       {label: '普通用户', value: 1},
       {label: '管理员', value: 2},
       {label: '超级管理员', value: 3},
     ]},
-  {property: "phone", label: "手机号码", sortable: false},
-  {property: "created_at", label: "注册时间", sortable: true},
+  {property: "phone", label: "手机号码", sortable: false, width: 120},
+  {property: "created_at", label: "注册时间", sortable: true, width: 240},
   {property: "uid", label: "用户ID", sortable: true, width: 120},
 ]
 

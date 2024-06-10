@@ -19,19 +19,19 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "仓库名", sortable: false},
-  {property: "comment", label: "备注", sortable: false},
-  {property: "manager", label: "管理人", sortable: false, isFK: true, FKData:{
+  {property: "name", label: "仓库名", sortable: false, width: 120},
+  {property: "manager", label: "管理人", sortable: false, width: 120, isFK: true, FKData:{
       url: "/staff/list",
       property: "sid",
       label: "name"
     }},
-  {property: "status", label: "状态", sortable: false, isMapping: true, mappingList:[
+  {property: "status", label: "状态", sortable: false, width: 80, isMapping: true, mappingList:[
       {label: "禁用", value: 0},
       {label: "启用", value: 1},
     ]},
-  {property: "created_at", label: "创建时间", sortable: true},
+  {property: "created_at", label: "创建时间", width: 240, sortable: true},
   {property: "wid", label: "仓库ID", sortable: true, width: 120},
+  {property: "comment", label: "备注", sortable: false},
 ]
 
 /**

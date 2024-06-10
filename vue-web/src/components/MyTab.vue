@@ -13,7 +13,7 @@
   </el-tabs>
   <router-view v-slot="{ Component }">
     <keep-alive :include="cachedViews">
-      <component :is="Component" />
+      <component :is="Component" @addTab="addTab"/>
     </keep-alive>
   </router-view>
 </template>
@@ -22,6 +22,7 @@
 
 import {router} from "@/router/index.js";
 import {ref, watch} from "vue";
+import {objectToUrl} from "@/utils/objectToUrl"
 
 const prop = defineProps({
   defaultTab: {
@@ -48,7 +49,14 @@ watch(() => activeTab.value, (newValue) => {
 });
 
 //添加tab界面
-function addTab(name, label, path){
+function addTab(name, label, path, params){
+  //如果有参数则将其加入到路径中
+  if(params !== undefined){
+    path = objectToUrl({
+      path: path,
+      query: params
+    })
+  }
   // 检查这个路由是否已经在 tabList 中
   if (!tabList.value.some(tab => tab.path === path)) {
     // 如果不在，就添加到 tabList 中

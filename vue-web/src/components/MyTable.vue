@@ -13,6 +13,7 @@
           @upload="upload"
           @search="searchChange"
           @print="print"
+          @refresh="refresh"
       />
 
       <table-header
@@ -23,6 +24,7 @@
           @upload="upload"
           @search="searchChange"
           @print="print"
+          @refresh="refresh"
       />
 
     </el-header>
@@ -32,20 +34,10 @@
           :data="filterTableData"
           :border="true"
           :stripe="true"
-          height="64vh"
+          height="60vh"
           style="width: 100%"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column
-          v-for="item in tableColList"
-          :property="item.property"
-          :label="item.label"
-          :width="item.width"
-          :sortable="item.sortable"
-          :formatter="mapping(item.property)"
-        >
-
-        </el-table-column>
 
         <el-table-column
             v-if="operations.edit || operations.del"
@@ -68,6 +60,15 @@
             >删除</el-button>
           </template>
         </el-table-column>
+
+        <el-table-column
+          v-for="item in tableColList"
+          :property="item.property"
+          :label="item.label"
+          :width="item.width"
+          :sortable="item.sortable"
+          :formatter="mapping(item.property)"/>
+
       </el-table>
     </el-main>
 
@@ -85,6 +86,7 @@
   </el-container>
 
   <el-dialog
+      v-if="!hasSubmitPage"
       v-model="editFormVisible"
       title="编辑"
       width="500"
@@ -145,6 +147,7 @@
 
   </el-dialog>
   <el-dialog
+      v-if="!hasSubmitPage"
       v-model="addFormVisible"
       title="添加"
       width="500"
@@ -205,6 +208,7 @@
 
   </el-dialog>
   <el-dialog
+      v-if="!hasSubmitPage"
       v-model="uploadFormVisible"
       title="批量导入"
       width="700"
@@ -322,10 +326,15 @@ const prop = defineProps({
     type: Object,
     default: () => null,
     description: '表格支持的操作, 包含增删查改以及导入导出等等(通常无需手动配置)'
+  },
+  hasSubmitPage:{
+    type: Boolean,
+    default: () => false,
+    description: '是否需要提交表单的页面, 如果为false则使用简单的窗口来提交表单'
   }
 });
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search"]);
+const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh"]);
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -443,8 +452,19 @@ function print(){
 
 }
 
+function refresh(){
+  emit("refresh");
+}
+
 function add(){
-  addFormVisible.value = true
+  //如果用窗口提交表单则显示窗口
+  if(!prop.hasSubmitPage){
+    addFormVisible.value = true
+  }
+  //否则直接向父组件提交事件, 让父组件处理
+  else{
+    emit("add")
+  }
 }
 
 async function submitAddForm(form) {
