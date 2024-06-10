@@ -12,14 +12,16 @@
       :show-f-k-map="state.showFKMap"
       :key-data="keyData"
       :page-count="state.pageCount"
-      :large="large"
       :operations="state.operations"
+      :large="large"
+      :has-submit-page="hasSubmitPage"
       @add="add"
       @upload="upload"
       @del="del"
       @edit="edit"
       @update="update"
       @search="startSearch"
+      @refresh="initialize"
   >
   </my-table>
 </template>
@@ -93,10 +95,18 @@ const prop = defineProps({
     default: () => false,
     description: '是否支持打印功能'
   },
+  hasSubmitPage:{
+    type: Boolean,
+    default: () => false,
+    description: '是否需要提交表单的页面, 如果为false则使用简单的窗口来提交表单'
+  }
 });
 
+//对外事件列表
+const emit = defineEmits(["addTab"]);
+
 //初始化函数
-onMounted(async () => {
+async function initialize(){
   state.isLoading = true
   await getFKList()
   if(!prop.large) {
@@ -104,7 +114,8 @@ onMounted(async () => {
   }
   await update(state.currentPage)
   state.isLoading = false
-})
+}
+onMounted(initialize)
 
 //获取外键列表
 async function getFKList() {
@@ -226,7 +237,12 @@ async function startSearch(s) {
 
 //点击子组件的添加按钮, 子组件处理完返回的可提交表单
 function add(form){
-  addData(form)
+  if(!prop.hasSubmitPage){
+    addData(form)
+  }
+  else{
+    emit("addTab")
+  }
 }
 
 //点击子组件的上传按钮, 子组件处理完返回的可提交表单
