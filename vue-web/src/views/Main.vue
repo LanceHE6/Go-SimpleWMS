@@ -29,7 +29,7 @@
           />
         </a>
         <el-text size="large" style="color: white; margin-right: 10px;">
-          SimpleWMS
+          简行云仓库
         </el-text>
 
         <el-menu-item
@@ -42,7 +42,7 @@
         </el-menu-item>
 
         <el-menu-item
-            index="/home/productManagement/allProduction"
+            index="/home/productManagement/productionDefine"
 
         >
           货品管理
@@ -235,7 +235,7 @@ async function initialize(){
   display: flex;
   justify-content: center;
   min-width: 100vh;
-  min-height: 97vh;
+  min-height: 100vh;
   background: rgb(255, 255, 255);
   background-size: contain;
 }
