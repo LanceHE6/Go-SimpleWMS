@@ -15,6 +15,7 @@
 <script setup>
 import {reactive} from "vue";
 import DataShowView from "@/components/DataShowView.vue";
+import { pNumValidatorNRequire } from "@/utils/validator.js"
 
 /**
  * 表头属性列表
@@ -29,17 +30,11 @@ const tableColList = [
       property: "gtid",
       label: "name"
     }},
-  {property: "warehouse", label: "所属仓库", sortable: false, isFK: true, FKData:{
-      url: "/warehouse/list",
-      property: "wid",
-      label: "name"
-    }},
   {property: "unit", label: "计量单位", sortable: false, isFK: true, FKData:{
       url: "/unit/list",
       property: "unid",
       label: "name"
     }},
-  {property: "quantity", label: "单位数", sortable: true},
   {property: "unit_price", label: "单价", sortable: true},
   {property: "manufacturer", label: "生产厂商", sortable: false, width: 150},
 ]
@@ -54,10 +49,8 @@ const editForm = reactive({
     model:'',
     goods_code:'',
     goods_type:'',
-    warehouse:'',
     manufacturer:'',
     unit:'',
-    quantity:'',
     unit_price:''
   },
   dataType:{
@@ -66,15 +59,15 @@ const editForm = reactive({
     model:'String',
     goods_code:'String',
     goods_type:'String',
-    warehouse:'String',
     manufacturer:'String',
     unit:'String',
-    quantity:'Int',
     unit_price:'Float'
   },
-  dataNum: 9,
+  dataNum: 7,
   rules: {
-
+    unit_price:[
+      { validator: pNumValidatorNRequire, trigger: 'blur' }
+    ],
   },
   item:[
     {label: '货品名称', prop: 'name', dataName: 'name', isInput: true,},
@@ -86,19 +79,12 @@ const editForm = reactive({
         property: "gtid",
         label: "name"
       }},
-    {label: '所属仓库', prop: 'warehouse', dataName: 'warehouse', isFK: true,
-      FKData:{
-        url: "/warehouse/list",
-        property: "wid",
-        label: "name"
-      }},
     {label: '计量单位', prop: 'unit', dataName: 'unit', isFK: true,
       FKData:{
         url: "/unit/list",
         property: "unid",
         label: "name"
       }},
-    {label: '单位数', prop: 'quantity', dataName: 'quantity', isInput: true, type: 'number'},
     {label: '单价', prop: 'unit_price', dataName: 'unit_price', isInput: true},
     {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true},
   ],
@@ -113,10 +99,8 @@ const addForm = reactive({
     model:'',
     goods_code:'',
     goods_type:'',
-    warehouse:'',
     manufacturer:'',
     unit:'',
-    quantity:'',
     unit_price:''
   },
   dataType:{
@@ -124,25 +108,26 @@ const addForm = reactive({
     model:'String',
     goods_code:'String',
     goods_type:'String',
-    warehouse:'String',
     manufacturer:'String',
     unit:'String',
-    quantity:'Int',
     unit_price:'Float'
   },
-  dataNum: 9,
+  dataNum: 7,
   rules: {
     name:[
       { required: 'true', message: '请输入货品名称', trigger: 'blur' }
     ],
+    goods_code:[
+      { required: 'true', message: '请输入货品编码', trigger: 'blur' }
+    ],
     goods_type:[
       { required: 'true', message: '请选择货品类型', trigger: 'blur' }
     ],
-    warehouse:[
-      { required: 'true', message: '请选择所属仓库', trigger: 'blur' }
-    ],
     unit:[
       { required: 'true', message: '请选择计量单位', trigger: 'blur' }
+    ],
+    unit_price:[
+      { validator: pNumValidatorNRequire, trigger: 'blur' }
     ],
   },
   item:[
@@ -155,19 +140,12 @@ const addForm = reactive({
         property: "gtid",
         label: "name"
       }},
-    {label: '所属仓库', prop: 'warehouse', dataName: 'warehouse', isFK: true,
-      FKData:{
-        url: "/warehouse/list",
-        property: "wid",
-        label: "name"
-      }},
     {label: '计量单位', prop: 'unit', dataName: 'unit', isFK: true,
       FKData:{
         url: "/unit/list",
         property: "unid",
         label: "name"
       }},
-    {label: '单位数', prop: 'quantity', dataName: 'quantity', isInput: true, type: 'number'},
     {label: '单价', prop: 'unit_price', dataName: 'unit_price', isInput: true},
     {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true,},
   ],
