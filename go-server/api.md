@@ -1825,16 +1825,18 @@ headers:{
     "message": "Get inventory type list successfully",
     "rows": [
         {
-            "created_at": "2024-04-07 17:17:44",
-            "gtid": "it0001",
-            "name": "采购入库",
-            "type_code": "cg"
+            "created_at": "2024-06-03T10:09:47+08:00",
+            "itid": "_default1_",
+            "name": "默认入库",
+            "type": 1,
+            "type_code": "default_in"
         },
         {
-            "created_at": "2024-04-07 17:17:44",
-            "gtid": "it0002",
-            "name": "生产入库",
-            "type_code": "sc"
+            "created_at": "2024-06-03T10:09:47+08:00",
+            "itid": "_default2_",
+            "name": "默认出库",
+            "type": 2,
+            "type_code": "default_out"
         }
     ]
 }
