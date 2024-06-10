@@ -5,7 +5,7 @@
         <img class="logo" src="../res/WMS-Logo.png"  alt="原神，启动！"/>
         <div class="name">
           <div class="title">Go-SimpleWMS</div>
-          <div class="tips">仓库后台管理系统</div>
+          <div class="tips">简行云仓库</div>
         </div>
       </div>
       <el-form label-position="top"
@@ -195,7 +195,7 @@ const submitForm = async (form) => {
   justify-content: center;
   align-items: center;
   min-width: 100vh;
-  min-height: 97vh;
+  min-height: 100vh;
   background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("../res/login-background.jpeg") no-repeat center;
   background-size: cover;
 }
@@ -223,7 +223,7 @@ const submitForm = async (form) => {
   font-weight: bold;
 }
 .head .tips {
-  font-size: 12px;
+  font-size: 18px;
   color: #999;
 }
 .login-form {
