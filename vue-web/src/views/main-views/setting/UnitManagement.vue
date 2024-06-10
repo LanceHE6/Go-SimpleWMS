@@ -18,7 +18,7 @@ import DataShowView from "@/components/DataShowView.vue";
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "计量单位名", sortable: false},
+  {property: "name", label: "计量单位名", sortable: false, width: 140},
   {property: "unid", label: "计量单位ID", sortable: true, width: 140},
 ]
 
