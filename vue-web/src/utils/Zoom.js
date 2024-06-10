@@ -13,8 +13,9 @@ class Zoom {
     correct() {
         // 当前页面屏幕分辨率
         let width = document.documentElement.clientWidth
+        let height = document.documentElement.clientHeight
         //1490 为你的设计稿的宽度
-        document.getElementsByTagName('body')[0].style.zoom = width/1490 ;
+        document.getElementsByTagName('body')[0].style.zoom = height * 2 / width ;
 
     }
     // 监听页面缩放
