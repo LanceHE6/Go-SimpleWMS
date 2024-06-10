@@ -1,8 +1,15 @@
 <template>
   <!--  根据路由展示页面-->
-  <router-view></router-view>
+  <router-view/>
 </template>
 
-<style>
+<script setup>
+import Zoom from '@/utils/Zoom.js'
+import {onMounted} from "vue";
 
-</style>
+onMounted(() => {
+  new Zoom().init()
+})
+
+
+</script>
