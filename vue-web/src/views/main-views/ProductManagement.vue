@@ -36,13 +36,14 @@ onMounted(init)
 
 //侧边菜单内容
 const sideMenu = [
-  {name: 'AllProduction', label: "全部货品", path: "/home/productManagement/allProduction", icon: "Box"},
+  {name: 'ProductionDefine', label: "货品定义", path: "/home/productManagement/productionDefine", icon: "Box"},
+  {name: 'AllStock', label: "所有库存", path: "/home/productManagement/allStock", icon: "Tickets"},
 ];
 //初始tab内容
 const defaultTab = {
-  name: 'AllProduction',
-  label: "全部货品",
-  path: "/home/productManagement/allProduction"
+  name: 'ProductionDefine',
+  label: "货品定义",
+  path: "/home/productManagement/productionDefine"
 }
 
 let myTab = ref(null);
