@@ -189,7 +189,7 @@ headers:{
 
 ----
 
-### 批量注册（上传用户）
+### 批量注册（导入）
 
 **请求路径**：/api/user/upload
 
@@ -1351,11 +1351,11 @@ headers:{
 
 **请求参数**：
 
-| 参数名  | 参数类型 | 是否必填 | 参数说明   |
-| ------- | -------- | -------- | ---------- |
-| name    | String   | 是       | 员工名称   |
-| phone   | string   | 否       | 电话       |
-| dept_id | string   | 是       | 所属部门id |
+| 参数名     | 参数类型 | 是否必填 | 参数说明   |
+| ---------- | -------- | -------- | ---------- |
+| name       | String   | 是       | 员工名称   |
+| phone      | string   | 否       | 电话       |
+| department | string   | 是       | 所属部门id |
 
 **返回结果示例**：
 
@@ -1409,6 +1409,93 @@ headers:{
 |  500   | InternalServerError | 后端服务内部错误 |
 
 ----
+
+### 批量添加（导入）
+
+**请求路径**：/api/staff/upload
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型       | 是否必填 | 参数说明 |
+| ------ | -------------- | -------- | -------- |
+| list   | Array <Object> | 是       | 员工列表 |
+
+**列表参数**
+
+| 参数名     | 参数类型 | 是否必填 | 参数说明   |
+| ---------- | -------- | -------- | ---------- |
+| name       | String   | 是       | 员工名称   |
+| phone      | string   | 否       | 电话       |
+| department | string   | 是       | 所属部门id |
+
+**返回结果示例**：
+
+```json
+// 部分导入失败 217
+{
+    "code": 403,
+    "detail": [
+        {
+            "code": 403,
+            "message": "The staff's zzt2 department does not exist"
+        }
+    ],
+    "message": "Some staffs failed to register; 1/2"
+}
+// 全部导入失败 400
+{
+    "code": 402,
+    "detail": [
+        {
+            "code": 403,
+            "message": "The staff's zzt3 department does not exist"
+        },
+        {
+            "code": 403,
+            "message": "The staff's zzt2 department does not exist"
+        }
+    ],
+    "message": "All staffs failed to register"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 全部导入成功 200
+{
+    "code":    201,
+	"message": "All staffs have completed registration",
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |       参数说明       |
+| :-----: | :------: | :------------------: |
+|  code   |   int    |        业务码        |
+| message |  string  |       返回消息       |
+|   uid   |  string  | 注册成功返回的用户id |
+|  error  |  string  |   后端内部错误消息   |
+| detail  |  string  |   每个错误注册详情   |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |             说明             |
+| :----: | :-----------------: | :--------------------------: |
+|  200   |         OK          |           注册成功           |
+|  217   |   PartialContent    |        注册不完全成功        |
+|  400   |     BadRequest      | 请求参数不全获取注册全部失败 |
+|  500   | InternalServerError |       后端服务内部错误       |
+
+----
+
+
 
 ### 更新
 
