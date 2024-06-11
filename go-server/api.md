@@ -299,8 +299,19 @@ headers:{
 // 登录成功 200
 {
     "code": 201,
-    "message": "Login successfully",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDk1NTUxMjEsInN1YiI6IjAwMDAwMDAyIn0.hvz-Xp9kfhVNsCy6Q9nhS9wM8-c-DgJJ8PLcME17Fto"
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTgzNTU5ODcsInVpZCI6InUwMDAwMDAwMSIsInBlcm1pc3Npb24iOjMsImNyZWF0ZWQtYXQiOiIyMDI0LTA2LTExIDE1OjUzOjMzICswODAwIENTVCJ9.keeh5VhCwKDQmGph4KgkS0A4o5rZjwzy1V-ILea89eY",
+        "user": {
+            "created_at": "2024-06-11T15:53:33+08:00",
+            "updated_at": "2024-06-11T17:06:27.8157393+08:00",
+            "uid": "u00000001",
+            "account": "admin",
+            "permission": 3,
+            "nickname": "admin",
+            "phone": ""
+        }
+    },
+    "message": "Login successfully"
 }
 // 参数有误 400
 {
@@ -2433,58 +2444,84 @@ headers:{
 // 查询成功（有数据） 200
 {
     "code": 201,
-    "keyword": "重",
+    "keyword": "1",
     "message": "Query successfully",
     "page": 1,
     "page_size": 10,
     "rows": [
         {
-            "ID": 1,
-            "CreatedAt": "2024-04-15T20:24:46+08:00",
-            "UpdatedAt": "2024-04-15T20:24:46+08:00",
-            "Gid": "g07a99cb7",
-            "GoodsCode": "XJ001",
-            "Name": "橡胶",
-            "Model": "XJ-JT",
-            "GoodsType": "gtd180d212",
-            "Warehouse": "w62d263ec",
-            "Manufacturer": "重游",
-            "Unit": "un546af271",
-            "Image": "",
-            "Quantity": 200
+            "created_at": "2024-06-11T16:21:00+08:00",
+            "updated_at": "2024-06-11T16:35:28+08:00",
+            "gid": "ga42b87cf",
+            "goods_code": "HP001",
+            "name": "货品1",
+            "model": "YYPACW",
+            "goods_type": "_default_",
+            "manufacturer": "生产商1",
+            "unit": "_default_",
+            "images": [
+                {
+                    "path": "static/res/goodsImage/goods_17180948221.png"
+                }
+            ],
+            "files": [
+                {
+                    "path": "static/res/goodsFile/goods_17180949281.jpg"
+                },
+                {
+                    "path": "static/res/goodsFile/goods_17180949282.jpg"
+                }
+            ],
+            "unit_price": 139
         },
         {
-            "ID": 2,
-            "CreatedAt": "2024-04-15T20:27:39+08:00",
-            "UpdatedAt": "2024-04-15T20:27:39+08:00",
-            "Gid": "gc034b22e",
-            "GoodsCode": "XJ002",
-            "Name": "橡胶",
-            "Model": "XJ-JT",
-            "GoodsType": "gtd180d212",
-            "Warehouse": "w62d263ec",
-            "Manufacturer": "重游",
-            "Unit": "un546af271",
-            "Image": "",
-            "Quantity": 300
+            "created_at": "2024-06-11T16:21:00+08:00",
+            "updated_at": "2024-06-11T16:48:04+08:00",
+            "gid": "g242bcd49",
+            "goods_code": "HP002",
+            "name": "货品2",
+            "model": "GPARDR",
+            "goods_type": "gt09a5d1ac",
+            "manufacturer": "生产商2",
+            "unit": "un0b7be337",
+            "images": null,
+            "files": [
+                {
+                    "path": "static/res/goodsFile/goods_g242bcd49_1.xlsx"
+                }
+            ],
+            "unit_price": 260
         },
         {
-            "ID": 3,
-            "CreatedAt": "2024-04-15T20:27:47+08:00",
-            "UpdatedAt": "2024-04-15T20:27:47+08:00",
-            "Gid": "g643cb699",
-            "GoodsCode": "XJ003",
-            "Name": "橡胶",
-            "Model": "XJ-JT",
-            "GoodsType": "gtd180d212",
-            "Warehouse": "w62d263ec",
-            "Manufacturer": "重游",
-            "Unit": "un546af271",
-            "Image": "",
-            "Quantity": 400
+            "created_at": "2024-06-11T16:21:00+08:00",
+            "updated_at": "2024-06-11T16:21:00+08:00",
+            "gid": "g05c1a76d",
+            "goods_code": "HP004",
+            "name": "货品4",
+            "model": "ZESZYA",
+            "goods_type": "gt09a5d1ac",
+            "manufacturer": "生产商4",
+            "unit": "un0b7be337",
+            "images": null,
+            "files": null,
+            "unit_price": 548
+        },
+        {
+            "created_at": "2024-06-11T16:21:00+08:00",
+            "updated_at": "2024-06-11T16:21:00+08:00",
+            "gid": "g0ee64da5",
+            "goods_code": "HP0010",
+            "name": "货品10",
+            "model": "GFDTJL",
+            "goods_type": "gt8f736a99",
+            "manufacturer": "生产商10",
+            "unit": "unb91a76f8",
+            "images": null,
+            "files": null,
+            "unit_price": 348
         }
     ],
-    "total": 3,
+    "total": 4,
     "total_pages": 1
 }
 // 查询成功（无数据） 200
@@ -2531,23 +2568,32 @@ headers:{
 
 **请求参数**：
 
-| 参数名 | 参数类型 | 是否必填 | 参数说明 |
-| ------ | -------- | -------- | -------- |
-| gid    | String   | 是       | 货品id   |
-| image  | File     | 是       | 图片文件 |
+| 参数名 | 参数类型  | 是否必填 | 参数说明 |
+| ------ | --------- | -------- | -------- |
+| goods  | String    | 是       | 货品id   |
+| image  | Multipart | 是       | 图片文件 |
+
+*支持图片格式：*`.png, .jpg, .jpeg, .gif, .svg`
 
 **返回结果示例**：
 
 ```json
 // 上传成功 200
 {
-    "code": 201,
-    "data": {
-        "gid": "g07a99cb7",
-        "image_name": "goods_1716190218.png",
-        "image_path": "static/res/goodsImage/goods_1716190218.png"
+  "code": 201,
+  "data": [
+    {
+      "gid": "ga42b87cf",
+      "name": "goods_17180949281.jpg",
+      "path": "static/res/goodsFile/goods_17180949281.jpg"
     },
-    "message": "Upload successfully"
+    {
+      "gid": "ga42b87cf",
+      "name": "goods_17180949282.jpg",
+      "path": "static/res/goodsFile/goods_17180949282.jpg"
+    }
+  ],
+  "message": "Upload successfully"
 }
 // 参数有误 400
 {
@@ -2561,9 +2607,21 @@ headers:{
 	"detail": err.Error(),
 	"code":   501,
 }
+// 无法解析image参数 400
+{
+    "message": "Failed to parse multipart form",
+	"code":    402,
+	"detail":  err.Error(),
+}
+// 无法打开文件 500
+{
+    "error":  "Failed to open file",
+	"detail": err.Error(),
+	"code":   502,
+}
 // 图片格式不支持 400
 {
-    "message": "Unsupported image format",
+    "message": "Unsupported format",
 	"code":    402,
 }
 // 货品不存在 400
@@ -2571,12 +2629,6 @@ headers:{
     "error":  "The goods does not exist",
 	"detail": err.Error(),
 	"code":   403,
-}
-// 无法更新货品表 500
-{
-    "error":  "Updating database failed",
-	"detail": err.Error(),
-	"code":   504,
 }
 // 保存图片失败 500
 {
@@ -2590,26 +2642,130 @@ headers:{
 	"detail": err.Error(),
 	"code":   502,
 }
-// 无法从请求中读取图片文件 500
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+|  data   |  string  |    返回数据体    |
+|   gid   |  string  |    目标货品id    |
+|  name   |  string  |      图片名      |
+|  path   |  string  |     访问路径     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     修改成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  401   |    Unauthorized     |    鉴权未通过    |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+### 附件上传
+
+**请求路径**：/api/upload/goods_file
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型  | 是否必填 | 参数说明 |
+| ------ | --------- | -------- | -------- |
+| goods  | String    | 是       | 货品id   |
+| file   | Multipart | 是       | 图片文件 |
+
+*支持文件格式：*`.doc .docx .pdf .xls .xlsx .ppt .pptx .txt .zip .rar .png .jpg .jpeg .gif .svg`
+
+**返回结果示例**：
+
+```json
+// 上传成功 200
+{
+  "code": 201,
+  "data": [
+    {
+      "gid": "ga42b87cf",
+      "name": "goods_17180949281.jpg",
+      "path": "static/res/goodsFile/goods_17180949281.jpg"
+    },
+    {
+      "gid": "ga42b87cf",
+      "name": "goods_17180949282.jpg",
+      "path": "static/res/goodsFile/goods_17180949282.jpg"
+    }
+  ],
+  "message": "Upload successfully"
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 无法创建文件夹 500
 {
     "error":  "Upload failed",
 	"detail": err.Error(),
-	"code":   503,
+	"code":   501,
+}
+// 无法解析file参数 400
+{
+    "message": "Failed to parse multipart form",
+	"code":    402,
+	"detail":  err.Error(),
+}
+// 无法打开文件 500
+{
+    "error":  "Failed to open file",
+	"detail": err.Error(),
+	"code":   502,
+}
+// 格式不支持 400
+{
+    "message": "Unsupported format",
+	"code":    402,
+}
+// 货品不存在 400
+{
+    "error":  "The goods does not exist",
+	"detail": err.Error(),
+	"code":   403,
+}
+// 保存文件失败 500
+{
+    "error":  "Upload failed",
+	"detail": ioErr.Error(),
+	"code":   501,
+}
+// 无法创建文件 500
+{
+    "error":  "Upload failed",
+	"detail": err.Error(),
+	"code":   502,
 }
 ```
 
 **返回数据说明**
 
-|   参数名   | 参数类型 |     参数说明     |
-| :--------: | :------: | :--------------: |
-|    code    |   int    |      业务码      |
-|  message   |  string  |     返回消息     |
-|   error    |  string  | 后端内部错误消息 |
-|   detail   |  string  |     错误详情     |
-|    data    |  string  |    返回数据体    |
-|    gid     |  string  |    目标货品id    |
-| image_name |  string  |      图片名      |
-| image_path |  string  |     访问路径     |
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+|  data   |  string  |    返回数据体    |
+|   gid   |  string  |    目标货品id    |
+|  name   |  string  |      附件名      |
+|  path   |  string  |     访问路径     |
 
 **返回状态码说明**
 
@@ -2924,7 +3080,8 @@ headers:{
                 "gid": "gb003821b",
                 "goods_code": "",
                 "goods_type": "_default_",
-                "image": "",
+                "image": null,
+                "file":null
                 "manufacturer": "",
                 "model": "",
                 "name": "嘛",
