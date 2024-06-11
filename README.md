@@ -24,39 +24,6 @@
 * 后端[gin](https://gin-gonic.com/zh-cn/)+[gorm](https://gorm.io/zh_CN/docs/index.html)。
 * 数据库[mysql]([MySQL](https://www.mysql.com/cn/))。
 
-## 前端运行
-
-```bash
-# 克隆项目
-git clone https://github.com/LanceHE6/Go-SimpleWMS.git
-
-# 进入项目目录
-cd vue-web
-
-# 安装依赖
-npm install
-
-# 启动服务
-npm run dev
-
-# 前端访问地址 http://localhost:80
-```
-
-## 后端运行
-
-```bash
-# 进入项目目录
-cd go-server
-
-# 下载依赖
-go mod download
-
-# 构建项目
-go build -o main .
-```
-
-
-
 ## 内置功能
 
 ### 权限组
@@ -93,6 +60,76 @@ go build -o main .
 * 货品类型管理
 
 * 出入库订单管理
+
+  
+
+## 部署
+
+#### 直接部署
+
+##### 前端
+
+```bash
+# 克隆项目
+git clone https://github.com/LanceHE6/Go-SimpleWMS.git
+
+# 进入项目目录
+cd vue-web
+
+# 安装依赖
+npm install
+
+# 启动服务
+npm run dev
+
+# 前端访问地址 http://localhost:5173
+```
+
+##### 后端
+
+```bash
+# 进入项目目录
+cd go-server
+
+# 下载依赖
+go mod download
+
+# 构建项目
+go build -o main .
+```
+
+----
+
+#### Docker部署
+
+##### 前端
+
+```bash
+# 克隆项目
+git clone https://github.com/LanceHE6/Go-SimpleWMS.git
+
+# 进入项目目录
+cd vue-web
+
+# 构建镜像
+docker build -t simple-wms-web:latest .
+
+# 运行容器
+docker run --name simple-wms-web -p 5173:80 -d simple-wms-web:latest
+```
+
+##### 后端端
+
+```bash
+# 进入项目目录
+cd go-server
+
+# 构建镜像
+docker build -t simple-wms-server:latest .
+
+# 运行容器
+docker run --name simple-wms-server -p 8080:8080 -d simple-wms-server:latest
+```
 
 
 
