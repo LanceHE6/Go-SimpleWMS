@@ -10,7 +10,7 @@ import (
 func ListInventoryType(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var invTs []model.InventoryType
-	err := db.Select([]string{"itid", "name", "type_code", "type", "created_at"}).Find(&invTs).Error
+	err := db.Select("*").Find(&invTs).Error
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -21,17 +21,9 @@ func ListInventoryType(context *gin.Context) {
 		return
 	}
 
-	var invTsRes []gin.H
+	var invTsRes []model.InventoryType
 	for _, invT := range invTs {
-
-		invTRes := gin.H{
-			"itid":       invT.Itid,
-			"name":       invT.Name,
-			"type_code":  invT.TypeCode,
-			"created_at": invT.CreatedAt,
-			"type":       invT.Type,
-		}
-		invTsRes = append(invTsRes, invTRes)
+		invTsRes = append(invTsRes, invT)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get inventory type list successfully",

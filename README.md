@@ -2,7 +2,9 @@
 <img alt="logo" src="./imgs/WMS-Logo.png">
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Go-SimpleWMS</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">简行云仓库</h1>
 <div align="center"> 
+
 
 简体中文/[English](./README-EN.md) 
 </div>
@@ -21,39 +23,6 @@
 * 前端技术栈 [Vue3](https://v3.cn.vuejs.org) + [Element Plus](https://element-plus.org/zh-CN) + [Vite](https://cn.vitejs.dev) 。
 * 后端[gin](https://gin-gonic.com/zh-cn/)+[gorm](https://gorm.io/zh_CN/docs/index.html)。
 * 数据库[mysql]([MySQL](https://www.mysql.com/cn/))。
-
-## 前端运行
-
-```bash
-# 克隆项目
-git clone https://github.com/LanceHE6/Go-SimpleWMS.git
-
-# 进入项目目录
-cd vue-web
-
-# 安装依赖
-npm install
-
-# 启动服务
-npm run dev
-
-# 前端访问地址 http://localhost:80
-```
-
-## 后端运行
-
-```bash
-# 进入项目目录
-cd go-server
-
-# 下载依赖
-go mod download
-
-# 构建项目
-go build -o main .
-```
-
-
 
 ## 内置功能
 
@@ -91,6 +60,76 @@ go build -o main .
 * 货品类型管理
 
 * 出入库订单管理
+
+  
+
+## 部署
+
+#### 直接部署
+
+##### 前端
+
+```bash
+# 克隆项目
+git clone https://github.com/LanceHE6/Go-SimpleWMS.git
+
+# 进入项目目录
+cd vue-web
+
+# 安装依赖
+npm install
+
+# 启动服务
+npm run dev
+
+# 前端访问地址 http://localhost:5173
+```
+
+##### 后端
+
+```bash
+# 进入项目目录
+cd go-server
+
+# 下载依赖
+go mod download
+
+# 构建项目
+go build -o main .
+```
+
+----
+
+#### Docker部署
+
+##### 前端
+
+```bash
+# 克隆项目
+git clone https://github.com/LanceHE6/Go-SimpleWMS.git
+
+# 进入项目目录
+cd vue-web
+
+# 构建镜像
+docker build -t simple-wms-web:latest .
+
+# 运行容器
+docker run --name simple-wms-web -p 5173:80 -d simple-wms-web:latest
+```
+
+##### 后端端
+
+```bash
+# 进入项目目录
+cd go-server
+
+# 构建镜像
+docker build -t simple-wms-server:latest .
+
+# 运行容器
+docker run --name simple-wms-server -p 8080:8080 -d simple-wms-server:latest
+```
 
 
 

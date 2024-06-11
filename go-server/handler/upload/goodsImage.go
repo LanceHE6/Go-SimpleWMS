@@ -71,10 +71,10 @@ func GoodsImageUpload(context *gin.Context) {
 		var goods model.Goods
 		err := db.Model(&model.Goods{}).Where("gid=?", gid).Find(&goods).Error
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
+			context.JSON(http.StatusBadRequest, gin.H{
 				"error":  "The goods does not exist",
 				"detail": err.Error(),
-				"code":   505,
+				"code":   403,
 			})
 			return
 		}

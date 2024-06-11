@@ -13,7 +13,7 @@ type Time struct {
 }
 
 type MyModel struct {
-	ID uint `gorm:"primary_key;" json:"id"`
+	ID uint `gorm:"primary_key;" json:"-"`
 	Time
 }
 
@@ -23,11 +23,11 @@ type User struct {
 	MyModel
 	Uid        string `gorm:"primary_key;index" json:"uid"`
 	Account    string `json:"account"`
-	Password   string `json:"password"`
+	Password   string `json:"-"`
 	Permission int    `json:"permission"`
 	Nickname   string `json:"nickname"`
 	Phone      string `gorm:"type:varchar(100);default:''" json:"phone"`
-	Token      string `gorm:"type:varchar(255);default:''" json:"token"`
+	Token      string `gorm:"type:varchar(255);default:''" json:"-"`
 }
 
 type Department struct {

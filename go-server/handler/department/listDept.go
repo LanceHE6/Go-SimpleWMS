@@ -11,7 +11,7 @@ func ListDepartment(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 
 	var departments []model.Department
-	err := db.Select([]string{"did", "name", "created_at"}).Find(&departments).Error
+	err := db.Select("*").Find(&departments).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Can not get the list of departments",
@@ -20,14 +20,9 @@ func ListDepartment(context *gin.Context) {
 		})
 	}
 	// 封装返回列表
-	var res []gin.H
+	var res []model.Department
 	for _, department := range departments {
-		departmentRes := gin.H{
-			"did":        department.Did,
-			"name":       department.Name,
-			"created_at": department.CreatedAt,
-		}
-		res = append(res, departmentRes)
+		res = append(res, department)
 	}
 
 	context.JSON(http.StatusOK, gin.H{

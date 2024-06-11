@@ -11,7 +11,7 @@ func ListGoodsType(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var gts []model.GoodsType
 
-	err := db.Select([]string{"gtid", "name", "type_code", "created_at"}).Find(&gts).Error
+	err := db.Select("*").Find(&gts).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of goods type",
@@ -21,16 +21,9 @@ func ListGoodsType(context *gin.Context) {
 		return
 	}
 
-	var gtsRes []gin.H
+	var gtsRes []model.GoodsType
 	for _, gt := range gts {
-
-		gtRes := gin.H{
-			"gtid":       gt.Gtid,
-			"name":       gt.Name,
-			"type_code":  gt.TypeCode,
-			"created_at": gt.CreatedAt,
-		}
-		gtsRes = append(gtsRes, gtRes)
+		gtsRes = append(gtsRes, gt)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get goods type list successfully",

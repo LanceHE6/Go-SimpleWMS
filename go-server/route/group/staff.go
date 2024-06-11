@@ -20,4 +20,7 @@ func StaffGroup(ginApi *gin.RouterGroup) {
 	staffGroup.GET("/list", func(c *gin.Context) {
 		staff.ListStaff(c)
 	})
+	staffGroup.POST("/upload", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
+		staff.UploadStaffs(c)
+	})
 }

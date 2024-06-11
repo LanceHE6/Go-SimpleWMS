@@ -12,7 +12,7 @@ func ListUnit(context *gin.Context) {
 
 	var units []model.Unit
 
-	err := db.Select([]string{"unid", "name", "created_at"}).Find(&units).Error
+	err := db.Select("*").Find(&units).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Can not get the list of units",
@@ -21,14 +21,9 @@ func ListUnit(context *gin.Context) {
 		})
 	}
 	// 封装返回列表
-	var res []gin.H
+	var res []model.Unit
 	for _, unit := range units {
-		unitRes := gin.H{
-			"unid":       unit.Unid,
-			"name":       unit.Name,
-			"created_at": unit.CreatedAt,
-		}
-		res = append(res, unitRes)
+		res = append(res, unit)
 	}
 
 	context.JSON(http.StatusOK, gin.H{

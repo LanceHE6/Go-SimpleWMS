@@ -51,7 +51,7 @@ func InitData() {
 	createIfNotExists(db, &model.User{
 		Uid:        "u00000001",
 		Account:    "admin",
-		Password:   "123",
+		Password:   "123456",
 		Permission: 3,
 		Nickname:   "admin",
 	}, "u00000001", "uid")
