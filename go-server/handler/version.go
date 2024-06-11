@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const version = "v0.0.4.20240610_Alpha"
+const version = "v0.0.5.20240611_Alpha"
 
 func GetVersion(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
