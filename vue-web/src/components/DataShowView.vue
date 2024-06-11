@@ -22,6 +22,7 @@
       @update="update"
       @search="startSearch"
       @refresh="initialize"
+      @upload-img="uploadImg"
   >
   </my-table>
 </template>
@@ -207,6 +208,7 @@ async function update(currentPage) {
     // 使用这些索引来获取对应的元素
     state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
   } else {  //后端分页
+    state.isLoading = true
     const defaultParams = {
       page: currentPage,
       page_size: PAGE_SIZE,
@@ -218,6 +220,7 @@ async function update(currentPage) {
       currentPage = state.pageCount
     }
     state.currentPage = currentPage
+    state.isLoading = false
   }
 }
 
@@ -257,6 +260,16 @@ function del(row){
   deleteData(prop.deleteDataBody)
 }
 
+//上传图片
+async function uploadImg(id, file) {
+  console.log("uploadImg", id, file)
+  const requestBody = {}
+  requestBody[prop.keyData] = id
+  requestBody['image'] = file
+
+  await uploadImage(requestBody)
+}
+
 //点击子组件的编辑按钮, 子组件处理完返回的可提交表单
 function edit(form){
   updateData(form)
@@ -294,6 +307,7 @@ const token="bearer "+localStorage.getItem("token");
 
 const getData = async (url = prop.urls.getData, params = {}) => {
   let resultList = []
+  url = '/api' + url
   await axios.get(url, {
     headers: {
       'Authorization': token
@@ -325,7 +339,7 @@ const getData = async (url = prop.urls.getData, params = {}) => {
  * */
 const deleteData=async (data) => {
   state.isLoading = true
-  await axios.delete(prop.urls.deleteData, {
+  await axios.delete('/api' + prop.urls.deleteData, {
         headers: {
           'Authorization': token
         },
@@ -351,7 +365,7 @@ const deleteData=async (data) => {
  * */
 const addData=async (newData) => {
   state.isLoading = true
-  await axios.post(prop.urls.addData, newData, {
+  await axios.post('/api' + prop.urls.addData, newData, {
     headers: {
       'Authorization': token
     }
@@ -375,7 +389,7 @@ const addData=async (newData) => {
  * */
 const updateData=async (newData) => {
   state.isLoading = true
-  await axios.put(prop.urls.updateData, newData, {
+  await axios.put('/api' + prop.urls.updateData, newData, {
         headers: {
           'Authorization': token
         },
@@ -401,7 +415,7 @@ const updateData=async (newData) => {
 const uploadData=async (list) => {
   console.log(list)
   state.isLoading = true
-  await axios.post(prop.urls.uploadData, {list: list}, {
+  await axios.post('/api' + prop.urls.uploadData, {list: list}, {
     headers: {
       'Authorization': token
     }
@@ -434,6 +448,31 @@ const uploadData=async (list) => {
       .catch( error => {
         ElMessage.error("网络请求出错了！数据是否已被添加过？")
         console.error("uploadData:", error)
+      })
+  await update(state.currentPage)
+  state.isLoading = false
+}
+
+/**
+ * uploadImage()
+ * 上传图片 param: data
+ * */
+const uploadImage=async (data) => {
+  state.isLoading = true
+  await axios.post('/api' + prop.urls.uploadImage, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': token
+    }
+  })
+      .then( async message => {
+        ElMessage.success("图片上传成功！")
+        console.log("uploadImage:", message)
+        state.allDataArray = await getData()
+      })
+      .catch( error => {
+        ElMessage.error("网络请求出错了！")
+        console.error("uploadImage:", error)
       })
   await update(state.currentPage)
   state.isLoading = false

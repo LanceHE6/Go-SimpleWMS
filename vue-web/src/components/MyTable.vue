@@ -67,7 +67,24 @@
           :label="item.label"
           :width="item.width"
           :sortable="item.sortable"
-          :formatter="mapping(item.property)"/>
+          :formatter="mapping(item.property)">
+          <template #default="scope" v-if="item.isImage">
+            <div style="display: flex; align-items: center">
+              <el-image
+                  class="table-col-img"
+                  :src="`${axios.defaults.baseURL}/${scope.row.image}`"
+                  fit="cover"
+                  :preview-src-list="[`${axios.defaults.baseURL}/${scope.row.image}`]"
+                  preview-teleported>
+                <template #error>
+                  <div class="error-image-slot" @click="uploadImg(scope.row[keyData])">
+                    <el-icon><Plus /></el-icon>
+                  </div>
+                </template>
+              </el-image>
+            </div>
+          </template>
+        </el-table-column>
 
       </el-table>
     </el-main>
@@ -220,7 +237,7 @@
         accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         :auto-upload="false"
         :http-request="excelToJson"
-        limit="1"
+        :limit="1"
         drag
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -245,15 +262,52 @@
     </template>
 
   </el-dialog>
+  <el-dialog
+      v-model="uploadImgVisible"
+      title="上传图片"
+      width="700"
+      center
+  >
+    <el-upload
+        ref="myUploadImgForm"
+        class="avatar-uploader"
+        accept="image/jpeg, image/png, image/gif, image/bmp, image/x-bmp, image/webp, image/tiff, image/x-tiff, image/svg+xml"
+        :show-file-list="false"
+        :auto-upload="false"
+        :http-request="submitImgUploadForm"
+        :limit="1"
+        :on-change="handleImgChange"
+        :on-exceed="uploadImgExceed"
+        drag
+    >
+      <el-image v-if="imageUrl" :src="imageUrl" class="avatar" />
+      <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+      <template #tip>
+        <div class="el-upload__tip">
+          <el-text type="info">支持jpg、png等图片类型文件, </el-text>
+        </div>
+      </template>
+    </el-upload>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="uploadImgVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitUploadImgData()">
+          上传
+        </el-button>
+      </div>
+    </template>
+
+  </el-dialog>
 </template>
 
 <script setup>
 import {computed, markRaw, ref, watch} from "vue";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, UploadFilled} from "@element-plus/icons-vue";
+import {ElMessage, ElMessageBox, genFileId} from "element-plus";
+import {Delete, Plus, UploadFilled} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
 import TableHeader from "@/components/TableHeader.vue";
 import LargeTableHeader from "@/components/LargeTableHeader.vue";
+import axios from "axios";
 
 const prop = defineProps({
   large:{
@@ -334,7 +388,13 @@ const prop = defineProps({
   }
 });
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh"]);
+const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh", "uploadImg"]);
+
+const imageUrl = ref('')
+
+//表格高度
+const tableHeight = document.documentElement.clientHeight * 0.6
+const colHeight = ref(tableHeight / 10)
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -365,6 +425,13 @@ let addFormVisible = ref(false)
 const myUploadForm = ref(null)
 //上传表单是否可见
 let uploadFormVisible = ref(false)
+
+//上传图片窗口组件
+const myUploadImgForm = ref(null)
+//上传图片窗口是否可见
+let uploadImgVisible = ref(false)
+//上传图片的对应列id
+let uploadImgId = ref('')
 
 //监听数据变化并实时更新表格
 watch(() => prop.defaultData, (newValue) => {
@@ -512,9 +579,19 @@ function upload(){
   uploadFormVisible.value = true
 }
 
+function uploadImg(id){
+  uploadImgVisible.value = true
+  uploadImgId.value = id
+}
+
 function submitUploadData(){
   myUploadForm.value.submit()
   uploadFormVisible.value = false
+}
+
+function submitUploadImgData(){
+  myUploadImgForm.value.submit()
+  uploadImgVisible.value = false
 }
 
 //提交编辑表单
@@ -627,12 +704,37 @@ function excelToJson(e){
   fileReader.readAsBinaryString(file)
 }
 
+function submitImgUploadForm(e){
+  let file = e.file // 文件信息
+  if (!file) {
+    // 没有文件
+    return false
+  } else if (!/\.(jfif|pjepg|jepg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(file.name.toLowerCase())) {
+    // 格式根据自己需求定义
+    ElMessage.error('上传格式不正确，请上传支持的图片格式')
+    return false
+  }
+  emit("uploadImg",uploadImgId.value ,file)
+}
+
 function downloadTemplate(){
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet([addForm.value.data])
   XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1")
   worksheet["!cols"] = new Array(addForm.value.dataNum).fill({ wch: 15 });
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
+}
+
+const handleImgChange = (response, uploadFile) => {
+  imageUrl.value = URL.createObjectURL(uploadFile[0].raw)
+}
+
+//上传图片超限时调用此函数
+const uploadImgExceed = (files) => {
+  myUploadImgForm.value.clearFiles()
+  const file = files[0]
+  file.uid = genFileId()
+  myUploadImgForm.value.handleStart(file)
 }
 
 </script>
@@ -648,5 +750,44 @@ function downloadTemplate(){
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
+}
+
+.table-col-img{
+  z-index: 9999;
+  height: 50px;
+  width: 50px;
+}
+
+.error-image-slot{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>
