@@ -72,16 +72,32 @@
             <div style="display: flex; align-items: center">
               <el-image
                   class="table-col-img"
+                  v-if="scope.row.image !== ''"
                   :src="`${axios.defaults.baseURL}/${scope.row.image}`"
                   fit="cover"
                   :preview-src-list="[`${axios.defaults.baseURL}/${scope.row.image}`]"
-                  preview-teleported>
+                  preview-teleported
+              >
                 <template #error>
                   <div class="error-image-slot" @click="uploadImg(scope.row[keyData])">
                     <el-icon><Plus /></el-icon>
                   </div>
                 </template>
               </el-image>
+
+              <div class="error-image-slot" v-else @click="uploadImg(scope.row[keyData])">
+                <el-icon><Plus /></el-icon>
+              </div>
+
+              <el-button
+                  v-if="scope.row.image !== ''"
+                  type="success"
+                  icon="Edit"
+                  @click="uploadImg(scope.row[keyData])"
+                  circle
+                  plain
+                  style="margin-left: 10px"
+              />
             </div>
           </template>
         </el-table-column>
@@ -229,6 +245,7 @@
       v-model="uploadFormVisible"
       title="批量导入"
       width="700"
+      @closed="uploadDialogClosed"
       center
   >
     <el-upload
@@ -266,6 +283,7 @@
       v-model="uploadImgVisible"
       title="上传图片"
       width="700"
+      @closed="uploadImgDialogClosed"
       center
   >
     <el-upload
@@ -391,6 +409,8 @@ const prop = defineProps({
 const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh", "uploadImg"]);
 
 const imageUrl = ref('')
+
+const successLoad = ref(false)
 
 //表格高度
 const tableHeight = document.documentElement.clientHeight * 0.6
@@ -709,7 +729,7 @@ function submitImgUploadForm(e){
   if (!file) {
     // 没有文件
     return false
-  } else if (!/\.(jfif|pjepg|jepg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(file.name.toLowerCase())) {
+  } else if (!/\.(jfif|pjpeg|jpeg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(file.name.toLowerCase())) {
     // 格式根据自己需求定义
     ElMessage.error('上传格式不正确，请上传支持的图片格式')
     return false
@@ -723,6 +743,15 @@ function downloadTemplate(){
   XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1")
   worksheet["!cols"] = new Array(addForm.value.dataNum).fill({ wch: 15 });
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
+}
+
+function uploadDialogClosed(){
+  myUploadForm.value.clearFiles()
+}
+
+function uploadImgDialogClosed(){
+  myUploadImgForm.value.clearFiles()
+  imageUrl.value = ''
 }
 
 const handleImgChange = (response, uploadFile) => {
@@ -762,8 +791,8 @@ const uploadImgExceed = (files) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 50px;
+  height: 50px;
   background: var(--el-fill-color-light);
   color: var(--el-text-color-secondary);
   font-size: 15px;
