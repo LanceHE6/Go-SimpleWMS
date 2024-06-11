@@ -72,7 +72,7 @@
             <div style="display: flex; align-items: center">
               <el-image
                   class="table-col-img"
-                  v-if="scope.row.image !== ''"
+                  v-if="scope.row.image"
                   :src="`${axios.defaults.baseURL}/${scope.row.image}`"
                   fit="cover"
                   :preview-src-list="[`${axios.defaults.baseURL}/${scope.row.image}`]"
@@ -90,7 +90,7 @@
               </div>
 
               <el-button
-                  v-if="scope.row.image !== ''"
+                  v-if="scope.row.image"
                   type="success"
                   icon="Edit"
                   @click="uploadImg(scope.row[keyData])"
@@ -410,11 +410,9 @@ const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", 
 
 const imageUrl = ref('')
 
-const successLoad = ref(false)
-
 //表格高度
-const tableHeight = document.documentElement.clientHeight * 0.6
-const colHeight = ref(tableHeight / 10)
+//const tableHeight = document.documentElement.clientHeight * 0.6
+//const colHeight = ref(tableHeight / 10)
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
