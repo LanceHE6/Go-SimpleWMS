@@ -144,7 +144,7 @@ async function about(){
   let go_simpleWMS_version = 'unknown'
   let go_server_version = 'unknown'
   let vue_web_version = 'v0.0.2.20240610_Alpha'
-  await axios.get('/ping')
+  await axios.get('/api/ping')
       .then(result => {
         console.log("ping:", result)
         if(result.status === 200){
@@ -206,7 +206,7 @@ async function initialize(){
   pageChange()
 
   const token="bearer "+localStorage.getItem("token");
-  await axios.get('/auth', {
+  await axios.get('/api/auth', {
     headers: {
       'Authorization': token
     }
