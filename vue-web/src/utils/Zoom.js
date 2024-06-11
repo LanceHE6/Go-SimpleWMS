@@ -21,7 +21,7 @@ class Zoom {
     }
     // 监听页面缩放
     watch() {
-        this.addHandler(window, 'resize', function() { // 注意这个方法是解决全局有两个window.resize
+        this.addHandler(window, 'resize', () => { // 注意这个方法是解决全局有两个window.resize
             // 重新校正
             this.correct()
         })
