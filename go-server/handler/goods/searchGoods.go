@@ -85,22 +85,9 @@ func SearchGoods(context *gin.Context) {
 		return
 	}
 
-	var goodsRes []gin.H
+	var goodsRes []model.Goods
 	for _, g := range goods {
-		goodsMeta := gin.H{
-			"created_at":   g.CreatedAt,
-			"update_at":    g.UpdatedAt,
-			"gid":          g.Gid,
-			"goods_code":   g.GoodsCode,
-			"name":         g.Name,
-			"model":        g.Model,
-			"goods_type":   g.GoodsType,
-			"manufacturer": g.Manufacturer,
-			"unit":         g.Unit,
-			"unit_price":   g.UnitPrice,
-			"image":        g.Image,
-		}
-		goodsRes = append(goodsRes, goodsMeta)
+		goodsRes = append(goodsRes, g)
 	}
 
 	context.JSON(http.StatusOK, gin.H{

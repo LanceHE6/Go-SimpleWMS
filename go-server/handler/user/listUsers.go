@@ -11,7 +11,7 @@ func ListUsers(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 
 	var users []model.User
-	err := db.Select([]string{"uid", "account", "permission", "created_at", "phone", "nickname"}).Find(&users).Error
+	err := db.Select("*").Find(&users).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of users",
@@ -21,17 +21,9 @@ func ListUsers(context *gin.Context) {
 		return
 	}
 
-	var usersRes []gin.H
+	var usersRes []model.User
 	for _, user := range users {
-		userRes := gin.H{
-			"uid":        user.Uid,
-			"account":    user.Account,
-			"permission": user.Permission,
-			"created_at": user.CreatedAt,
-			"phone":      user.Phone,
-			"nickname":   user.Nickname,
-		}
-		usersRes = append(usersRes, userRes)
+		usersRes = append(usersRes, user)
 	}
 
 	context.JSON(http.StatusOK, gin.H{

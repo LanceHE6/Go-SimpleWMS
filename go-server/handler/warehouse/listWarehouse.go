@@ -11,7 +11,7 @@ func ListWarehouse(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var warehouses []model.Warehouse
 
-	err := db.Select([]string{"wid", "name", "created_at", "comment", "manager", "status"}).Find(&warehouses).Error
+	err := db.Select("*").Find(&warehouses).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot get the list of warehouses",
@@ -21,18 +21,9 @@ func ListWarehouse(context *gin.Context) {
 		return
 	}
 
-	var warehousesRes []gin.H
+	var warehousesRes []model.Warehouse
 	for _, warehouse := range warehouses {
-
-		warehouseRes := gin.H{
-			"wid":        warehouse.Wid,
-			"name":       warehouse.Name,
-			"created_at": warehouse.CreatedAt,
-			"comment":    warehouse.Comment,
-			"manager":    warehouse.Manager,
-			"status":     warehouse.Status,
-		}
-		warehousesRes = append(warehousesRes, warehouseRes)
+		warehousesRes = append(warehousesRes, warehouse)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Get warehouse list successfully",
