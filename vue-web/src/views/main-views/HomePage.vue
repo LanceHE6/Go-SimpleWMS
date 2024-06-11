@@ -268,7 +268,7 @@ const token="bearer "+localStorage.getItem("token");
 
 const getData = async (url, params = {}) => {
   let resultObj = {}
-  await axios.get(url, {
+  await axios.get('/api' + url, {
     headers: {
       'Authorization': token
     },
