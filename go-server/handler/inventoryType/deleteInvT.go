@@ -25,8 +25,8 @@ func DeleteInventoryType(context *gin.Context) {
 
 	db := myDb.GetMyDbConnection()
 
-	// 删除仓库
-	err := db.Delete(&model.InventoryType{}, "itid=?", itid).Error
+	// 软删除
+	err := db.Model(&model.InventoryType{}).Where("itid = ?", itid).Update("is_deleted", 1).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete the inventory type",
