@@ -144,10 +144,10 @@ db:
 
 ## goods表
 
-| 字段 | id             |       gid        |  goods_code  |     name     |    model     |   goods_type   |   warehouse    | manufacturer |   quantity   |      unit      | created_at | updated_at |
-| :--: | -------------- | :--------------: | :----------: | :----------: | :----------: | :------------: | :------------: | :----------: | :----------: | :------------: | ---------- | ---------- |
-| 类型 | int            |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  |  varchar(255)  | varchar(255) | varchar(255) |  varchar(255)  | datetime   | datetime   |
-| 说明 | 数据库内置索引 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) | 存储仓库(外键) |    生产商    |     数量     | 计量单位(外键) | 创建时间   | 更新时间   |
+| 字段 | id             |       gid        |  goods_code  |     name     |    model     |   goods_type   | manufacturer |      unit      | created_at | updated_at |
+| :--: | -------------- | :--------------: | :----------: | :----------: | :----------: | :------------: | :----------: | :------------: | ---------- | ---------- |
+| 类型 | int            |   varchar(20)    | varchar(255) | varchar(255) | varchar(255) |  varchar(255)  | varchar(255) |  varchar(255)  | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引 |   货品编码   |   货品名称   |   型号规格   | 货品类型(外键) |    生产商    | 计量单位(外键) | 创建时间   | 更新时间   |
 
 ## units表
 
@@ -160,7 +160,14 @@ db:
 
 ## inventories表
 
-| 字段 | id             |          iid           |    number    | goods        |   inventory_type   | amount |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
-| :--: | -------------- | :--------------------: | :----------: | ------------ | :----------------: | ------ | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
-| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) |    varchar(255)    | int    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
-| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 货品id(外键) | 出入库类型id(外键) | 数量   | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       |            |            |
+| 字段 | id             |          iid           |    number    | goods_list |   inventory_type   | amount |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | ---------- | :----------------: | ------ | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | json       |    varchar(255)    | int    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 货品列表   | 出入库类型id(外键) | 数量   | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       |            |            |
+
+## stocks表
+
+| 字段 | id             |  warehouse   |    goods     | quantity | created_at | updated_at |
+| :--: | -------------- | :----------: | :----------: | :------: | :--------: | :--------: |
+| 类型 | int            | varchar(255) | varchar(255) |  float   |  datetime  |  datetime  |
+| 说明 | 数据库内置索引 | 仓库id(外键) | 货品id(外键) |   数量   |  创建时间  |  更新时间  |
