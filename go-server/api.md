@@ -3148,8 +3148,10 @@ headers:{
 
 | 参数名    | 参数类型 | 是否必填 | 参数说明    |
 | --------- | -------- | -------- | ----------- |
-| warehouse | string   | 是       | 仓库id(wid) |
+| warehouse | string   | 否       | 仓库id(wid) |
 | goods     | string   | 否       | 货品id(gid) |
+
+*注：只提供warehouse返回该仓库所有货品信息，只提供goods返回该货品所有库存信息*
 
 **返回结果示例**：
 
@@ -3177,6 +3179,37 @@ headers:{
             "quantity": 150
         }
     ]
+}
+// 查询成功（总库存） 203
+{
+    "code": 203,
+    "data": {
+        "rows": [
+            {
+                "created_at": "2024-06-12T10:36:41+08:00",
+                "updated_at": "2024-06-12T11:00:49+08:00",
+                "goods": "gf02c82db",
+                "warehouse": "_default_",
+                "quantity": 200
+            },
+            {
+                "created_at": "2024-06-12T11:06:25+08:00",
+                "updated_at": "2024-06-12T11:06:24+08:00",
+                "goods": "gf02c82db",
+                "warehouse": "wcd74b1e5",
+                "quantity": 100
+            },
+            {
+                "created_at": "2024-06-12T11:06:26+08:00",
+                "updated_at": "2024-06-12T11:06:27+08:00",
+                "goods": "gf02c82db",
+                "warehouse": "wf716f6dc",
+                "quantity": 500
+            }
+        ],
+        "total": 800
+    },
+    "message": "Get stock success"
 }
 // 参数缺失 400
 {
