@@ -3,7 +3,6 @@ package route
 import (
 	"Go_simpleWMS/handler"
 	"Go_simpleWMS/handler/auth"
-	"Go_simpleWMS/handler/upload"
 	"Go_simpleWMS/route/group"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
@@ -23,9 +22,7 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	ginApi.GET("/auth", func(c *gin.Context) {
 		auth.Auth(c)
 	})
-	ginApi.POST("/upload/goods_img", func(c *gin.Context) {
-		upload.GoodsImageUpload(c)
-	})
+
 	// 分组路由
 	group.UserGroup(ginApi)          // 用户路由
 	group.WarehouseGroup(ginApi)     // 仓库路由
@@ -37,4 +34,5 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	group.InventoryGroup(ginApi)     // 出入库路由
 	group.UnitGroup(ginApi)          // 单位路由
 	group.StockGroup(ginApi)         // 库存路由
+	group.UploadGroup(ginApi)        // 上传路由
 }

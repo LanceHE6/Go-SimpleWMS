@@ -52,12 +52,13 @@ func UpdateUser(context *gin.Context) {
 		})
 		return
 	}
-
 	var updateData = map[string]interface{}{
-		"password":   password,
 		"nickname":   nickname,
 		"permission": permission,
 		"phone":      phone,
+	}
+	if password != "" {
+		updateData["password"] = password
 	}
 
 	err = db.Model(&model.User{}).Where("uid = ?", uid).Updates(updateData).Error

@@ -49,8 +49,6 @@ func SearchGoods(context *gin.Context) {
 			"%"+keyword+"%",
 			"%"+keyword+"%",
 			"%"+keyword+"%",
-			"%"+keyword+"%",
-			"%"+keyword+"%",
 			"%"+keyword+"%")
 	}
 
