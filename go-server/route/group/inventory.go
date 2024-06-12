@@ -17,4 +17,7 @@ func InventoryGroup(ginApi *gin.RouterGroup) {
 	inventoryGroup.PUT("/update", utils.IsAdminMiddleware(), func(c *gin.Context) {
 		inventory.UpdateInv(c)
 	})
+	inventoryGroup.DELETE("/delete", utils.IsAdminMiddleware(), func(c *gin.Context) {
+		inventory.DeleteInv(c)
+	})
 }
