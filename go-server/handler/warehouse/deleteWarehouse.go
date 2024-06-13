@@ -26,7 +26,9 @@ func DeleteWarehouse(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 
 	// 删除仓库
-	err := db.Delete(&model.Warehouse{}, "wid=?", wid).Error
+	var delData model.Warehouse
+	db.Model(&model.Warehouse{}).Where("wid = ?", wid).First(&delData)
+	err := db.Delete(&delData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete the warehouse",

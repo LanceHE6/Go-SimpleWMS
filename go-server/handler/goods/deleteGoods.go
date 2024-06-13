@@ -25,8 +25,10 @@ func DeleteGoods(context *gin.Context) {
 
 	db := myDb.GetMyDbConnection()
 
-	// 删除仓库
-	err := db.Delete(&model.Goods{}, "gid=?", gid).Error
+	// 删除
+	var goods model.Goods
+	db.Model(&model.Goods{}).Where("gid=?", gid).First(&goods)
+	err := db.Delete(&goods).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Cannot delete the Goods",

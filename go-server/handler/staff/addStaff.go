@@ -4,9 +4,8 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
-	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -26,55 +25,47 @@ func AddStaff(context *gin.Context) {
 		})
 		return
 	}
-	staffName := data.Name
-	staffDeptId := data.DeptId
-	phone := data.Phone
+	// 执行注册逻辑
+	status, returnData := DoAddStaff(data)
+
+	context.JSON(status, returnData)
+}
+
+// DoAddStaff 执行注册逻辑函数
+func DoAddStaff(staffData addStaffRequest) (int, gin.H) {
+	name := staffData.Name
+	phone := staffData.Phone
+	deptId := staffData.DeptId
 
 	db := myDb.GetMyDbConnection()
 
-	var staff model.Staff
-
-	// 判断该员工是否已存在
-	err := db.Where("name=?", staffName).First(&staff).Error
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The staff already exists",
-			"code":    402,
-		})
-		return
-	}
-
-	newSid := "s" + utils.GenerateUuid(8) // 转换为 8 位字符串
-
-	var dep model.Department
-	err = db.Model(&model.Department{}).Where("did=?", staffDeptId).First(&dep).Error
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "The staff's department does not exist",
-			"code":    403,
-		})
-		return
-	}
-
-	// 增加员工
-	staff = model.Staff{
-		Name:       staffName,
+	// 插入新用户
+	newSid := "s" + utils.GenerateUuid(8)
+	staff := model.Staff{
 		Sid:        newSid,
+		Name:       name,
 		Phone:      phone,
-		Department: staffDeptId,
+		Department: deptId,
 	}
-	err = db.Create(&staff).Error
+	var dep model.Department
+	err := db.Model(&model.Department{}).Where("did=?", staff.Department).First(&dep).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the staff",
+		return http.StatusBadRequest, gin.H{
+			"message": fmt.Sprintf("The staff's %s department does not exist", staff.Name),
+			"code":    403,
+		}
+	}
+	if err := db.Create(&staff).Error; err != nil {
+		return http.StatusInternalServerError, gin.H{
+			"error":  fmt.Sprintf("Cannot insert new staff %s", staff.Name),
 			"detail": err.Error(),
-			"code":   501,
-		})
-		return
+			"code":   505,
+		}
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Staff added successfully",
+	return http.StatusOK, gin.H{
+		"message": "Staff registered successfully",
+		"sid":     newSid,
 		"code":    201,
-	})
+	}
 }

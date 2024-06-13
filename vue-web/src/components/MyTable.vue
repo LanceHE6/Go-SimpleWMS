@@ -5,20 +5,11 @@
     <el-header
       style="height: 20px"
     >
-      <large-table-header
-          v-if="large"
-          :operations="operations"
-          @add="add"
-          @download="download"
-          @upload="upload"
-          @search="searchChange"
-          @print="print"
-          @refresh="refresh"
-      />
 
       <table-header
-          v-else
           :operations="operations"
+          :has-submit-page="hasSubmitPage"
+          :large="large"
           @add="add"
           @download="download"
           @upload="upload"
@@ -31,10 +22,12 @@
 
     <el-main>
       <el-table
+          ref="myTable"
           :data="filterTableData"
           :border="true"
           :stripe="true"
-          height="60vh"
+          :height="height"
+          @selection-change="handleSelectionChange"
           style="width: 100%"
       >
         <el-table-column type="selection" width="55" />
@@ -67,7 +60,40 @@
           :label="item.label"
           :width="item.width"
           :sortable="item.sortable"
-          :formatter="mapping(item.property)"/>
+          :formatter="mapping(item.property)">
+          <template #default="scope" v-if="item.isImage">
+            <div style="display: flex; align-items: center">
+              <el-image
+                  class="table-col-img"
+                  v-if="scope.row.images && scope.row.images.length > 0"
+                  :src="`${axios.defaults.baseURL}/${scope.row.images[0].path}`"
+                  fit="cover"
+                  :preview-src-list="scope.row.images.map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
+                  preview-teleported
+              >
+                <template #error>
+                  <div class="error-image-slot" @click="uploadImg(scope.row[keyData])">
+                    <el-icon><Picture /></el-icon>
+                  </div>
+                </template>
+              </el-image>
+
+              <div class="error-image-slot" v-else @click="uploadImg(scope.row[keyData])">
+                <el-icon><Plus /></el-icon>
+              </div>
+
+              <el-button
+                  v-if="scope.row.images && scope.row.images.length > 0 && operations.uploadImg"
+                  type="success"
+                  icon="Edit"
+                  @click="uploadImg(scope.row[keyData])"
+                  circle
+                  plain
+                  style="margin-left: 10px"
+              />
+            </div>
+          </template>
+        </el-table-column>
 
       </el-table>
     </el-main>
@@ -86,7 +112,7 @@
   </el-container>
 
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.edit"
       v-model="editFormVisible"
       title="编辑"
       width="500"
@@ -147,7 +173,7 @@
 
   </el-dialog>
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.add"
       v-model="addFormVisible"
       title="添加"
       width="500"
@@ -208,10 +234,11 @@
 
   </el-dialog>
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.upload"
       v-model="uploadFormVisible"
       title="批量导入"
       width="700"
+      @closed="uploadDialogClosed"
       center
   >
     <el-upload
@@ -220,7 +247,7 @@
         accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         :auto-upload="false"
         :http-request="excelToJson"
-        limit="1"
+        :limit="1"
         drag
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -245,15 +272,56 @@
     </template>
 
   </el-dialog>
+  <el-dialog
+      v-if="operations.uploadImg"
+      v-model="uploadImgVisible"
+      title="上传图片"
+      width="700"
+      @opened="uploadImgDialogOpen"
+      center
+  >
+    <el-upload
+        ref="myUploadImgForm"
+        class="avatar-uploader"
+        accept="image/jpeg, image/png, image/gif, image/bmp, image/x-bmp, image/webp, image/tiff, image/x-tiff, image/svg+xml"
+        list-type="picture-card"
+        :auto-upload="false"
+        :limit="5"
+        :on-preview="handlePictureCardPreview"
+        :on-change="handleImgChange"
+        :on-remove="handleRemove"
+        :on-exceed="uploadImgExceed"
+    >
+      <el-icon><Plus /></el-icon>
+      <template #tip>
+        <div class="el-upload__tip">
+          <el-text type="info">支持jpg、png、svg、webp等图片类型文件</el-text>
+        </div>
+      </template>
+    </el-upload>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="uploadImgVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitUploadImgData()">
+          上传
+        </el-button>
+      </div>
+    </template>
+
+  </el-dialog>
+
+  <el-dialog v-model="imgDialogVisible" class="img-dialog">
+    <el-image :src="dialogImageUrl" alt="Preview Image" :fit="'contain'" class="preview-img"/>
+  </el-dialog>
 </template>
 
 <script setup>
 import {computed, markRaw, ref, watch} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
-import {Delete, UploadFilled} from "@element-plus/icons-vue";
+import {Delete, Plus, UploadFilled, Picture} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
 import TableHeader from "@/components/TableHeader.vue";
-import LargeTableHeader from "@/components/LargeTableHeader.vue";
+import axios from "axios";
 
 const prop = defineProps({
   large:{
@@ -331,10 +399,41 @@ const prop = defineProps({
     type: Boolean,
     default: () => false,
     description: '是否需要提交表单的页面, 如果为false则使用简单的窗口来提交表单'
+  },
+  height:{
+    type: String,
+    default: () => '60vh',
+    description: '表格高度'
   }
 });
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh"]);
+const emit = defineEmits([
+  "add", "download", "upload",
+  "edit", "del", "update",
+  "search", "refresh", "uploadImg",
+  "selectionChange"
+]);
+
+//表格当前已选内容
+let multipleSelection = []
+const getMultipleSelection = () => multipleSelection
+//清空表格选择
+const clearSelection = () => myTable.value.clearSelection()
+//暴露函数，可供父组件调用
+defineExpose({
+  getMultipleSelection,
+  clearSelection
+});
+
+//上传图片列表
+const imgList = ref([])
+
+//表格高度
+//const tableHeight = document.documentElement.clientHeight * 0.6
+//const colHeight = ref(tableHeight / 10)
+
+const dialogImageUrl = ref('')
+const imgDialogVisible = ref(false)
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -351,6 +450,9 @@ const tableHead = prop.tableColList.map( item => {
   return item.label
 })
 
+//表格
+const myTable = ref(null)
+
 //编辑表单
 const myEditForm = ref(null)
 //编辑表单是否可见
@@ -365,6 +467,13 @@ let addFormVisible = ref(false)
 const myUploadForm = ref(null)
 //上传表单是否可见
 let uploadFormVisible = ref(false)
+
+//上传图片窗口组件
+const myUploadImgForm = ref(null)
+//上传图片窗口是否可见
+let uploadImgVisible = ref(false)
+//上传图片的对应列id
+let uploadImgId = ref('')
 
 //监听数据变化并实时更新表格
 watch(() => prop.defaultData, (newValue) => {
@@ -385,7 +494,6 @@ const filterTableData = computed(() =>
 
 //输入元素超过4个的窗口分列显示
 const DIALOG_COL = 4
-console.log("table:", prop.operations)
 let addDialogClass = prop.operations.add
     ? ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
     : null
@@ -473,7 +581,7 @@ async function submitAddForm(form) {
     if (valid) {
       //类型转换
       for (const i in prop.addDataTemplate.dataType) {
-        if (addForm.value.data[i]) {
+        if (i in addForm.value.data) {
           if (prop.addDataTemplate.dataType[i] === "String") {
             addForm.value.data[i] = addForm.value.data[i].toString()
           }
@@ -482,6 +590,9 @@ async function submitAddForm(form) {
           }
           else if (prop.addDataTemplate.dataType[i] === "Float") {
             addForm.value.data[i] = addForm.value.data[i] !== '' ? parseFloat(addForm.value.data[i]) : 0.0
+          }
+          else{
+            console.log('unknown dataType', i)
           }
         }
       }
@@ -512,11 +623,24 @@ function upload(){
   uploadFormVisible.value = true
 }
 
+function uploadImg(id){
+  if(prop.operations.uploadImg === true){
+    uploadImgVisible.value = true
+    uploadImgId.value = id
+  }
+}
+
 function submitUploadData(){
   myUploadForm.value.submit()
   uploadFormVisible.value = false
 }
 
+function submitUploadImgData(){
+  myUploadImgForm.value.clearFiles()
+  console.log("submit", imgList.value)
+  emit("uploadImg",uploadImgId.value ,imgList.value)
+  uploadImgVisible.value = false
+}
 //提交编辑表单
 async function submitEditForm(form){
   if (!form) return
@@ -635,6 +759,47 @@ function downloadTemplate(){
   XLSX.writeFileXLSX(workbook, "提交模版.xlsx")
 }
 
+function uploadDialogClosed(){
+  myUploadForm.value.clearFiles()
+}
+
+const handleImgChange = (uploadFile) => {
+  if (!/\.(jfif|pjpeg|jpeg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(uploadFile.name.toLowerCase())) {
+    // 格式根据自己需求定义
+    ElMessage.error('上传格式不正确，请上传支持的图片格式')
+    myUploadImgForm.value.handleRemove(uploadFile)
+    return false
+  }
+  imgList.value.push(uploadFile.raw)
+}
+
+const uploadImgDialogOpen = () => {
+  myUploadImgForm.value.clearFiles()
+  imgList.value.length = 0  //清空图片数组
+}
+
+//上传图片超限时调用此函数
+const uploadImgExceed = () => {
+  ElMessage.error("图片上传量已达上限！")
+}
+
+const handlePictureCardPreview = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url
+  imgDialogVisible.value = true
+}
+
+const handleRemove = (f) => {
+  const index = imgList.value.indexOf(f.raw)
+  if(index !== -1){
+    imgList.value.splice(index, 1)
+  }
+}
+
+const handleSelectionChange = (val) => {
+  multipleSelection = val
+  emit("selectionChange", val)
+}
+
 </script>
 
 <style scoped>
@@ -648,5 +813,53 @@ function downloadTemplate(){
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
+}
+
+.table-col-img{
+  height: 50px;
+  width: 50px;
+}
+
+.preview-img{
+  max-height: 70vh;
+  width: auto;
+}
+
+.img-dialog{
+  width: auto;
+  height: auto;
+}
+
+.error-image-slot{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>

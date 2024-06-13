@@ -96,7 +96,7 @@
             <el-icon>
               <user />
             </el-icon>
-            用户
+            {{state.user?.nickname || '用户'}}
           </template>
           <el-menu-item @click="help">帮助中心</el-menu-item>
           <el-menu-item @click="about">关于</el-menu-item>
@@ -134,6 +134,7 @@ const state = reactive({
   nowMenuActive: '',  //当前首部栏界面
   defaultPage: '',  //当前路由界面
   headMenuOffset: 0,  //首部菜单锚点偏移量
+  user: null,  //用户
 })
 
 function help(){
@@ -143,8 +144,8 @@ function help(){
 async function about(){
   let go_simpleWMS_version = 'unknown'
   let go_server_version = 'unknown'
-  let vue_web_version = 'v0.0.2.20240610_Alpha'
-  await axios.get('/ping')
+  let vue_web_version = 'v0.1.0.20240613_Alpha'
+  await axios.get('/api/ping')
       .then(result => {
         console.log("ping:", result)
         if(result.status === 200){
@@ -204,9 +205,17 @@ const pageChange = (key = '') => {
 //初始化
 async function initialize(){
   pageChange()
-
+  const userJson = localStorage.getItem("user") || '';
+  if(!userJson){
+    ElMessage.error("用户信息获取失败，请重新登录！")
+    await router.push('/')
+  }
+  else{
+    state.user = JSON.parse(userJson)
+  }
+  console.log("user", state.user)
   const token="bearer "+localStorage.getItem("token");
-  await axios.get('/auth', {
+  await axios.get('/api/auth', {
     headers: {
       'Authorization': token
     }

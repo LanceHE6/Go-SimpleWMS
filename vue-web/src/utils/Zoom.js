@@ -12,15 +12,16 @@ class Zoom {
     // 校正浏览器缩放比例
     correct() {
         // 当前页面屏幕分辨率
-        let width = document.documentElement.clientWidth
-        let height = document.documentElement.clientHeight
-        //1490 为你的设计稿的宽度
-        document.getElementsByTagName('body')[0].style.zoom = height * 2 / width ;
+        // let width = document.documentElement.clientWidth
+        // let height = document.documentElement.clientHeight
+        // console.log("zoom", 2 * height / width)
+
+        document.getElementsByTagName('body')[0].style.zoom = '1.0' ;
 
     }
     // 监听页面缩放
     watch() {
-        this.addHandler(window, 'resize', function() { // 注意这个方法是解决全局有两个window.resize
+        this.addHandler(window, 'resize', () => { // 注意这个方法是解决全局有两个window.resize
             // 重新校正
             this.correct()
         })

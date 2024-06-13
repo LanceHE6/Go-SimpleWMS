@@ -2,7 +2,6 @@
   <DataShowView
       :table-col-list="tableColList"
       :key-data="'iid'"
-      :add-form="addForm"
       :urls="urls"
       :extra-params="extraParams"
       @addTab="addTab"
@@ -14,7 +13,6 @@
 </template>
 
 <script setup>
-import {reactive} from "vue";
 import DataShowView from "@/components/DataShowView.vue";
 
 //对外事件列表
@@ -66,46 +64,6 @@ const tableColList = [
     }},
   {property: "comment", label: "备注", sortable: false},
 ]
-
-/**
- * 添加数据时所用到的对象
- * */
-const addForm = reactive({
-  data : {
-    date: '',
-    number: '',
-    department: '',
-    inventory_type: '',
-    goods_list: [],
-    warehouse: '',
-    manufacturer: '',
-    operator: '',
-    comment: '',
-  },
-  dataType:{
-    date:'String',
-    number: 'String',
-    department: 'String',
-    inventory_type: 'String',
-    goods_list: 'Array',
-    warehouse: 'String',
-    manufacturer: 'String',
-    operator: 'String',
-    comment: 'String',
-  },
-  dataNum: 9,
-  rules: {
-    inventory_type:[
-      { required: 'true', message: '请选择出入库类型', trigger: 'blur' }
-    ],
-    warehouse:[
-      { required: 'true', message: '请选择所属仓库', trigger: 'blur' }
-    ],
-    operator:[
-      { required: 'true', message: '请选择操作员', trigger: 'blur' }
-    ],
-  }
-})
 
 /**
  * 网络请求url

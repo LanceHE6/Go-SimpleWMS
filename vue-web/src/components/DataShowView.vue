@@ -15,6 +15,7 @@
       :operations="state.operations"
       :large="large"
       :has-submit-page="hasSubmitPage"
+      :height="tableHeight"
       @add="add"
       @upload="upload"
       @del="del"
@@ -22,6 +23,7 @@
       @update="update"
       @search="startSearch"
       @refresh="initialize"
+      @upload-img="uploadImg"
   >
   </my-table>
 </template>
@@ -29,12 +31,17 @@
 <script setup>
 import axios from "axios";
 import {ElMessage, ElNotification} from "element-plus";
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
 const prop = defineProps({
+  tableHeight:{
+    type: String,
+    default: () => '60vh',
+    description: '表格高度'
+  },
   large:{
     type: Boolean,
     default: () => false,
@@ -95,6 +102,11 @@ const prop = defineProps({
     default: () => false,
     description: '是否支持打印功能'
   },
+  uploadImg:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持图片上传功能'
+  },
   hasSubmitPage:{
     type: Boolean,
     default: () => false,
@@ -102,8 +114,42 @@ const prop = defineProps({
   }
 });
 
+//表格对象
+const myTable = ref(null)
+
+const state =  reactive({
+  pageCount: 1, //数据总页数
+  currentPage: 1, //当前页数
+  searchWord: '',  //后端查询关键词
+  isLoading: true,  //数据是否正在加载
+  allDataArray: [],  //所有表格展示数据列表
+  currentDataArray: [], //当前表格展示数据列表
+  addFKMap: new Map(),  //添加窗口外键
+  editFKMap: new Map(),  //编辑窗口外键
+  showFKMap: new Map(),  //显示映射外键
+  operations: {
+    add: prop.addForm !== null,
+    del: prop.deleteDataBody !== null,
+    edit: prop.editForm !== null,
+    upload: prop.upload,
+    download: prop.download,
+    print: prop.print,
+    uploadImg: prop.uploadImg
+  }
+})
+
 //对外事件列表
 const emit = defineEmits(["addTab"]);
+
+//获取当前已选项列表
+const getMultipleSelection = () => myTable.value.getMultipleSelection()
+//清空表格选择
+const clearSelection = () => myTable.value.clearSelection()
+//暴露函数，可供父组件调用
+defineExpose({
+  getMultipleSelection,
+  clearSelection
+});
 
 //初始化函数
 async function initialize(){
@@ -207,6 +253,7 @@ async function update(currentPage) {
     // 使用这些索引来获取对应的元素
     state.currentDataArray = state.allDataArray.slice(startIndex, endIndex);
   } else {  //后端分页
+    state.isLoading = true
     const defaultParams = {
       page: currentPage,
       page_size: PAGE_SIZE,
@@ -218,6 +265,7 @@ async function update(currentPage) {
       currentPage = state.pageCount
     }
     state.currentPage = currentPage
+    state.isLoading = false
   }
 }
 
@@ -257,31 +305,27 @@ function del(row){
   deleteData(prop.deleteDataBody)
 }
 
+//上传图片
+async function uploadImg(id, fileList) {
+
+  // 创建一个新的FormData对象
+  const formData = new FormData();
+  formData.append('goods', id);
+
+  // 遍历文件列表并添加到FormData中
+  fileList.forEach((file, _) => {
+    formData.append('image', file);
+  });
+
+
+  // 调用uploadImage函数并传入formData
+  await uploadImage(formData);
+}
+
 //点击子组件的编辑按钮, 子组件处理完返回的可提交表单
 function edit(form){
   updateData(form)
 }
-
-const state =  reactive({
-  pageCount: 1, //数据总页数
-  currentPage: 1, //当前页数
-  searchWord: '',  //后端查询关键词
-  isLoading: true,  //数据是否正在加载
-  allDataArray: [],  //所有表格展示数据列表
-  currentDataArray: [], //当前表格展示数据列表
-  addFKMap: new Map(),  //添加窗口外键
-  editFKMap: new Map(),  //编辑窗口外键
-  showFKMap: new Map(),  //显示映射外键
-  operations: {
-    add: prop.addForm !== null,
-    del: prop.deleteDataBody !== null,
-    edit: prop.editForm !== null,
-    upload: prop.upload,
-    download: prop.download,
-    print: prop.print
-  }
-})
-
 
 const token="bearer "+localStorage.getItem("token");
 
@@ -294,6 +338,7 @@ const token="bearer "+localStorage.getItem("token");
 
 const getData = async (url = prop.urls.getData, params = {}) => {
   let resultList = []
+  url = '/api' + url
   await axios.get(url, {
     headers: {
       'Authorization': token
@@ -325,7 +370,7 @@ const getData = async (url = prop.urls.getData, params = {}) => {
  * */
 const deleteData=async (data) => {
   state.isLoading = true
-  await axios.delete(prop.urls.deleteData, {
+  await axios.delete('/api' + prop.urls.deleteData, {
         headers: {
           'Authorization': token
         },
@@ -351,7 +396,7 @@ const deleteData=async (data) => {
  * */
 const addData=async (newData) => {
   state.isLoading = true
-  await axios.post(prop.urls.addData, newData, {
+  await axios.post('/api' + prop.urls.addData, newData, {
     headers: {
       'Authorization': token
     }
@@ -375,7 +420,7 @@ const addData=async (newData) => {
  * */
 const updateData=async (newData) => {
   state.isLoading = true
-  await axios.put(prop.urls.updateData, newData, {
+  await axios.put('/api' + prop.urls.updateData, newData, {
         headers: {
           'Authorization': token
         },
@@ -401,7 +446,7 @@ const updateData=async (newData) => {
 const uploadData=async (list) => {
   console.log(list)
   state.isLoading = true
-  await axios.post(prop.urls.uploadData, {list: list}, {
+  await axios.post('/api' + prop.urls.uploadData, {list: list}, {
     headers: {
       'Authorization': token
     }
@@ -434,6 +479,31 @@ const uploadData=async (list) => {
       .catch( error => {
         ElMessage.error("网络请求出错了！数据是否已被添加过？")
         console.error("uploadData:", error)
+      })
+  await update(state.currentPage)
+  state.isLoading = false
+}
+
+/**
+ * uploadImage()
+ * 上传图片 param: data
+ * */
+const uploadImage=async (data) => {
+  state.isLoading = true
+  await axios.post('/api' + prop.urls.uploadImage, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': token
+    }
+  })
+      .then( async message => {
+        ElMessage.success("图片上传成功！")
+        console.log("uploadImage:", message)
+        state.allDataArray = await getData()
+      })
+      .catch( error => {
+        ElMessage.error("网络请求出错了！")
+        console.error("uploadImage:", error)
       })
   await update(state.currentPage)
   state.isLoading = false

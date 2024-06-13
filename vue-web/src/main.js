@@ -9,7 +9,7 @@ import "element-plus/theme-chalk/el-message.css";
 import ECharts from 'vue-echarts'
 import 'echarts'
 
-axios.defaults.baseURL = localStorage.getItem("url") || "http://47.236.80.244:6007/api";
+axios.defaults.baseURL = localStorage.getItem("url") || "http://47.236.80.244:6007";
 
 const app = createApp(App)
 

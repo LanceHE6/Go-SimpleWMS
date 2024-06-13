@@ -13,7 +13,7 @@ import Entry from '@/views/main-views/entry-and-out/Entry.vue'
 import Out from '@/views/main-views/entry-and-out/Out.vue'
 import Check from '@/views/main-views/entry-and-out/Check.vue'
 import Allocate from '@/views/main-views/entry-and-out/Allocate.vue'
-import InventorySubmit from "@/views/submit-views/InventorySubmit.vue";
+import InventorySubmit from "@/views/main-views/entry-and-out/submit-views/InventorySubmit.vue";
 
 
 import Setting from  '@/views/main-views/Setting.vue'
