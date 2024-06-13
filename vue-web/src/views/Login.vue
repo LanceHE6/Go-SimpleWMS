@@ -83,7 +83,6 @@
 
 <script setup>
 import {ref, reactive, inject, onMounted} from "vue";
-import {UserStore} from "@/store/UserStore";
 import {router} from "@/router/index.js";
 import { ElMessage } from 'element-plus'
 
@@ -151,10 +150,9 @@ const submitForm = async (form) => {
             .then(async result => {
               if (result.data.code === 201) {
                 // 需要将返回的数据存入Store中
-                UserStore.token = result.data.token
-                localStorage.setItem("token", UserStore.token)
-                console.log(localStorage.getItem("token"))
-
+                localStorage.setItem("token", result.data.data.token)
+                localStorage.setItem("user", JSON.stringify(result.data.data.user))
+                console.log("user", localStorage.getItem('user'))
                 // 记住账号密码
                 if (state.remember) {
                   localStorage.setItem("account", state.ruleForm.account)
@@ -172,11 +170,11 @@ const submitForm = async (form) => {
                 localStorage.setItem("token", "")
                 ElMessage.error("账号或密码错误")
               }
-              console.log(result)
+              console.log("login", result)
             })
             .catch(error => {
                   ElMessage.error("网络请求出错了！")
-                  console.error(error)
+                  console.error("login", error)
                   state.loading = false
                 }
             )
