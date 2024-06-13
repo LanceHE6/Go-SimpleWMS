@@ -15,6 +15,7 @@
       :operations="state.operations"
       :large="large"
       :has-submit-page="hasSubmitPage"
+      :height="tableHeight"
       @add="add"
       @upload="upload"
       @del="del"
@@ -30,12 +31,17 @@
 <script setup>
 import axios from "axios";
 import {ElMessage, ElNotification} from "element-plus";
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
 const prop = defineProps({
+  tableHeight:{
+    type: String,
+    default: () => '60vh',
+    description: '表格高度'
+  },
   large:{
     type: Boolean,
     default: () => false,
@@ -96,6 +102,11 @@ const prop = defineProps({
     default: () => false,
     description: '是否支持打印功能'
   },
+  uploadImg:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持图片上传功能'
+  },
   hasSubmitPage:{
     type: Boolean,
     default: () => false,
@@ -103,8 +114,39 @@ const prop = defineProps({
   }
 });
 
+//表格对象
+const myTable = ref(null)
+
+const state =  reactive({
+  pageCount: 1, //数据总页数
+  currentPage: 1, //当前页数
+  searchWord: '',  //后端查询关键词
+  isLoading: true,  //数据是否正在加载
+  allDataArray: [],  //所有表格展示数据列表
+  currentDataArray: [], //当前表格展示数据列表
+  addFKMap: new Map(),  //添加窗口外键
+  editFKMap: new Map(),  //编辑窗口外键
+  showFKMap: new Map(),  //显示映射外键
+  operations: {
+    add: prop.addForm !== null,
+    del: prop.deleteDataBody !== null,
+    edit: prop.editForm !== null,
+    upload: prop.upload,
+    download: prop.download,
+    print: prop.print,
+    uploadImg: prop.uploadImg
+  }
+})
+
 //对外事件列表
 const emit = defineEmits(["addTab"]);
+
+//获取当前已选项列表
+const getMultipleSelection = () => myTable.value.getMultipleSelection()
+//暴露函数，可供父组件调用
+defineExpose({
+  getMultipleSelection
+});
 
 //初始化函数
 async function initialize(){
@@ -261,40 +303,26 @@ function del(row){
 }
 
 //上传图片
-async function uploadImg(id, file) {
-  console.log("uploadImg", id, file)
-  const requestBody = {}
-  requestBody[prop.keyData] = id
-  requestBody['image'] = file
+async function uploadImg(id, fileList) {
 
-  await uploadImage(requestBody)
+  // 创建一个新的FormData对象
+  const formData = new FormData();
+  formData.append('goods', id);
+
+  // 遍历文件列表并添加到FormData中
+  fileList.forEach((file, _) => {
+    formData.append('image', file);
+  });
+
+
+  // 调用uploadImage函数并传入formData
+  await uploadImage(formData);
 }
 
 //点击子组件的编辑按钮, 子组件处理完返回的可提交表单
 function edit(form){
   updateData(form)
 }
-
-const state =  reactive({
-  pageCount: 1, //数据总页数
-  currentPage: 1, //当前页数
-  searchWord: '',  //后端查询关键词
-  isLoading: true,  //数据是否正在加载
-  allDataArray: [],  //所有表格展示数据列表
-  currentDataArray: [], //当前表格展示数据列表
-  addFKMap: new Map(),  //添加窗口外键
-  editFKMap: new Map(),  //编辑窗口外键
-  showFKMap: new Map(),  //显示映射外键
-  operations: {
-    add: prop.addForm !== null,
-    del: prop.deleteDataBody !== null,
-    edit: prop.editForm !== null,
-    upload: prop.upload,
-    download: prop.download,
-    print: prop.print
-  }
-})
-
 
 const token="bearer "+localStorage.getItem("token");
 
