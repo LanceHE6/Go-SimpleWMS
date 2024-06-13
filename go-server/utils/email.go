@@ -6,16 +6,30 @@ import (
 	"crypto/tls"
 	"fmt"
 	"gopkg.in/gomail.v2"
+	"os"
+	"strconv"
 )
 
 // SendVerifyEmail 发送绑定邮箱验证邮件
 func SendVerifyEmail(target string, account string, code string) error {
 	message := emailTemplate.GetVerifyEmailHTML(target, account, code)
 
-	host := config.ServerConfig.SMTP.HOST
-	port := config.ServerConfig.SMTP.PORT // 使用 SSL/TLS 端口
-	userName := config.ServerConfig.SMTP.USERNAME
-	password := config.ServerConfig.SMTP.PASSWORD
+	host := os.Getenv("SMTP_HOST")
+	if host == "" {
+		host = config.ServerConfig.SMTP.HOST
+	}
+	port, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	if port == 0 {
+		port = config.ServerConfig.SMTP.PORT // 使用 SSL/TLS 端口
+	}
+	userName := os.Getenv("SMTP_USERNAME")
+	if userName == "" {
+		userName = config.ServerConfig.SMTP.USERNAME
+	}
+	password := os.Getenv("SMTP_PASSWORD")
+	if password == "" {
+		password = config.ServerConfig.SMTP.PASSWORD
+	}
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", "SimpleWMS"+"<"+userName+">")
