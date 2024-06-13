@@ -6,10 +6,24 @@
 
 ```
 http://47.236.80.244:6007
-https://api.simplewms.hycerlance.fun/api
+https://simplewms.hycerlance.fun/api
 ```
 
 
+
+----
+
+## 状态码说明
+
+| code |   2xx    |   4xx    |      5xx       |
+| :--: | :------: | :------: | :------------: |
+| 说明 | 请求成功 | 请求有误 | 服务端内部错误 |
+
+## 业务码说明
+
+| code |    1xx     |   2xx    |   4xx    |      5xx       |
+| :--: | :--------: | :------: | :------: | :------------: |
+| 说明 | 鉴权不通过 | 处理成功 | 处理失败 | 服务端内部错误 |
 
 ## 请求说明
 
@@ -39,14 +53,13 @@ headers:{
     "data": {
         "version": "v0.0.1.20240605_Alpha"
     },
-    "message": "Hello Go-SimpleWMS"
+    "msg": "Hello Go-SimpleWMS"
 }
 ```
 
-----
 
 
-
+## 用户
 
 ### 鉴权：
 
@@ -73,30 +86,35 @@ headers:{
 ### 鉴权相关返回示例
 
 ```json
-// 无token 400
+// 无token 401
 {
-    "code": 401,
-	"message": "No Authorization header provided"
+    "code": 101,
+	"msg": "No Authorization header provided",
+    "data": null
 }
-// 无效token 400
+// 无效token 401
 {
-    "message": "Invalid token",
-	"code":    401,
+    "msg": "Invalid token",
+	"code":    102,
+    "data": null
 }
 // 鉴权通过 200
 {
     "code": 201,
-	"uid":  uid,
+    "msg": "Hello",
+	"data":  {
+    	"uid": uid
+	},
 }
 ```
 
 ### 鉴权相关返回数据说明
 
-| 参数名  | 参数类型 |       参数说明       |
-| :-----: | :------: | :------------------: |
-|  code   |   int    |        业务码        |
-|  error  |  string  | 后端服务内部错误消息 |
-| message |  string  |     请求返回消息     |
+| 参数名 | 参数类型 |       参数说明       |
+| :----: | :------: | :------------------: |
+|  code  |   int    |        业务码        |
+| error  |  string  | 后端服务内部错误消息 |
+|  msg   |  string  |     请求返回消息     |
 
 ### 鉴权相关返回状态码说明
 
@@ -106,21 +124,7 @@ headers:{
 |  403   |   StatusForbidden   |     权限拒绝     |
 |  500   | InternalServerError | 后端服务内部错误 |
 
-----
 
-## 业务码 code 说明
-
-| code | 1xx  |   2xx    |   4xx    |   5xx    |
-| :--: | :--: | :------: | :------: | :------: |
-| 说明 | 鉴权 | 处理成功 | 处理失败 | 内部错误 |
-
-
-
-----
-
-
-
-## 用户
 
 ### 注册
 
@@ -146,46 +150,24 @@ headers:{
 // 注册成功 200
 {
     "code": 201,
-    "message": "User registered successfully",
-    "uid": "00000002"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 账号已被注册 403
-{
-    "message": "The account '%s' has been registered",
-	"code":    402,
-}
-// 无法注册新用户 500
-{
-    "error":  "Cannot insert new user",
-	"detail": err.Error(),
-	"code":   505,
+    "msg": "User registered successfully",
+    "data": {
+        "uid": uid
+    }
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |       参数说明       |
-| :-----: | :------: | :------------------: |
-|  code   |   int    |        业务码        |
-| message |  string  |       返回消息       |
-|   uid   |  string  | 注册成功返回的用户id |
-|  error  |  string  |   后端内部错误消息   |
-| detail  |  string  |       错误详情       |
+| 参数名 | 参数类型 |       参数说明       |
+| :----: | :------: | :------------------: |
+|  code  |   int    |        业务码        |
+|  msg   |  string  |       返回消息       |
+|  uid   |  string  | 注册成功返回的用户id |
+| error  |  string  |   后端内部错误消息   |
+| detail |  string  |       错误详情       |
 
-**返回状态码说明**
 
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     注册成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  403   |      Forbidden      |   账号已被注册   |
-|  500   | InternalServerError | 后端服务内部错误 |
 
 ----
 
@@ -219,60 +201,50 @@ headers:{
 // 部分导入失败 217
 {
     "code": 403,
-    "detail": [
-        {
-            "code": 402,
-            "message": "The account '87' has been registered"
-        }
+    "msg": "Some users failed to register; 1/2",
+    "data": {
+    	"detail": [
+            {
+                "code": 402,
+                "msg": "The account '87' has been registered"
+            }
     ],
-    "message": "Some users failed to register; 1/2"
+    }
 }
 // 全部导入失败 400
 {
     "code": 402,
-    "detail": [
-        {
-            "code": 402,
-            "message": "The account '87' has been registered"
-        },
-        {
-            "code": 402,
-            "message": "The account '81' has been registered"
-        }
+    "msg": "All users failed to register",
+    "data": {
+         "detail": [
+             {
+                 "code": 402,
+                 "msg": "The account '87' has been registered"
+             },
+             {
+                 "code": 402,
+                 "msg": "The account '81' has been registered"
+             }
     ],
-    "message": "All users failed to register"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
+    }
 }
 // 全部导入成功 200
 {
     "code":    201,
-	"message": "All users have completed registration",
+	"msg": "All users have completed registration",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |       参数说明       |
-| :-----: | :------: | :------------------: |
-|  code   |   int    |        业务码        |
-| message |  string  |       返回消息       |
-|   uid   |  string  | 注册成功返回的用户id |
-|  error  |  string  |   后端内部错误消息   |
-| detail  |  string  |   每个错误注册详情   |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |             说明             |
-| :----: | :-----------------: | :--------------------------: |
-|  200   |         OK          |           注册成功           |
-|  217   |   PartialContent    |        注册不完全成功        |
-|  400   |     BadRequest      | 请求参数不全获取注册全部失败 |
-|  500   | InternalServerError |       后端服务内部错误       |
+| 参数名 | 参数类型 |       参数说明       |
+| :----: | :------: | :------------------: |
+|  code  |   int    |        业务码        |
+|  msg   |  string  |       返回消息       |
+|  uid   |  string  | 注册成功返回的用户id |
+| error  |  string  |   后端内部错误消息   |
+| detail |  string  |   每个错误注册详情   |
 
 ----
 
@@ -311,46 +283,19 @@ headers:{
             "phone": ""
         }
     },
-    "message": "Login successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法生成token 500
-{
-    "error":  "Cannot generate token",
-	"detail": err.Error(),
-	"code":   501,
-}
-// 无法更新token 500
-{
-    "error":  "Cannot update token",
-	"detail": err.Error(),
-	"code":   502,
+    "msg": "Login successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |        参数说明         |
-| :-----: | :------: | :---------------------: |
-|  code   |   int    |         业务码          |
-| message |  string  |        返回消息         |
-|  token  |  string  | 登录成功返回的用户token |
-|  error  |  string  |    后端内部错误消息     |
-| detail  |  string  |        错误详情         |
-
-**返回状态码说明**
-
-| 状态码 |         含义         |       说明       |
-| :----: | :------------------: | :--------------: |
-|  200   |          OK          |     登录成功     |
-|  203   | NonAuthoritativeInfo | 账号或密码不正确 |
-|  400   |      BadRequest      |   请求参数不全   |
-|  500   | InternalServerError  | 后端服务内部错误 |
+| 参数名 | 参数类型 |        参数说明         |
+| :----: | :------: | :---------------------: |
+|  code  |   int    |         业务码          |
+|  msg   |  string  |        返回消息         |
+| token  |  string  | 登录成功返回的用户token |
+| error  |  string  |    后端内部错误消息     |
+| detail |  string  |        错误详情         |
 
 ----
 
@@ -376,44 +321,19 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "User deleted successfully"
-}
-// 参数有误 400 
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 非法删除对象 403
-{
-    "message": "Invalid target uid",
-	"code":    402,
-}
-// 无法删除用户 500
-{
-    "error":  "Cannot delete user",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "User deleted successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     登录成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -445,44 +365,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "User updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 用户不存在 403
-{
-    "message": "The user does not exist",
-	"code":    403,
-}
-// 无法更新用户 500
-{
-    "error":  "Cannot update user",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "User updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -506,8 +401,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get user list successfully",
-    "rows": [
+    "msg": "Get user list successfully",
+    "data": {
+        "rows": [
         {
             "account": "admin",
             "nickname": "admin",
@@ -549,32 +445,20 @@ headers:{
             "uid": "00000005"
         }
     ]
-}
-// 无法获取列表 500
-{
-    "error":  "Cannot get the list of users",
-	"detail": err.Error(),
-	"code":   "501",
+    }
+
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   用户信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   用户信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -598,44 +482,20 @@ headers:{
 ```json
 // 发送成功 200
 {
-    "message": "Verification code sent successfully",
+    "msg": "Verification code sent successfully",
 	"code":    200,
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标用户不存在 400
-{
-    "message": "User does not exist",
-	"code":    402,
-}
-// 发送失败 500
-{
-    "message": "Failed to send email",
-	"code":    501,
-	"detail":  err.Error(),
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     登录成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -662,43 +522,20 @@ headers:{
 ```json
 // 绑定成功 200
 {
-    "message": "Email verification successful",
+    "msg": "Email verification successful",
 	"code":    200,
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 验证失败 400
-{
-    "message": "Invalid verification code",
-	"code":    401,
-}
-// 验证码过期 500
-{
-   "message": "The verification code has expired",
-	"code":    402,
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     登录成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -729,45 +566,19 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Warehouse added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 该仓库已存在 409
-{
-    "message": "The warehouse already exists",
-	"code":    402,
-}
-// 无法插入新仓库 500
-{
-    "error":  "Cannot insert the warehouse",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Warehouse added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    仓库已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -791,39 +602,19 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Warehouse deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除仓库 500
-{
-    "error":  "Cannot delete the warehouse",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Warehouse deleted successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -853,45 +644,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Warehouse updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 该仓库不存在 403
-{
-    "message": "The department does not exist",
-	"code":    403,
-}
-// 无法更新仓库 500
-{
-    "error":  "Cannot update the warehouse",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Warehouse updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -915,8 +680,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get warehouse list successfully",
-    "rows": [
+    "msg": "Get warehouse list successfully",
+    "data": {
+    	"rows": [
         {
             "created_at": "2024-04-07 17:17:44",
             "comment": "123",
@@ -934,32 +700,19 @@ headers:{
             "wid": "000002"
         }
     ]
-}
-// 无法获取列表 500
-{
-    "error":  "Cannot get the list of warehouses",
-	"detail": err.Error(),
-	"code":   501,
+    },
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -988,45 +741,19 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Goods type added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 该类型已存在 403
-{
-    "message": "The type name already exists",
-	"code":    402,
-}
-// 无法插入新类型 500
-{
-    "error":  "Cannot insert the goods type",
-	"detail": err.Error(),
-	"code":   505,
+    "msg": "Goods type added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    仓库已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1054,51 +781,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Goods type updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标类型不存在 403 
-{
-    "message": "The goods type does not exist",
-	"code":    403,
-}
-// 该类型名已存在 400
-{
-    "error":  "The name is already exists",
-	"detail": err.Error(),
-	"code":   404,
-}
-// 无法更新类型 500
-{
-    "error":  "Cannot update the goods type",
-	"detail": err.Error(),
-	"code":   504,
+    "msg": "Goods type updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1122,39 +817,19 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Goods type deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除 500
-{
-    "error":  "Cannot delete the Goods type",
-	"detail": err.Error(),
-	"code":   502,
+    "msg": "Goods type deleted successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1178,8 +853,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get user list successfully",
-    "rows": [
+    "msg": "Get user list successfully",
+    "data": {
+        "rows": [
         {
             "created_at": "2024-04-07 17:17:44",
             "gtid": "0001",
@@ -1193,32 +869,20 @@ headers:{
             "type_code": "yzl"
         }
     ]
-}
-// 无法获取列表 500
-{
-	"error":  "Cannot get the list of goods type",
-	"detail": err.Error(),
-	"code":   501,
+    },
+    
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1246,45 +910,18 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Department added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 该部门已经存在
-{
-    "message": "The department name already exists",
-	"code":    402,
-}
-// 无法插入新部门 500
-{
-    "error":  "Cannot insert new department",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Department added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    仓库已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1309,51 +946,18 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Department updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标部门不存在 403
-{
-    "message": "The department does not exist",
-	"code":    403,
-}
-// 部门已存在 400
-{
-    "error":  "The name is already exists",
-	"detail": err.Error(),
-	"code":   402,
-}
-// 无法更新 500
-{
-    "error":  "Cannot update department",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Department updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1377,39 +981,18 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Department deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除 500
-{
-    "error":  "Cannot delete department",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Department deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1433,40 +1016,28 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get departments list successfully",
-    "rows": [
-        {
-            "created_at": "2024-04-07 17:17:44",
-            "did": "d0002",
-            "name": "生产"
-        }
-    ]
-}
-// 无法获取列表 500
-{
-    "error":  "Can not get the list of departments",
-	"detail": err.Error(),
-	"code":   201,
+    "msg": "Get departments list successfully",
+    “data": {
+        "rows": [
+            {
+                "created_at": "2024-04-07 17:17:44",
+                "did": "d0002",
+                "name": "生产"
+            }
+        ]
+	}
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1496,50 +1067,18 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Staff added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 员工已存在 403
-{
-    "message": "The staff already exists",
-	"code":    402,
-}
-// 员工所属部门不存在 403
-{
-    "message": "The staff's department does not exist",
-	"code":    403,
-}
-// 无法插入新员工 500
-{
-    "error":  "Cannot insert the staff",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Staff added successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    仓库已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1570,61 +1109,45 @@ headers:{
 ```json
 // 部分导入失败 217
 {
-    "code": 403,
-    "detail": [
+    "code": 202,
+    "data": {
+        "detail": [
         {
             "code": 403,
-            "message": "The staff's zzt2 department does not exist"
+            "msg": "The staff's zzt2 department does not exist"
         }
-    ],
-    "message": "Some staffs failed to register; 1/2"
+    ]
+    },
+    "msg": "Some staffs failed to register; 1/2"
 }
 // 全部导入失败 400
 {
-    "code": 402,
-    "detail": [
+    "code": 203,
+    "data": {
+        "detail": [
         {
             "code": 403,
-            "message": "The staff's zzt3 department does not exist"
+            "msg": "The staff's zzt3 department does not exist"
         },
         {
             "code": 403,
-            "message": "The staff's zzt2 department does not exist"
+            "msg": "The staff's zzt2 department does not exist"
         }
-    ],
-    "message": "All staffs failed to register"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 全部导入成功 200
-{
-    "code":    201,
-	"message": "All staffs have completed registration",
+    ]
+    },
+    "msg": "All staffs failed to register"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |       参数说明       |
-| :-----: | :------: | :------------------: |
-|  code   |   int    |        业务码        |
-| message |  string  |       返回消息       |
-|   uid   |  string  | 注册成功返回的用户id |
-|  error  |  string  |   后端内部错误消息   |
-| detail  |  string  |   每个错误注册详情   |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |             说明             |
-| :----: | :-----------------: | :--------------------------: |
-|  200   |         OK          |           注册成功           |
-|  217   |   PartialContent    |        注册不完全成功        |
-|  400   |     BadRequest      | 请求参数不全获取注册全部失败 |
-|  500   | InternalServerError |       后端服务内部错误       |
+| 参数名 | 参数类型 |       参数说明       |
+| :----: | :------: | :------------------: |
+|  code  |   int    |        业务码        |
+|  msg   |  string  |       返回消息       |
+|  uid   |  string  | 注册成功返回的用户id |
+| error  |  string  |   后端内部错误消息   |
+| detail |  string  |   每个错误注册详情   |
 
 ----
 
@@ -1653,50 +1176,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Staff updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标员工不存在 403
-{
-    "message": "The staff does not exist",
-	"code":    403,
-}
-// 员工所属部门不存在 403
-{
-    "message": "The staff's department does not exist",
-	"code":    404,
-}
-// 无法更新员工 500
-{
-    "error":  "Cannot update staff",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Staff updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 仓库名已经存在/该仓库不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1720,39 +1212,18 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Staff deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除 500
-{
-    "error":  "Cannot delete staff",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Staff deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1776,8 +1247,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get staffs list successfully",
-    "rows": [
+    "msg": "Get staffs list successfully",
+    "data": {
+        "rows": [
         {
             "created_at": "2024-04-07 17:17:44",
             "department": "d0002",
@@ -1800,32 +1272,19 @@ headers:{
             "sid": "s00000004"
         }
     ]
-}
-// 无法获取列表 500
-{
-    "error":  "Cannot get the list of staffs",
-	"detail": err.Error(),
-	"code":   502,
+    }
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1855,45 +1314,19 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Inventory type added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 该类型已存在 403
-{
-    "message": "The type name already exists",
-	"code":    401,
-}
-// 无法插入新类型 500
-{
-    "error":  "Cannot insert the inventory type",
-	"detail": err.Error(),
-	"code":   505,
+    "msg": "Inventory type added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    类型已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1922,45 +1355,18 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Inventory type updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标类型不存在 403
-{
-    "message": "The inventory type does not exist",
-	"code":    403,
-}
-// 更新失败 500
-{
-    "error":  "Cannot get the number of inventory type for this itid",
-	"detail": err.Error(),
-	"code":   502,
+    "msg": "Inventory type updated successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 类型名已经存在/该类型不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -1984,39 +1390,18 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Inventory type deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除 500
-{
-    "error":  "Cannot delete the inventory type",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Inventory type deleted successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2042,8 +1427,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get inventory type list successfully",
-    "rows": [
+    "msg": "Get inventory type list successfully",
+    "data": {
+        "rows": [
         {
             "created_at": "2024-06-03T10:09:47+08:00",
             "itid": "_default1_",
@@ -2059,32 +1445,19 @@ headers:{
             "type_code": "default_out"
         }
     ]
-}
-// 无法获取列表 500
-{
-    "error":  "Cannot get the list of inventory type",
-	"detail": err.Error(),
-	"code":   501,
+    }
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 -----
 
@@ -2112,47 +1485,19 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Unit added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 单位已存在 403
-{
-    "message": "The unit already exists",
-	"code":    402,
-}
-// 无法插入新单位 500
-{
-    "error":  "Cannot insert new unit",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Unit added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    类型已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
-
-
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2179,45 +1524,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "unit type updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 目标单位不存在 403
-{
-    "message": "The unit does not exist",
-	"code":    403,
-}
-// 无法更新 500
-{
-    "error":  "Cannot update unit",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "unit type updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 类型名已经存在/该类型不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2242,27 +1561,19 @@ headers:{
 ```json
 {
     "code": 201,
-    "message": "Unit deleted successfully"
+    "msg": "Unit deleted successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2288,8 +1599,9 @@ headers:{
 // 查询成功 200
 {
     "code": 201,
-    "message": "Get inventory type list successfully",
-    "rows": [
+    "msg": "Get inventory type list successfully",
+    "data": {
+         "rows": [
         {
             "name": "km",
             "unid": "un0002"
@@ -2303,32 +1615,19 @@ headers:{
             "unid": "un0004"
         }
     ]
-}
-// 无法获取列表 500
-{
-    "error":  "Can not get the list of units",
-	"detail": err.Error(),
-	"code":   201,
+    }  
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2362,45 +1661,19 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Goods added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 已存在该编码的货品 403
-{
-    "message": "The goods with this code already exists",
-	"code":    402,
-}
-// 无法插入新货品 500
-{
-    "error":  "Cannot insert the goods",
-	"detail": err.Error(),
-	"code":   501,
+    "msg": "Goods added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    类型已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2435,46 +1708,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Goods updated successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 已存在该编码的货品 400
-{
-    "error":  "The code of the goods is already exists",
-	"detail": err.Error(),
-	"code":   404,
-}
-// 无法更新货品 500
-{
-    "message": "Update goods failed",
-	"code":    403,
-	"detail":  err.Error(),
+    "msg": "Goods updated successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |            说明             |
-| :----: | :-----------------: | :-------------------------: |
-|  200   |         OK          |          修改成功           |
-|  400   |     BadRequest      |        请求参数不全         |
-|  401   |    Unauthorized     |         鉴权未通过          |
-|  403   |      Forbidden      | 类型名已经存在/该类型不存在 |
-|  500   | InternalServerError |      后端服务内部错误       |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2500,39 +1746,19 @@ headers:{
 // 删除成功 200
 {
     "code": 201,
-    "message": "Goods deleted successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法删除 500
-{
-    "error":  "Cannot delete the Goods",
-	"detail": err.Error(),
-	"code":   502,
+    "msg": "Goods deleted successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2566,8 +1792,9 @@ headers:{
 // 查询成功（有数据） 200
 {
     "code": 201,
+    "msg": "Query successfully",
+    "data": {
     "keyword": "1",
-    "message": "Query successfully",
     "page": 1,
     "page_size": 10,
     "rows": [
@@ -2645,36 +1872,19 @@ headers:{
     ],
     "total": 4,
     "total_pages": 1
-}
-// 查询成功（无数据） 200
-{
-   "code":        202,
-	"message":     "No data",
-	"page":        1,
-	"page_size":   10,
-	"total":       0,
-	"total_pages": 0,
-	"rows":        [], 
+    }
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -2715,78 +1925,22 @@ headers:{
       "path": "static/res/goodsFile/goods_17180949282.jpg"
     }
   ],
-  "message": "Upload successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法创建文件夹 500
-{
-    "error":  "Upload failed",
-	"detail": err.Error(),
-	"code":   501,
-}
-// 无法解析image参数 400
-{
-    "message": "Failed to parse multipart form",
-	"code":    402,
-	"detail":  err.Error(),
-}
-// 无法打开文件 500
-{
-    "error":  "Failed to open file",
-	"detail": err.Error(),
-	"code":   502,
-}
-// 图片格式不支持 400
-{
-    "message": "Unsupported format",
-	"code":    402,
-}
-// 货品不存在 400
-{
-    "error":  "The goods does not exist",
-	"detail": err.Error(),
-	"code":   403,
-}
-// 保存图片失败 500
-{
-    "error":  "Upload failed",
-	"detail": ioErr.Error(),
-	"code":   501,
-}
-// 无法创建图片文件 500
-{
-    "error":  "Upload failed",
-	"detail": err.Error(),
-	"code":   502,
+  "msg": "Upload successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-|  data   |  string  |    返回数据体    |
-|   gid   |  string  |    目标货品id    |
-|  name   |  string  |      图片名      |
-|  path   |  string  |     访问路径     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+|  data  |  string  |    返回数据体    |
+|  gid   |  string  |    目标货品id    |
+|  name  |  string  |      图片名      |
+|  path  |  string  |     访问路径     |
 
 ----
 
@@ -2825,78 +1979,22 @@ headers:{
       "path": "static/res/goodsFile/goods_17180949282.jpg"
     }
   ],
-  "message": "Upload successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 无法创建文件夹 500
-{
-    "error":  "Upload failed",
-	"detail": err.Error(),
-	"code":   501,
-}
-// 无法解析file参数 400
-{
-    "message": "Failed to parse multipart form",
-	"code":    402,
-	"detail":  err.Error(),
-}
-// 无法打开文件 500
-{
-    "error":  "Failed to open file",
-	"detail": err.Error(),
-	"code":   502,
-}
-// 格式不支持 400
-{
-    "message": "Unsupported format",
-	"code":    402,
-}
-// 货品不存在 400
-{
-    "error":  "The goods does not exist",
-	"detail": err.Error(),
-	"code":   403,
-}
-// 保存文件失败 500
-{
-    "error":  "Upload failed",
-	"detail": ioErr.Error(),
-	"code":   501,
-}
-// 无法创建文件 500
-{
-    "error":  "Upload failed",
-	"detail": err.Error(),
-	"code":   502,
+  "msg": "Upload successfully"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-|  data   |  string  |    返回数据体    |
-|   gid   |  string  |    目标货品id    |
-|  name   |  string  |      附件名      |
-|  path   |  string  |     访问路径     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+|  data  |  string  |    返回数据体    |
+|  gid   |  string  |    目标货品id    |
+|  name  |  string  |      附件名      |
+|  path  |  string  |     访问路径     |
 
 ----
 
@@ -2950,57 +2048,19 @@ headers:{
 // 添加成功 200
 {
     "code": 201,
-    "message": "Inventory added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 货品列表参数格式错误 400
-{
-    "message": "The format of the goods_list is incorrect",
-	"code":    402,
-	"detail":  err.Error(),
-}
-// 出入库类型不存在 400
-{
-    "message": "The inventory type does not exist",
-	"code":    402,
-}
-// 日期格式错误 400
-{
-    "message": "The format of the date is incorrect",
-	"code":    403,
-	"detail":  err.Error(),
-}
-// 无法插入新单据 500
-{
-    "error":  "Cannot insert new inventory",
-	"code":   501,
-	"detail": err.Error(),
+    "msg": "Inventory added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    类型已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -3051,108 +2111,19 @@ headers:{
 // 更新成功 200
 {
     "code": 201,
-    "message": "Inventory added successfully"
-}
-// 参数有误 400
-{
-    "message": "Missing parameters or incorrect format",
-	"code":    401,
-	"detail":  err.Error(),
-}
-// 货品列表参数格式错误 400
-{
-    "message": "The format of the goods_list is incorrect",
-	"code":    402,
-	"detail":  err.Error(),
-}
-// 启动数据库事务失败 500
-{
-    "message": "Failed to start transaction",
-	"code":    501,
-	"detail":  tx.Error.Error(),
-}
-// 无法获取旧单据记录 500
-{
-    "message": "Failed to get original inventory record",
-	"code":    502,
-	"detail":  err.Error(),
-}
-// 无法获取单据对应的出入库类型 500
-{
-    "message": "Failed to get inventory type",
-	"code":    503,
-	"detail":  err.Error(),
-}
-// 原库存数据不存在 500
-{
-    "message": "Contains invalid Stock records",
-	"code":    403,
-}
-// 无法更新库存 500
-{
-    "message": "Failed to update stock",
-	"code":    504,
-	"detail":  err.Error(),
-}
-// 无法获取新单据出入库类型 500
-{
-    "message": "Failed to get new inventory type",
-	"code":    505,
-	"detail":  err.Error(),
-}
-// 新库存数据造成库存不足 400
-{
-    "message": "Contains invalid Stock records",
-	"code":    405,
-}
-// 单号已存在 400
-{
-    "error":  "The Number already exists",
-	"detail": err.Error(),
-	"code":   404,
-}
-// 更新失败 500
-{
-    "message": "Failed to update inventory record",
-	"code":    505,
-	"detail":  err.Error(),
-}
-// 无法获取新单据记录 500
-{
-    "message": "Failed to get updated inventory record",
-	"code":    506,
-	"detail":  err.Error(),
-}
-// 提交数据库事务失败 500
-{
-    "message": "Failed to commit transaction",
-	"code":    508,
-	"detail":  err.Error(),
+    "msg": "Inventory added successfully",
+    "data": null
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  400   |     BadRequest      |   请求参数不全   |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  403   |      Forbidden      |    类型已存在    |
-|  500   | InternalServerError | 后端服务内部错误 |
-
-----
-
-
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -3188,8 +2159,9 @@ headers:{
 // 查询成功（有数据） 200
 {
     "code": 201,
+     "msg": "Query successfully",
+    "data": {
     "keyword": "",
-    "message": "Query successfully",
     "page": 1,
     "page_size": 2,
     "rows": [
@@ -3223,36 +2195,19 @@ headers:{
     ],
     "total": 1,
     "total_pages": 1
-}
-// 查询成功（无数据） 200
-{
-    "code":        202,
-	"message":     "No data",
-	"page":        1,
-	"page_size":   10,
-	"total":       0,
-	"total_pages": 0,
-	"rows":        [],
+    }
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |     参数说明     |
-| :-----: | :------: | :--------------: |
-|  code   |   int    |      业务码      |
-| message |  string  |     返回消息     |
-|  rows   | array[]  |   仓库信息数组   |
-|  error  |  string  | 后端内部错误消息 |
-| detail  |  string  |     错误详情     |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
 
 ----
 
@@ -3286,12 +2241,12 @@ headers:{
         "quantity": 150,
         "warehouse": "_default_"
     },
-    "message": "Get stock success"
+    "msg": "Get stock success"
 }
 // 查询成功（1对多） 202
 {
     "code": 202,
-    "message": "Get stock success",
+    "msg": "Get stock success",
     "rows": [
         {
             "created_at": "2024-06-07T16:59:34+08:00",
@@ -3331,33 +2286,15 @@ headers:{
         ],
         "total": 800
     },
-    "message": "Get stock success"
-}
-// 参数缺失 400
-{
-    "message": "Missing parameters",
-	"code":    400,
-}
-// 获取记录失败 500
-{
-    "message": "Get stock failed",
-	"code":    500,
+    "msg": "Get stock success"
 }
 ```
 
 **返回数据说明**
 
-| 参数名  | 参数类型 |   参数说明   |
-| :-----: | :------: | :----------: |
-|  code   |   int    |    业务码    |
-| message |  string  |   返回消息   |
-|  data   |  string  |   返回数据   |
-|  rows   |  string  | 返回数据列表 |
-
-**返回状态码说明**
-
-| 状态码 |        含义         |       说明       |
-| :----: | :-----------------: | :--------------: |
-|  200   |         OK          |     修改成功     |
-|  401   |    Unauthorized     |    鉴权未通过    |
-|  500   | InternalServerError | 后端服务内部错误 |
+| 参数名 | 参数类型 |   参数说明   |
+| :----: | :------: | :----------: |
+|  code  |   int    |    业务码    |
+|  msg   |  string  |   返回消息   |
+|  data  |  string  |   返回数据   |
+|  rows  |  string  | 返回数据列表 |

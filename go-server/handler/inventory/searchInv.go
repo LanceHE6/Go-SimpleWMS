@@ -3,6 +3,7 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math"
@@ -97,24 +98,19 @@ func SearchInv(context *gin.Context) {
 	// 执行查询
 	result := query.Find(&invs)
 	if result.Error != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": result.Error.Error(),
-			"code":  401,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Internal Server Error", result.Error.Error()))
 		return
 	}
 
 	// 查询结果数量为0
 	if len(invs) == 0 {
-		context.JSON(http.StatusOK, gin.H{
-			"code":        202,
-			"message":     "No data",
+		context.JSON(http.StatusOK, response.Response(202, "No data", gin.H{
 			"page":        page,
 			"page_size":   limit,
 			"total":       total,
 			"total_pages": totalPages,
 			"rows":        invs,
-		})
+		}))
 		return
 	}
 
@@ -151,14 +147,12 @@ func SearchInv(context *gin.Context) {
 		invsRes = append(invsRes, goodsMeta)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"code":        201,
-		"message":     "Query successfully",
+	context.JSON(http.StatusOK, response.Response(201, "Query successfully", gin.H{
 		"page":        page,
 		"page_size":   limit,
 		"total":       total,
 		"total_pages": totalPages,
-		"keyword":     keyword,
 		"rows":        invsRes,
-	})
+		"keyword":     keyword,
+	}))
 }

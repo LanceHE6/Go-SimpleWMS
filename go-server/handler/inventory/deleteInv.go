@@ -3,6 +3,7 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,11 +15,7 @@ type delInvRequest struct {
 func DeleteInv(context *gin.Context) {
 	var data delInvRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	iid := data.Iid
@@ -31,10 +28,7 @@ func DeleteInv(context *gin.Context) {
 	// 检查仓库是否存在
 	notExist := tx.Model(model.Inventory{}).Where("iid=?", iid).First(&inv).RecordNotFound()
 	if notExist {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "Inventory not found",
-			"code":  402,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Inventory not exist", nil))
 		return
 	}
 	warehouse := inv.Warehouse
@@ -53,11 +47,7 @@ func DeleteInv(context *gin.Context) {
 			err := tx.Model(model.Stock{}).Where("warehouse=? and goods=?", warehouse, goodsOrder.Goods).Updates(updateData).Error
 			if err != nil {
 				tx.Rollback()
-				context.JSON(http.StatusInternalServerError, gin.H{
-					"error":  "Cannot update the stock",
-					"detail": err.Error(),
-					"code":   502,
-				})
+				context.JSON(http.StatusInternalServerError, response.Response(503, "Cannot update the stock", nil))
 				return
 			}
 		}
@@ -71,11 +61,7 @@ func DeleteInv(context *gin.Context) {
 			err := tx.Model(model.Stock{}).Where("warehouse=? and goods=?", warehouse, goodsOrder.Goods).Updates(updateData).Error
 			if err != nil {
 				tx.Rollback()
-				context.JSON(http.StatusInternalServerError, gin.H{
-					"error":  "Cannot update the stock",
-					"detail": err.Error(),
-					"code":   503,
-				})
+				context.JSON(http.StatusInternalServerError, response.Response(504, "Cannot update the stock", nil))
 			}
 
 		}
@@ -85,24 +71,13 @@ func DeleteInv(context *gin.Context) {
 	err := tx.Delete(model.Inventory{}, "iid=?", iid).Error
 	if err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the inventory",
-			"detail": err.Error(),
-			"code":   504,
-		})
+		context.JSON(http.StatusInternalServerError, response.Response(505, "Cannot delete the inventory", nil))
 		return
 	}
 	err = tx.Commit().Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot commit the transaction",
-			"detail": err.Error(),
-			"code":   505,
-		})
+		context.JSON(http.StatusInternalServerError, response.Response(506, "Cannot commit the transaction", nil))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "inventory deleted successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Success", nil))
 }

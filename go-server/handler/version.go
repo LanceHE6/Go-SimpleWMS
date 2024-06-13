@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -8,11 +9,7 @@ import (
 const version = "v0.3.6.20240613_Alpha"
 
 func GetVersion(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{
-		"code":    200,
-		"message": "Hello Go-SimpleWMS",
-		"data": gin.H{
-			"version": version,
-		},
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Hello Simple-WMS", gin.H{
+		"version": version,
+	}))
 }

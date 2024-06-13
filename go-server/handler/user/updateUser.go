@@ -3,6 +3,7 @@ package user
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -20,11 +21,7 @@ type updateRequest struct {
 func UpdateUser(context *gin.Context) {
 	var data updateRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	uid := data.Uid
@@ -46,10 +43,7 @@ func UpdateUser(context *gin.Context) {
 	// 判断该用户是否已存在
 	err := db.Model(&model.User{}).Where("uid=?", uid).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The user does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
 		return
 	}
 	var updateData = map[string]interface{}{
@@ -63,16 +57,9 @@ func UpdateUser(context *gin.Context) {
 
 	err = db.Model(&model.User{}).Where("uid = ?", uid).Updates(updateData).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update user",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Update user failed", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "User updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Update user successfully", nil))
 }

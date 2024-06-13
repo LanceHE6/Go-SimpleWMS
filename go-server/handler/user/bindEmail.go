@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -17,11 +18,7 @@ type bindRequest struct {
 func BindEmail(context *gin.Context) {
 	var data bindRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 
@@ -34,10 +31,7 @@ func BindEmail(context *gin.Context) {
 	// 查询用户是否存在
 	notExist := db.Model(model.User{}).Where("uid = ?", uid).First(&user).RecordNotFound()
 	if notExist {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "User does not exist",
-			"code":    402,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
 		return
 	}
 
@@ -74,16 +68,9 @@ func BindEmail(context *gin.Context) {
 
 	// 处理协程中的错误信息
 	if err := <-errorChan; err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to send email",
-			"code":    501,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to send verification code", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Verification code sent successfully",
-		"code":    200,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Success", nil))
 }

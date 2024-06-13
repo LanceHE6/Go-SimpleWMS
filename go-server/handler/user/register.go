@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,7 @@ type registerRequest struct {
 func Register(context *gin.Context) {
 	var data registerRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 
@@ -48,10 +45,7 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	// 判断该账户是否已被注册
 	var user model.User
 	if err := db.Where("account = ?", account).First(&user).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
-		return http.StatusForbidden, gin.H{
-			"message": fmt.Sprintf("The account '%s' has been registered", account),
-			"code":    402,
-		}
+		return http.StatusOK, response.Response(202, fmt.Sprintf("The account '%s' has been registered", account), nil)
 	}
 
 	// 插入新用户
@@ -65,16 +59,10 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 		Phone:      phone,
 	}
 	if err := db.Create(&user).Error; err != nil {
-		return http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert new user",
-			"detail": err.Error(),
-			"code":   505,
-		}
+		return http.StatusInternalServerError, response.ErrorResponse(501, "Failed to register user", err.Error())
 	}
 
-	return http.StatusOK, gin.H{
-		"message": "User registered successfully",
-		"uid":     newUid,
-		"code":    201,
-	}
+	return http.StatusOK, response.Response(201, fmt.Sprintf("Successfully registered user '%s'", account), gin.H{
+		"uid": newUid,
+	})
 }

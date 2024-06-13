@@ -1,6 +1,7 @@
 package staff
 
 import (
+	"Go_simpleWMS/utils/response"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,11 +14,7 @@ type uploadUsersRequest struct {
 func UploadStaffs(context *gin.Context) {
 	var data uploadUsersRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 
@@ -37,23 +34,14 @@ func UploadStaffs(context *gin.Context) {
 	}
 	if len(errs) > 0 {
 		if len(errs) == num {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": fmt.Sprintf("All staffs failed to register"),
-				"code":    402,
-				"detail":  errs,
-			})
+			context.JSON(http.StatusOK, response.Response(203, "All staffs failed to register", nil))
 			return
 		} else {
-			context.JSON(217, gin.H{
-				"message": fmt.Sprintf("Some staffs failed to register; %d/%d", count, num),
-				"code":    403,
-				"detail":  errs,
-			})
+			context.JSON(http.StatusOK, response.Response(202, fmt.Sprintf("Some staffs failed to register; %d/%d", count, num), gin.H{
+				"detail": errs,
+			}))
 			return
 		}
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"code":    201,
-		"message": "All staffs have completed registration",
-	})
+	context.JSON(http.StatusOK, response.Response(201, "All staffs registered successfully", nil))
 }

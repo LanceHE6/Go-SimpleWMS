@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -17,11 +18,7 @@ type addInventoryTypeRequest struct {
 func AddInventoryType(context *gin.Context) {
 	var data addInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	typeName := data.Name
@@ -34,10 +31,7 @@ func AddInventoryType(context *gin.Context) {
 	notExist := db.Model(model.InventoryType{}).Where("name=?", typeName).First(&invt).RecordNotFound()
 
 	if !notExist {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The type name already exists",
-			"code":    401,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "The inventory type already exists", nil))
 		return
 	}
 
@@ -53,16 +47,9 @@ func AddInventoryType(context *gin.Context) {
 	err := db.Create(&invt).Error
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the inventory type",
-			"detail": err.Error(),
-			"code":   505,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Cannot create the inventory type", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Inventory type added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Create inventory type successfully", nil))
 }

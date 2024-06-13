@@ -3,6 +3,7 @@ package upload
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -61,11 +62,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		fileDir = "static/res/goodsFile"
 	}
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	// 判断本地静态文件夹是否存在
@@ -74,11 +71,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		// 创建文件夹
 		err = os.MkdirAll(fileDir, os.ModePerm)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Upload failed",
-				"detail": err.Error(),
-				"code":   501,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to create directory", err.Error()))
 			return
 		}
 	}
@@ -91,11 +84,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 	}
 	form, err := context.MultipartForm()
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to parse multipart form",
-			"code":    402,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.Response(402, "Failed to get multipart form", nil))
 		return
 	}
 	fileHeaders := form.File[requestKey]
@@ -107,11 +96,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 	var goods model.Goods
 	err = db.Model(&model.Goods{}).Where("gid=?", gid).First(&goods).Error
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error":  "The goods does not exist",
-			"detail": err.Error(),
-			"code":   403,
-		})
+		context.JSON(http.StatusOK, response.Response(403, "Goods not found", nil))
 		return
 	}
 
@@ -124,11 +109,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		count += 1
 		file, err := header.Open()
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Failed to open file",
-				"detail": err.Error(),
-				"code":   502,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Failed to open file", err.Error()))
 			return
 		}
 		defer func(file multipart.File) {
@@ -150,10 +131,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		}
 
 		if !ext[extString] {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": "Unsupported format",
-				"code":    402,
-			})
+			context.JSON(http.StatusBadRequest, response.Response(404, "Invalid file type", nil))
 			return
 		}
 		// 构造文件名
@@ -163,11 +141,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 
 		out, err := os.Create(filePath.Path)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Failed to create file",
-				"detail": err.Error(),
-				"code":   505,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(503, "Failed to create file", err.Error()))
 			return
 		}
 		defer func(out *os.File) {
@@ -180,11 +154,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		// 保存文件
 		_, ioErr := io.Copy(out, file)
 		if ioErr != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Upload failed",
-				"detail": ioErr.Error(),
-				"code":   506,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(504, "Failed to save file", ioErr.Error()))
 			return
 		}
 		filePaths = append(filePaths, filePath)
@@ -209,9 +179,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		db.Model(model.Goods{}).Where("gid = ?", gid).Updates(&goods)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Upload successfully",
-		"data":    res,
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Upload successful", gin.H{
+		"data": res,
+	}))
 }

@@ -3,6 +3,7 @@ package goods
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -22,11 +23,7 @@ type updateGoodsRequest struct {
 func UpdateGoods(context *gin.Context) {
 	var data updateGoodsRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	Gid := data.Gid
@@ -60,22 +57,11 @@ func UpdateGoods(context *gin.Context) {
 	err := db.Model(&model.Goods{}).Where("gid=?", Gid).Updates(goods).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"error":  "The code of the goods is already exists",
-				"detail": err.Error(),
-				"code":   404,
-			})
+			context.JSON(http.StatusOK, response.Response(403, "The goods already exist", nil))
 			return
 		}
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Update goods failed",
-			"code":    403,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Update failed", err.Error()))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Update successfully", nil))
 }

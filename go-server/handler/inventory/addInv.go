@@ -5,6 +5,7 @@ import (
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/handler/stock"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -26,11 +27,7 @@ type addInvRequest struct {
 func AddInv(context *gin.Context) {
 	var data addInvRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	Date := data.Date
@@ -40,11 +37,7 @@ func AddInv(context *gin.Context) {
 	var GoodsList model.GoodsList
 	err := json.Unmarshal([]byte(data.GoodsList), &GoodsList)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "The format of the goods_list is incorrect",
-			"code":    402,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.Response(402, "The goods list is not in the correct format", nil))
 		return
 	}
 	InventoryType := data.InventoryTpe
@@ -58,10 +51,7 @@ func AddInv(context *gin.Context) {
 	var iType model.InventoryType
 	err = db.Model(&model.InventoryType{}).Where("itid=?", InventoryType).First(&iType).Error
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "The inventory type does not exist",
-			"code":    402,
-		})
+		context.JSON(http.StatusOK, response.Response(403, "The inventory type does not exist", nil))
 		return
 	}
 
@@ -85,11 +75,7 @@ func AddInv(context *gin.Context) {
 	} else {
 		parsedDate, err = time.ParseInLocation("2006-01-02 15:04:05", Date, time.Local)
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": "The format of the date is incorrect",
-				"code":    403,
-				"detail":  err.Error(),
-			})
+			context.JSON(http.StatusBadRequest, response.Response(404, "The date format is incorrect", nil))
 			return
 		}
 	}
@@ -131,15 +117,8 @@ func AddInv(context *gin.Context) {
 	// 插入单据
 	err = db.Model(model.Inventory{}).Create(&inventory).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert new inventory",
-			"code":   501,
-			"detail": err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add inventory", err.Error()))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Inventory added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Add inventory successfully", nil))
 }

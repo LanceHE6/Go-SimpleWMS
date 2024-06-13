@@ -3,6 +3,7 @@ package staff
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,11 +14,7 @@ func ListStaff(context *gin.Context) {
 
 	err := db.Select("*").Find(&staffs).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of staffs",
-			"detail": err.Error(),
-			"code":   502,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Get staffs list failed", err.Error()))
 		return
 	}
 
@@ -25,9 +22,7 @@ func ListStaff(context *gin.Context) {
 	for _, staff := range staffs {
 		staffsRes = append(staffsRes, staff)
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Get staffs list successfully",
-		"rows":    staffsRes,
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Get staffs list successfully", gin.H{
+		"rows": staffsRes,
+	}))
 }

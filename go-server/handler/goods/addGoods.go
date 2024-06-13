@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -23,11 +24,7 @@ type addGoodsRequest struct {
 func AddGoods(context *gin.Context) {
 	var data addGoodsRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	GName := data.Name
@@ -45,10 +42,7 @@ func AddGoods(context *gin.Context) {
 	if GCode != "" {
 		err := db.Model(&model.Goods{}).Where("goods_code=?", GCode).First(&goods).Error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			context.JSON(http.StatusForbidden, gin.H{
-				"message": "The goods with this code already exists",
-				"code":    402,
-			})
+			context.JSON(http.StatusOK, response.Response(402, "The goods already exists", nil))
 			return
 		}
 	}
@@ -68,16 +62,9 @@ func AddGoods(context *gin.Context) {
 	}
 	err := db.Create(&goods).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the goods",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add goods", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Add goods successfully", nil))
 }

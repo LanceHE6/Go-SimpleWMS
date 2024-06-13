@@ -3,6 +3,7 @@ package stock
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,10 +13,7 @@ func GetStockRequest(context *gin.Context) {
 	goods := context.Query("goods")
 	warehouse := context.Query("warehouse")
 	if warehouse == "" && goods == "" {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters",
-			"code":    400,
-		})
+		context.JSON(http.StatusBadRequest, response.Response(401, "Missing parameters", nil))
 		return
 	}
 	// 获取仓库的库存信息
@@ -24,18 +22,13 @@ func GetStockRequest(context *gin.Context) {
 		db := myDb.GetMyDbConnection()
 		err := db.Model(model.Stock{}).Where("warehouse = ?", warehouse).Find(&stocks).Error
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Get stock failed",
-				"code":    500,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Get stock failed", err.Error()))
 			return
 		}
 
-		context.JSON(http.StatusOK, gin.H{
-			"message": "Get stock success",
-			"code":    202,
-			"rows":    stocks,
-		})
+		context.JSON(http.StatusOK, response.Response(202, "Get stock success", gin.H{
+			"rows": stocks,
+		}))
 		return
 	}
 	// 获取商品的总库存信息
@@ -44,10 +37,7 @@ func GetStockRequest(context *gin.Context) {
 		db := myDb.GetMyDbConnection()
 		err := db.Model(model.Stock{}).Where("goods = ?", goods).Find(&stocks).Error
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Get stock failed",
-				"code":    500,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Get stock failed", err.Error()))
 			return
 		}
 		// 计算总库存
@@ -56,26 +46,18 @@ func GetStockRequest(context *gin.Context) {
 			totalQuantity += stock.Quantity
 		}
 
-		context.JSON(http.StatusOK, gin.H{
-			"message": "Get stock success",
-			"code":    203,
-			"data": gin.H{
-				"rows":  stocks,
-				"total": totalQuantity,
-			},
-		})
+		context.JSON(http.StatusOK, response.Response(203, "Get stock success", gin.H{
+			"total": totalQuantity,
+			"rows":  stocks,
+		}))
 		return
 	}
 	// 获取指定仓库的指定商品的库存信息
 	quantity := GetStock(warehouse, goods)
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Get stock success",
-		"code":    201,
-		"data": gin.H{
-			"goods":     goods,
-			"warehouse": warehouse,
-			"quantity":  quantity,
-		},
-	})
+	context.JSON(http.StatusOK, response.Response(204, "Get stock success", gin.H{
+		"goods":     goods,
+		"warehouse": warehouse,
+		"quantity":  quantity,
+	}))
 }
