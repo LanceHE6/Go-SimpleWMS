@@ -143,9 +143,12 @@ const emit = defineEmits(["addTab"]);
 
 //获取当前已选项列表
 const getMultipleSelection = () => myTable.value.getMultipleSelection()
+//清空表格选择
+const clearSelection = () => myTable.value.clearSelection()
 //暴露函数，可供父组件调用
 defineExpose({
-  getMultipleSelection
+  getMultipleSelection,
+  clearSelection
 });
 
 //初始化函数
