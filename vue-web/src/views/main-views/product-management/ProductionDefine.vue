@@ -23,7 +23,7 @@ import { pNumValidatorNRequire } from "@/utils/validator.js"
  * */
 const tableColList = [
   {property: "name", label: "货品名称", sortable: false},
-  {property: "image", label: "图片", sortable: false, isImage: true, width: 120},
+  {property: "images", label: "图片", sortable: false, isImage: true, width: 120},
   {property: "goods_code", label: "货品编码", sortable: false},
   {property: "model", label: "规格型号", sortable: false},
   {property: "goods_type", label: "货品类型", sortable: false, isFK: true, FKData:{
