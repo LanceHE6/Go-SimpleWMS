@@ -1,17 +1,66 @@
 <template>
-  <submit-view>
-
+  <submit-view
+    :submit-form="form"
+    :main-table-col-list="mainTableColList"
+    :add-table-col-list="addTableColList"
+    :urls="urls"
+  >
   </submit-view>
 </template>
 
 <script setup>
 import SubmitView from "@/components/SubmitView.vue";
-import {reactive} from "vue";
 
 /**
- * 添加数据时所用到的对象
+ * 主页面中的列表表头
  * */
-const form = reactive({
+const mainTableColList = [
+  {property: "image", label: "图片", sortable: false, isImage: true, width: 80},
+  {property: "goods_code", label: "货品编码", sortable: false, width: 150},
+  {property: "name", label: "货品名称", sortable: false, width: 150},
+  {property: "model", label: "规格型号", sortable: false, width: 120},
+  {property: "goods_type", label: "货品类型", sortable: false, width: 120, isFK: true, FKData:{
+      url: "/gt/list",
+      property: "gtid",
+      label: "name"
+    }},
+  {property: "unit", label: "计量单位", sortable: false, width: 120, isFK: true, FKData:{
+      url: "/unit/list",
+      property: "unid",
+      label: "name"
+    }},
+  {property: "unit_price", label: "单价", sortable: false, width: 120},
+  {property: "amount", label: "数量", sortable: false, width: 120, isInput: true},
+  {property: "comment", label: "备注", sortable: false, width: 120, isInput: true},
+]
+
+/**
+ * 添加窗口中的列表表头
+ * */
+const addTableColList = [
+  {property: "image", label: "图片", sortable: false, isImage: true, width: 80},
+  {property: "name", label: "货品名称", sortable: false, width: 150},
+  {property: "model", label: "规格型号", sortable: false, width: 120},
+  {property: "manufacturer", label: "生产厂商", sortable: false, width: 120},
+  {property: "goods_code", label: "货品编码", sortable: false, width: 150},
+  {property: "goods_type", label: "货品类型", sortable: false, width: 120, isFK: true, FKData:{
+      url: "/gt/list",
+      property: "gtid",
+      label: "name"
+    }},
+  {property: "unit", label: "计量单位", sortable: false, width: 120, isFK: true, FKData:{
+      url: "/unit/list",
+      property: "unid",
+      label: "name"
+    }},
+  {property: "unit_price", label: "单价", sortable: false, width: 120},
+  {property: "amount", label: "数量", sortable: false, width: 120},
+]
+
+/**
+ * 提交表单时所用到的对象
+ * */
+const form = {
   data : {
     date: '',
     number: '',
@@ -45,8 +94,39 @@ const form = reactive({
     operator:[
       { required: 'true', message: '请选择操作员', trigger: 'blur' }
     ],
-  }
-})
+  },
+  item:[
+    {label: '仓库', prop: 'warehouse', dataName: 'warehouse', isFK: true, FKData:{
+        url: "/warehouse/list",
+        property: "wid",
+        label: "name"
+      }},
+    {label: '单据日期', prop: 'date', dataName: 'date', isInput: true},
+    {label: '单号', prop: 'number', dataName: 'number', isInput: true},
+    {label: '类型', prop: 'inventory_type', dataName: 'inventory_type', isFK: true, FKData:{
+        url: "/invt/list",
+        property: "itid",
+        label: "name"
+      }},
+    {label: '所属部门', prop: 'department', dataName: 'department', isFK: true, FKData:{
+        url: "/dept/list",
+        property: "did",
+        label: "name"
+      }},
+    {label: '制造商', prop: 'manufacturer', dataName: 'manufacturer', isInput: true},
+    {label: '操作员', prop: 'operator', dataName: 'operator', isFK: true, FKData:{
+        url: "/staff/list",
+        property: "sid",
+        label: "name"
+      }},
+    {label: '备注', prop: 'comment', dataName: 'comment', isInput: true, isLong: true},
+  ],
+}
+
+const urls = {
+  getData: "/goods/search",
+}
+
 </script>
 
 <style scoped>
