@@ -59,7 +59,7 @@ const editForm = {
     ],
     nickname:[
       { required: 'true', message: '请输入用户昵称', trigger: 'blur' },
-      { min: 1, max: 10, message: '昵称长度需要在1-10个字符之间', trigger: 'blur' },
+      { min: 1, max: 8, message: '昵称长度需要在1-8个字符之间', trigger: 'blur' },
     ]
   },
   item:[
@@ -107,7 +107,8 @@ const addForm = {
       { required: 'true', message: '请选择用户权限', trigger: 'blur' }
     ],
     nickname:[
-      { required: 'true', message: '请输入用户昵称', trigger: 'blur' }
+      { required: 'true', message: '请输入用户昵称', trigger: 'blur' },
+      { min: 1, max: 8, message: '昵称长度需要在1-8个字符之间', trigger: 'blur' },
     ]
   },
   item:[
