@@ -9,6 +9,7 @@
       large
       download
       print
+      upload-img
   />
 </template>
 
