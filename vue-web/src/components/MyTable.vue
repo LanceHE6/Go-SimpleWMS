@@ -22,6 +22,7 @@
 
     <el-main>
       <el-table
+          ref="myTable"
           :data="filterTableData"
           :border="true"
           :stripe="true"
@@ -294,7 +295,7 @@
       <el-icon><Plus /></el-icon>
       <template #tip>
         <div class="el-upload__tip">
-          <el-text type="info">支持jpg、png等图片类型文件, </el-text>
+          <el-text type="info">支持jpg、png、svg、webp等图片类型文件</el-text>
         </div>
       </template>
     </el-upload>
@@ -416,9 +417,12 @@ const emit = defineEmits([
 //表格当前已选内容
 let multipleSelection = []
 const getMultipleSelection = () => multipleSelection
+//清空表格选择
+const clearSelection = () => myTable.value.clearSelection()
 //暴露函数，可供父组件调用
 defineExpose({
-  getMultipleSelection
+  getMultipleSelection,
+  clearSelection
 });
 
 //上传图片列表
@@ -445,6 +449,9 @@ const currentPage = ref(1)
 const tableHead = prop.tableColList.map( item => {
   return item.label
 })
+
+//表格
+const myTable = ref(null)
 
 //编辑表单
 const myEditForm = ref(null)
@@ -574,7 +581,7 @@ async function submitAddForm(form) {
     if (valid) {
       //类型转换
       for (const i in prop.addDataTemplate.dataType) {
-        if (addForm.value.data[i]) {
+        if (i in addForm.value.data) {
           if (prop.addDataTemplate.dataType[i] === "String") {
             addForm.value.data[i] = addForm.value.data[i].toString()
           }
@@ -583,6 +590,9 @@ async function submitAddForm(form) {
           }
           else if (prop.addDataTemplate.dataType[i] === "Float") {
             addForm.value.data[i] = addForm.value.data[i] !== '' ? parseFloat(addForm.value.data[i]) : 0.0
+          }
+          else{
+            console.log('unknown dataType', i)
           }
         }
       }
