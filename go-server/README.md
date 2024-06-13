@@ -78,6 +78,11 @@ db:
     account: "root"			# 账号
     password: "root"		# 密码
     dbname: "simple_wms"	# 数据库名称
+smtp:						# 邮件发送相关
+  host: "smtp.example.com"	# smtp服务器
+  port: 465					# 端口
+  user_name: "your_email@example.com"	# 发送邮件的邮箱
+  password: "your_password"	# 邮箱密码（QQ邮箱为授权码）
 ```
 
 ----
@@ -92,10 +97,10 @@ db:
 
 ## users表
 
-| 字段 | id             |          uid           |   account    |   password   |  nick_name   |   permission    | created_at | updated_at |     token      |    phone     |
-| :--: | -------------- | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :--------: | ---------- | :------------: | :----------: |
-| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       |  datetime  | datetime   |  varchar(255)  | varchar(255) |
-| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  创建时间  | 更新时间   | 登录生成的凭证 |     电话     |
+| 字段 | id             |          uid           |   account    |   password   |  nick_name   |   permission    | created_at | updated_at |     token      |    phone     |    email     |
+| :--: | -------------- | :--------------------: | :----------: | :----------: | :----------: | :-------------: | :--------: | ---------- | :------------: | :----------: | :----------: |
+| 类型 | int            |      varchar(20)       | varchar(255) | varchar(255) | varchar(255) |       int       |  datetime  | datetime   |  varchar(255)  | varchar(255) | varchar(255) |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     账号     |     密码     |     昵称     | 权限（1，2，3） |  创建时间  | 更新时间   | 登录生成的凭证 |     电话     |     邮箱     |
 
 ----
 
@@ -171,3 +176,12 @@ db:
 | :--: | -------------- | :----------: | :----------: | :------: | :--------: | :--------: |
 | 类型 | int            | varchar(255) | varchar(255) |  float   |  datetime  |  datetime  |
 | 说明 | 数据库内置索引 | 仓库id(外键) | 货品id(外键) |   数量   |  创建时间  |  更新时间  |
+
+
+
+## verification_codes表
+
+| 字段 | uid          |    email     |     code     | created_at |   used   |
+| :--: | ------------ | :----------: | :----------: | :--------: | :------: |
+| 类型 | string       | varchar(255) | varchar(255) |    time    |   bool   |
+| 说明 | 用户id(主键) |     邮箱     |    验证码    |  创建时间  | 是否使用 |

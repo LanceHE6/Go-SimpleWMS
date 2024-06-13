@@ -578,7 +578,129 @@ headers:{
 
 ----
 
+### 绑定邮箱（发送验证码）
 
+**请求路径**：/api/user/email/bind
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| :----: | :------: | :------: | :------: |
+|  uid   |  String  |    是    |  用户id  |
+| email  |  String  |    是    | 绑定邮箱 |
+
+**返回结果示例**：
+
+```json
+// 发送成功 200
+{
+    "message": "Verification code sent successfully",
+	"code":    200,
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 目标用户不存在 400
+{
+    "message": "User does not exist",
+	"code":    402,
+}
+// 发送失败 500
+{
+    "message": "Failed to send email",
+	"code":    501,
+	"detail":  err.Error(),
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     登录成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
+
+
+
+### 绑定邮箱（校验验证码）
+
+**请求路径**：/api/user/email/verify
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| :----: | :------: | :------: | :------: |
+|  uid   |  String  |    是    |  用户id  |
+| email  |  String  |    是    | 绑定邮箱 |
+|  code  |  String  |    是    |  验证码  |
+
+**返回结果示例**：
+
+```json
+// 绑定成功 200
+{
+    "message": "Email verification successful",
+	"code":    200,
+}
+// 参数有误 400
+{
+    "message": "Missing parameters or incorrect format",
+	"code":    401,
+	"detail":  err.Error(),
+}
+// 验证失败 400
+{
+    "message": "Invalid verification code",
+	"code":    401,
+}
+// 验证码过期 500
+{
+   "message": "The verification code has expired",
+	"code":    402,
+}
+```
+
+**返回数据说明**
+
+| 参数名  | 参数类型 |     参数说明     |
+| :-----: | :------: | :--------------: |
+|  code   |   int    |      业务码      |
+| message |  string  |     返回消息     |
+|  error  |  string  | 后端内部错误消息 |
+| detail  |  string  |     错误详情     |
+
+**返回状态码说明**
+
+| 状态码 |        含义         |       说明       |
+| :----: | :-----------------: | :--------------: |
+|  200   |         OK          |     登录成功     |
+|  400   |     BadRequest      |   请求参数不全   |
+|  500   | InternalServerError | 后端服务内部错误 |
+
+----
 
 
 
