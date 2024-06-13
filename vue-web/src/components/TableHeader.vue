@@ -1,5 +1,5 @@
 <template>
-  <el-button v-if="operations.add" type="primary" icon="Plus" @click="add">
+  <el-button v-if="operations.add || hasSubmitPage" type="primary" icon="Plus" @click="add">
     添加
   </el-button>
 
@@ -16,6 +16,7 @@
     打印
   </el-button>
 
+  <span v-if="!large">
   <el-input
       v-model="search"
       style="width: 240px; margin-left: 20px"
@@ -24,6 +25,18 @@
       @input="searchChange"
       clearable
   />
+  </span>
+  <span v-else>
+    <el-input
+        v-model="search"
+        style="width: 240px; margin-left: 20px; margin-right: 10px;"
+        placeholder="关键字搜索"
+        clearable
+    />
+    <el-button type="success" icon="Search" @click="searchChange">
+      搜索
+    </el-button>
+  </span>
 
   <el-button type="primary" icon="Refresh" @click="refresh" plain style="margin-left: 10px">
     刷新
@@ -39,7 +52,17 @@ const prop = defineProps({
     type: Object,
     default: () => null,
     description: '表格支持的操作, 包含增删查改以及导入导出等等(通常无需手动配置)'
-  }
+  },
+  hasSubmitPage:{
+    type: Boolean,
+    default: () => false,
+    description: '是否需要单独的提交页面(由父组件传入, 无需手动配置)'
+  },
+  large:{
+    type: Boolean,
+    default: () => false,
+    description: '是否为后端分页(由父组件传入, 无需手动配置)'
+  },
 })
 
 const emit = defineEmits(["add", "download", "upload", "search", "print", "refresh"]);
