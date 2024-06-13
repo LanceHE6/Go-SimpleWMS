@@ -27,4 +27,13 @@ func UserGroup(ginApi *gin.RouterGroup) {
 	userGroup.GET("/list", utils.AuthMiddleware(), func(c *gin.Context) {
 		user.ListUsers(c)
 	})
+
+	emailGroup := userGroup.Group("/email")
+
+	emailGroup.POST("/bind", utils.AuthMiddleware(), func(c *gin.Context) {
+		user.BindEmail(c)
+	})
+	emailGroup.POST("/verify", utils.AuthMiddleware(), func(c *gin.Context) {
+		user.VerifyEmail(c)
+	})
 }
