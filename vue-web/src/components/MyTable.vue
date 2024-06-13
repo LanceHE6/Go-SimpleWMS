@@ -5,20 +5,11 @@
     <el-header
       style="height: 20px"
     >
-      <large-table-header
-          v-if="large"
-          :operations="operations"
-          @add="add"
-          @download="download"
-          @upload="upload"
-          @search="searchChange"
-          @print="print"
-          @refresh="refresh"
-      />
 
       <table-header
-          v-else
           :operations="operations"
+          :has-submit-page="hasSubmitPage"
+          :large="large"
           @add="add"
           @download="download"
           @upload="upload"
@@ -34,7 +25,8 @@
           :data="filterTableData"
           :border="true"
           :stripe="true"
-          height="60vh"
+          :height="height"
+          @selection-change="handleSelectionChange"
           style="width: 100%"
       >
         <el-table-column type="selection" width="55" />
@@ -72,15 +64,15 @@
             <div style="display: flex; align-items: center">
               <el-image
                   class="table-col-img"
-                  v-if="scope.row.image"
-                  :src="`${axios.defaults.baseURL}/${scope.row.image}`"
+                  v-if="scope.row.images && scope.row.images.length > 0"
+                  :src="`${axios.defaults.baseURL}/${scope.row.images[0].path}`"
                   fit="cover"
-                  :preview-src-list="[`${axios.defaults.baseURL}/${scope.row.image}`]"
+                  :preview-src-list="scope.row.images.map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
                   preview-teleported
               >
                 <template #error>
                   <div class="error-image-slot" @click="uploadImg(scope.row[keyData])">
-                    <el-icon><Plus /></el-icon>
+                    <el-icon><Picture /></el-icon>
                   </div>
                 </template>
               </el-image>
@@ -90,7 +82,7 @@
               </div>
 
               <el-button
-                  v-if="scope.row.image"
+                  v-if="scope.row.images && scope.row.images.length > 0 && operations.uploadImg"
                   type="success"
                   icon="Edit"
                   @click="uploadImg(scope.row[keyData])"
@@ -119,7 +111,7 @@
   </el-container>
 
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.edit"
       v-model="editFormVisible"
       title="编辑"
       width="500"
@@ -180,7 +172,7 @@
 
   </el-dialog>
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.add"
       v-model="addFormVisible"
       title="添加"
       width="500"
@@ -241,7 +233,7 @@
 
   </el-dialog>
   <el-dialog
-      v-if="!hasSubmitPage"
+      v-if="!hasSubmitPage && operations.upload"
       v-model="uploadFormVisible"
       title="批量导入"
       width="700"
@@ -280,26 +272,26 @@
 
   </el-dialog>
   <el-dialog
+      v-if="operations.uploadImg"
       v-model="uploadImgVisible"
       title="上传图片"
       width="700"
-      @closed="uploadImgDialogClosed"
+      @opened="uploadImgDialogOpen"
       center
   >
     <el-upload
         ref="myUploadImgForm"
         class="avatar-uploader"
         accept="image/jpeg, image/png, image/gif, image/bmp, image/x-bmp, image/webp, image/tiff, image/x-tiff, image/svg+xml"
-        :show-file-list="false"
+        list-type="picture-card"
         :auto-upload="false"
-        :http-request="submitImgUploadForm"
-        :limit="1"
+        :limit="5"
+        :on-preview="handlePictureCardPreview"
         :on-change="handleImgChange"
+        :on-remove="handleRemove"
         :on-exceed="uploadImgExceed"
-        drag
     >
-      <el-image v-if="imageUrl" :src="imageUrl" class="avatar" />
-      <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+      <el-icon><Plus /></el-icon>
       <template #tip>
         <div class="el-upload__tip">
           <el-text type="info">支持jpg、png等图片类型文件, </el-text>
@@ -316,15 +308,18 @@
     </template>
 
   </el-dialog>
+
+  <el-dialog v-model="imgDialogVisible" class="img-dialog">
+    <el-image :src="dialogImageUrl" alt="Preview Image" :fit="'contain'" class="preview-img"/>
+  </el-dialog>
 </template>
 
 <script setup>
 import {computed, markRaw, ref, watch} from "vue";
-import {ElMessage, ElMessageBox, genFileId} from "element-plus";
-import {Delete, Plus, UploadFilled} from "@element-plus/icons-vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {Delete, Plus, UploadFilled, Picture} from "@element-plus/icons-vue";
 import * as XLSX from "xlsx";
 import TableHeader from "@/components/TableHeader.vue";
-import LargeTableHeader from "@/components/LargeTableHeader.vue";
 import axios from "axios";
 
 const prop = defineProps({
@@ -403,16 +398,38 @@ const prop = defineProps({
     type: Boolean,
     default: () => false,
     description: '是否需要提交表单的页面, 如果为false则使用简单的窗口来提交表单'
+  },
+  height:{
+    type: String,
+    default: () => '60vh',
+    description: '表格高度'
   }
 });
 //对外事件列表
-const emit = defineEmits(["add", "download", "upload", "edit", "del", "update", "search", "refresh", "uploadImg"]);
+const emit = defineEmits([
+  "add", "download", "upload",
+  "edit", "del", "update",
+  "search", "refresh", "uploadImg",
+  "selectionChange"
+]);
 
-const imageUrl = ref('')
+//表格当前已选内容
+let multipleSelection = []
+const getMultipleSelection = () => multipleSelection
+//暴露函数，可供父组件调用
+defineExpose({
+  getMultipleSelection
+});
+
+//上传图片列表
+const imgList = ref([])
 
 //表格高度
 //const tableHeight = document.documentElement.clientHeight * 0.6
 //const colHeight = ref(tableHeight / 10)
+
+const dialogImageUrl = ref('')
+const imgDialogVisible = ref(false)
 
 //表格数据列表
 const tableData = ref(prop.defaultData)
@@ -470,7 +487,6 @@ const filterTableData = computed(() =>
 
 //输入元素超过4个的窗口分列显示
 const DIALOG_COL = 4
-console.log("table:", prop.operations)
 let addDialogClass = prop.operations.add
     ? ref(prop.addDataTemplate.dataNum > DIALOG_COL ? 'multi-column' : 'single-column')
     : null
@@ -598,8 +614,10 @@ function upload(){
 }
 
 function uploadImg(id){
-  uploadImgVisible.value = true
-  uploadImgId.value = id
+  if(prop.operations.uploadImg === true){
+    uploadImgVisible.value = true
+    uploadImgId.value = id
+  }
 }
 
 function submitUploadData(){
@@ -608,10 +626,11 @@ function submitUploadData(){
 }
 
 function submitUploadImgData(){
-  myUploadImgForm.value.submit()
+  myUploadImgForm.value.clearFiles()
+  console.log("submit", imgList.value)
+  emit("uploadImg",uploadImgId.value ,imgList.value)
   uploadImgVisible.value = false
 }
-
 //提交编辑表单
 async function submitEditForm(form){
   if (!form) return
@@ -722,19 +741,6 @@ function excelToJson(e){
   fileReader.readAsBinaryString(file)
 }
 
-function submitImgUploadForm(e){
-  let file = e.file // 文件信息
-  if (!file) {
-    // 没有文件
-    return false
-  } else if (!/\.(jfif|pjpeg|jpeg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(file.name.toLowerCase())) {
-    // 格式根据自己需求定义
-    ElMessage.error('上传格式不正确，请上传支持的图片格式')
-    return false
-  }
-  emit("uploadImg",uploadImgId.value ,file)
-}
-
 function downloadTemplate(){
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet([addForm.value.data])
@@ -747,21 +753,41 @@ function uploadDialogClosed(){
   myUploadForm.value.clearFiles()
 }
 
-function uploadImgDialogClosed(){
-  myUploadImgForm.value.clearFiles()
-  imageUrl.value = ''
+const handleImgChange = (uploadFile) => {
+  if (!/\.(jfif|pjpeg|jpeg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(uploadFile.name.toLowerCase())) {
+    // 格式根据自己需求定义
+    ElMessage.error('上传格式不正确，请上传支持的图片格式')
+    myUploadImgForm.value.handleRemove(uploadFile)
+    return false
+  }
+  imgList.value.push(uploadFile.raw)
 }
 
-const handleImgChange = (response, uploadFile) => {
-  imageUrl.value = URL.createObjectURL(uploadFile[0].raw)
+const uploadImgDialogOpen = () => {
+  myUploadImgForm.value.clearFiles()
+  imgList.value.length = 0  //清空图片数组
 }
 
 //上传图片超限时调用此函数
-const uploadImgExceed = (files) => {
-  myUploadImgForm.value.clearFiles()
-  const file = files[0]
-  file.uid = genFileId()
-  myUploadImgForm.value.handleStart(file)
+const uploadImgExceed = () => {
+  ElMessage.error("图片上传量已达上限！")
+}
+
+const handlePictureCardPreview = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url
+  imgDialogVisible.value = true
+}
+
+const handleRemove = (f) => {
+  const index = imgList.value.indexOf(f.raw)
+  if(index !== -1){
+    imgList.value.splice(index, 1)
+  }
+}
+
+const handleSelectionChange = (val) => {
+  multipleSelection = val
+  emit("selectionChange", val)
 }
 
 </script>
@@ -780,9 +806,18 @@ const uploadImgExceed = (files) => {
 }
 
 .table-col-img{
-  z-index: 9999;
   height: 50px;
   width: 50px;
+}
+
+.preview-img{
+  max-height: 70vh;
+  width: auto;
+}
+
+.img-dialog{
+  width: auto;
+  height: auto;
 }
 
 .error-image-slot{
