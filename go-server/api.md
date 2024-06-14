@@ -280,7 +280,8 @@ headers:{
             "account": "admin",
             "permission": 3,
             "nickname": "admin",
-            "phone": ""
+            "phone": "",
+            "email": ""
         }
     },
     "msg": "Login successfully"
@@ -462,6 +463,55 @@ headers:{
 
 ----
 
+
+
+### 获取用户信息
+
+**请求路径**：/api/user/info
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| :----: | :------: | :------: | :------: |
+|        |          |          |          |
+
+**返回结果示例**：
+
+```json
+// 查询成功 200
+{
+    "code": 201,
+    "data": {
+        "user": {
+            "created_at": "2024-06-13T09:35:24+08:00",
+            "updated_at": "2024-06-14T09:02:34+08:00",
+            "uid": "u00000001",
+            "account": "admin",
+            "permission": 3,
+            "nickname": "admin",
+            "phone": "",
+            "email": "27653491@qq.com"
+        }
+    },
+    "msg": "success"
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+|  user  |  object  |     用户数据     |
+
+
+
 ### 绑定邮箱（发送验证码）
 
 **请求路径**：/api/user/email/bind
@@ -483,7 +533,7 @@ headers:{
 // 发送成功 200
 {
     "msg": "Verification code sent successfully",
-	"code":    200,
+	"code":    201,
     "data": null
 }
 ```
@@ -523,7 +573,87 @@ headers:{
 // 绑定成功 200
 {
     "msg": "Email verification successful",
-	"code":    200,
+	"code":    201,
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+
+
+### 重置密码（发送验证码）
+
+**请求路径**：/api/user/psw/reset
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名  | 参数类型 | 是否必填 | 参数说明 |
+| :-----: | :------: | :------: | :------: |
+| account |  String  |    是    | 用户账号 |
+|  email  |  String  |    是    | 绑定邮箱 |
+
+**返回结果示例**：
+
+```json
+// 发送成功 200
+{
+    "msg": "Verification code sent successfully",
+	"code":    201,
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+
+
+### 重置密码（校验验证码）
+
+**请求路径**：/api/user/psw/verify
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+|    参数名    | 参数类型 | 是否必填 | 参数说明 |
+| :----------: | :------: | :------: | :------: |
+|   account    |  String  |    是    | 用户账号 |
+|    email     |  String  |    是    | 绑定邮箱 |
+|     code     |  String  |    是    |  验证码  |
+| new_password |  String  |    是    |  新密码  |
+
+**返回结果示例**：
+
+```json
+// 绑定成功 200
+{
+    "msg": "Password reset successful",
+	"code":    201,
     "data": null
 }
 ```
