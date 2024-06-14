@@ -1,4 +1,4 @@
 .idea
 /go-server/logs
 /go-server/static
-./go-server/config.yaml
+go-server/config.yaml
