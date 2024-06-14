@@ -94,6 +94,7 @@ func Init() {
 	db.AutoMigrate(&model.GoodsType{})
 	db.AutoMigrate(&model.Goods{}).AddForeignKey("goods_type", "goods_types(gtid)", "SET NULL", "CASCADE").AddForeignKey("unit", "units(unid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.Inventory{}).AddForeignKey("inventory_type", "inventory_types(itid)", "SET NULL", "CASCADE").AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Transfer{}).AddForeignKey("sour_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").AddForeignKey("dest_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").AddForeignKey("in_iid", "inventories(iid)", "SET NULL", "CASCADE").AddForeignKey("out_iid", "inventories(iid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.Stock{}).AddForeignKey("goods", "goods(gid)", "SET NULL", "CASCADE").AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.VerificationCode{})
 
