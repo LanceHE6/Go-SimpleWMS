@@ -3,6 +3,7 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/handler/stock"
 	"Go_simpleWMS/utils/response"
 	"encoding/json"
 	"fmt"
@@ -118,7 +119,7 @@ func UpdateInv(context *gin.Context) {
 	for _, g := range oldGoodsList {
 		var newGoodsOrder model.GoodsOrder
 		newGoodsOrder.Goods = g.Goods
-		oldStock := GetGoodsListAmountByGoods(oldGoodsList, g.Goods)
+		oldStock := stock.GetGoodsListAmountByGoods(oldGoodsList, g.Goods)
 		if newInventoryType.Type == 1 {
 			newGoodsOrder.Amount = oldStock + g.Amount
 		} else {
@@ -170,7 +171,7 @@ func UpdateInv(context *gin.Context) {
 	}
 
 	// 更新货品数量
-	if UpdateStocks(newInv.GoodsList, newInv.Warehouse, newInventoryType, context, tx) == 0 {
+	if stock.UpdateStocks(newInv.GoodsList, newInv.Warehouse, newInventoryType, context, tx) == 0 {
 		// 提交事务
 		if err := tx.Commit().Error; err != nil {
 			tx.Rollback()
