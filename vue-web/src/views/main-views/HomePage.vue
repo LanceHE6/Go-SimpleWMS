@@ -276,11 +276,11 @@ const getData = async (url, params = {}) => {
   })
       .then(result => {
         console.log("homepage-getData:", result)
-        if (result && result.data && result.data.rows) {
-          for (let i = 0; i < result.data.rows.length; i++){
-            result.data.rows[i].created_at = new Date(result.data.rows[i].created_at).toLocaleString()
+        if (result && result.data && result.data.data && result.data.data.rows) {
+          for (let i = 0; i < result.data.data.rows.length; i++){
+            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
           }
-          resultObj = result.data;
+          resultObj = result.data.data;
         }
       })
       .catch(error => {

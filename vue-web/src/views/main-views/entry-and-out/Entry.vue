@@ -41,20 +41,16 @@ const extraParams = {
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "goods", label: "货品名称", sortable: false, isParent: true, child:{
-      property: "name",
-      isParent: false
-    }},
-  {property: "amount", label: "数量", sortable: true},
-  {property: "manufacturer", label: "生产厂商", sortable: false, width: 150},
-  {property: "warehouse", label: "所属仓库", sortable: false, isFK: true, FKData:{
-      url: "/warehouse/list",
-      property: "wid",
-      label: "name"
-    }},
-  {property: "inventory_type", label: "出入库类型", sortable: false, isFK: true, FKData:{
+  {property: "number", label: "单号", sortable: false},
+  {property: "inventory_type", label: "类型", sortable: false, isFK: true, FKData:{
       url: "/invt/list",
       property: "itid",
+      label: "name"
+    }},
+  {property: "date", label: "单据日期", sortable: false},
+  {property: "warehouse", label: "仓库名称", sortable: false, isFK: true, FKData:{
+      url: "/warehouse/list",
+      property: "wid",
       label: "name"
     }},
   {property: "operator", label: "操作员", sortable: false, isFK: true, FKData:{
@@ -62,6 +58,7 @@ const tableColList = [
       property: "sid",
       label: "name"
     }},
+  {property: "manufacturer", label: "制造商", sortable: false, width: 150},
   {property: "comment", label: "备注", sortable: false},
 ]
 

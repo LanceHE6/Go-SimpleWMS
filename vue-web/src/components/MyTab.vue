@@ -13,7 +13,7 @@
   </el-tabs>
   <router-view v-slot="{ Component }">
     <keep-alive :include="cachedViews">
-      <component :is="Component" @addTab="addTab"/>
+      <component :is="Component" @addTab="addTab" @removeTab="removeTab"/>
     </keep-alive>
   </router-view>
 </template>
@@ -39,7 +39,8 @@ const cachedViews = ref([prop.defaultTab.name]); // 缓存的视图
 
 //暴露函数，可供父组件调用
 defineExpose({
-  addTab
+  addTab,
+  removeTab
 });
 
 router.push(prop.defaultTab.path);
