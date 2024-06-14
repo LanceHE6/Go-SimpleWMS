@@ -31,9 +31,12 @@
           style="width: 100%"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column type="index" label="序号" align="center" header-align="center" width="55" />
 
         <el-table-column
             v-if="operations.edit || operations.del"
+            align="center"
+            header-align="center"
             width="135"
             label="操作">
           <template #default="scope">
@@ -56,6 +59,8 @@
 
         <el-table-column
           v-for="item in tableColList"
+          align="center"
+          header-align="center"
           :property="item.property"
           :label="item.label"
           :width="item.width"
