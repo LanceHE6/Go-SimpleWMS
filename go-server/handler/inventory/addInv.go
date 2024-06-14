@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type addInvRequest struct {
+type AddInvRequest struct {
 	Date         string `json:"date" form:"date"`                                        // 单据日期
 	Number       string `json:"number" form:"number"`                                    // 单号
 	Department   string `json:"department" form:"department"`                            // 单据所属部门
@@ -25,11 +25,15 @@ type addInvRequest struct {
 }
 
 func AddInv(context *gin.Context) {
-	var data addInvRequest
+	var data AddInvRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
+	_, code, resp := DoAddInv(context, data)
+	context.JSON(code, resp)
+}
+func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
 	Date := data.Date
 	Number := data.Number
 	Department := data.Department
@@ -37,8 +41,8 @@ func AddInv(context *gin.Context) {
 	var GoodsList model.GoodsList
 	err := json.Unmarshal([]byte(data.GoodsList), &GoodsList)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, response.Response(402, "The goods list is not in the correct format", nil))
-		return
+
+		return "", http.StatusBadRequest, response.Response(402, "The goods list is not in the correct format", nil)
 	}
 	InventoryType := data.InventoryTpe
 	Sid := data.Operator
@@ -51,8 +55,7 @@ func AddInv(context *gin.Context) {
 	var iType model.InventoryType
 	err = db.Model(&model.InventoryType{}).Where("itid=?", InventoryType).First(&iType).Error
 	if err != nil {
-		context.JSON(http.StatusOK, response.Response(403, "The inventory type does not exist", nil))
-		return
+		return "", http.StatusOK, response.Response(403, "The inventory type does not exist", nil)
 	}
 
 	Iid := "i" + utils.GenerateUuid(8) // 转换为 8 位字符串
@@ -75,8 +78,7 @@ func AddInv(context *gin.Context) {
 	} else {
 		parsedDate, err = time.ParseInLocation("2006-01-02 15:04:05", Date, time.Local)
 		if err != nil {
-			context.JSON(http.StatusBadRequest, response.Response(404, "The date format is incorrect", nil))
-			return
+			return "", http.StatusBadRequest, response.Response(404, "The date format is incorrect", nil)
 		}
 	}
 	// 构造更新前后库存数据
@@ -98,7 +100,7 @@ func AddInv(context *gin.Context) {
 		newGoodsList = append(newGoodsList, newGoodsOrder)
 	}
 	// 更新库存
-	UpdateStocks(GoodsList, Warehouse, iType, context, db)
+	stock.UpdateStocks(GoodsList, Warehouse, iType, context, db)
 
 	var inventory = model.Inventory{
 		Iid:           Iid,
@@ -117,8 +119,7 @@ func AddInv(context *gin.Context) {
 	// 插入单据
 	err = db.Model(model.Inventory{}).Create(&inventory).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add inventory", err.Error()))
-		return
+		return "", http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add inventory", err.Error())
 	}
-	context.JSON(http.StatusOK, response.Response(200, "Add inventory successfully", nil))
+	return Iid, http.StatusOK, response.Response(200, "Add inventory successfully", nil)
 }
