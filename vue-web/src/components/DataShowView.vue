@@ -347,13 +347,14 @@ const getData = async (url = prop.urls.getData, params = {}) => {
   })
       .then(result => {
         console.log("getData:", result)
-        if (result && result.data && result.data.rows) {
-          for (let i = 0; i < result.data.rows.length; i++){
-            result.data.rows[i].created_at = new Date(result.data.rows[i].created_at).toLocaleString()
+        if (result && result.data && result.data.data && result.data.data.rows) {
+          for (let i = 0; i < result.data.data.rows.length; i++){
+            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
+            result.data.data.rows[i].date = new Date(result.data.data.rows[i].date).toLocaleString()
           }
-          resultList = result.data.rows;
+          resultList = result.data.data.rows;
           if(prop.large){
-            state.pageCount = Math.max(result.data.total_pages, 1)
+            state.pageCount = Math.max(result.data.data.total_pages, 1)
           }
         }
       })
