@@ -27,6 +27,9 @@ func UserGroup(ginApi *gin.RouterGroup) {
 	userGroup.GET("/list", utils.AuthMiddleware(), func(c *gin.Context) {
 		user.ListUsers(c)
 	})
+	userGroup.GET("/info", utils.AuthMiddleware(), func(c *gin.Context) {
+		user.GetUserInfo(c)
+	})
 
 	emailGroup := userGroup.Group("/email")
 
@@ -35,5 +38,14 @@ func UserGroup(ginApi *gin.RouterGroup) {
 	})
 	emailGroup.POST("/verify", utils.AuthMiddleware(), func(c *gin.Context) {
 		user.VerifyEmail(c)
+	})
+
+	pswGroup := userGroup.Group("/psw")
+
+	pswGroup.POST("/reset", utils.AuthMiddleware(), func(c *gin.Context) {
+		user.ResetPassword(c)
+	})
+	pswGroup.POST("/verify", utils.AuthMiddleware(), func(c *gin.Context) {
+		user.VerifyResetPasswordEmail(c)
 	})
 }
