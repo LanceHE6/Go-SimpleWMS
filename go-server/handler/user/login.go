@@ -26,7 +26,7 @@ func Login(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var user model.User
 
-	err := db.Where("account=? and password=?", account, password).First(&user).Error
+	err := db.Where("(account=? and password=?) OR (email=? and password=?)", account, password, account, password).First(&user).Error
 
 	if err != nil {
 		context.JSON(http.StatusOK, response.Response(202, "Account or password is incorrect", nil))
