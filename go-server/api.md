@@ -9,8 +9,6 @@ http://47.236.80.244:6007
 https://simplewms.hycerlance.fun/api
 ```
 
-
-
 ----
 
 ## 状态码说明
@@ -2170,8 +2168,6 @@ headers:{
 | 类型 | string      | float  | string  |
 | 说明 | 货品id(gid) | 数量   | 备注    |
 
-
-
 **返回结果示例**：
 
 ```json
@@ -2343,6 +2339,44 @@ headers:{
 
 
 
+### 删除
+
+**请求路径**：/api/inv/delete
+
+**请求方法**：DELETE
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明   |
+| ------ | -------- | -------- | ---------- |
+| iid    | String   | 是       | 出入库单id |
+
+**返回结果示例**：
+
+```json
+// 删除成功 200
+{
+    "code": 200,
+    "msg": "success",
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+
+
 ## 库存
 
 ### 查询
@@ -2428,3 +2462,67 @@ headers:{
 |  msg   |  string  |   返回消息   |
 |  data  |  string  |   返回数据   |
 |  rows  |  string  | 返回数据列表 |
+
+
+
+## 调拨
+
+### 添加
+
+**请求路径**：/api/tans/add
+
+**请求方法**：POST
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名                | 参数类型 | 是否必填 | 参数说明                          |
+| --------------------- | -------- | -------- | --------------------------------- |
+| date                  | String   | 否       | 单据日期 格式:2006-01-02 15:04:05 |
+| number                | String   | 否       | 单号                              |
+| goods_list            | String   | 是       | 货品数组 格式见下                 |
+| source_warehouse      | String   | 是       | 调出仓库(wid)                     |
+| destination_warehouse | String   | 是       | 调入仓库(wid)                     |
+| operator              | String   | 是       | 操作员(sid)                       |
+| comment               | String   | 否       | 备注                              |
+
+** goods_list数据结构*：
+
+```json
+[
+    {"goods": "g4c182157", "amount":26,"comment":"test"},
+    {"goods": "g08943f59", "amount":23,"comment":"test"}
+]
+```
+
+**参数说明**
+
+| 字段 | goods       | amount | comment |
+| ---- | ----------- | ------ | ------- |
+| 类型 | string      | float  | string  |
+| 说明 | 货品id(gid) | 数量   | 备注    |
+
+**返回结果示例**：
+
+```json
+// 添加成功 200
+{
+    "code": 201,
+    "msg": "Transfer added successfully",
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+### 
