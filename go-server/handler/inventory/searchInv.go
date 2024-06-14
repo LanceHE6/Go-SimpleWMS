@@ -134,6 +134,7 @@ func SearchInv(context *gin.Context) {
 			"created_at":     g.CreatedAt,
 			"update_at":      g.UpdatedAt,
 			"iid":            g.Iid,
+			"date":           g.Date,
 			"number":         g.Number,
 			"goods_list":     goodsList,
 			"old_goods_list": g.OldGoodsList,
