@@ -10,10 +10,15 @@ import (
 	"strconv"
 )
 
-// SendVerifyEmail 发送绑定邮箱验证邮件
-func SendVerifyEmail(target string, account string, code string) error {
-	message := emailTemplate.GetVerifyEmailHTML(target, account, code)
+type EmailType int
 
+const (
+	BindEmail          EmailType = 1
+	ResetPasswordEmail EmailType = 2
+)
+
+// SendEmail 发送绑定邮箱验证邮件
+func SendEmail(target string, account string, code string, emailType EmailType) error {
 	host := os.Getenv("SMTP_HOST")
 	if host == "" {
 		host = config.ServerConfig.SMTP.HOST
@@ -34,22 +39,50 @@ func SendVerifyEmail(target string, account string, code string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "SimpleWMS"+"<"+userName+">")
 	m.SetHeader("To", target)
-	m.SetHeader("Subject", "绑定邮箱验证码："+code)
-	m.SetBody("text/html", message)
 
-	d := gomail.NewDialer(
-		host,
-		port,
-		userName,
-		password,
-	)
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	if emailType == BindEmail {
+		message := emailTemplate.GetVerifyEmailHTML(target, account, code)
 
-	if err := d.DialAndSend(m); err != nil {
-		fmt.Println("Failed to send bindEmail:", err)
-		return err
-	} else {
-		fmt.Println("Email sent successfully")
-		return nil
+		m.SetHeader("Subject", "绑定邮箱验证码："+code)
+		m.SetBody("text/html", message)
+
+		d := gomail.NewDialer(
+			host,
+			port,
+			userName,
+			password,
+		)
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+		if err := d.DialAndSend(m); err != nil {
+			fmt.Println("Failed to send bindEmail:", err)
+			return err
+		} else {
+			fmt.Println("Email sent successfully")
+			return nil
+		}
 	}
+	if emailType == ResetPasswordEmail {
+		message := emailTemplate.GetResetPasswordEmailHTML(account, code)
+
+		m.SetHeader("Subject", "重置账号密码验证码："+code)
+		m.SetBody("text/html", message)
+
+		d := gomail.NewDialer(
+			host,
+			port,
+			userName,
+			password,
+		)
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+		if err := d.DialAndSend(m); err != nil {
+			fmt.Println("Failed to send bindEmail:", err)
+			return err
+		} else {
+			fmt.Println("Email sent successfully")
+			return nil
+		}
+	}
+	return nil
 }
