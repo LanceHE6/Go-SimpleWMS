@@ -1,6 +1,8 @@
 # Start from the latest golang base image
 FROM golang:1.21
 
+ENV TZ=Asia/Shanghai
+
 # Add Maintainer Info
 LABEL maintainer="Hycer Lance <2765543491@qq.com>"
 
