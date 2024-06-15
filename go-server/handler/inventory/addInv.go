@@ -49,7 +49,7 @@ func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
 	Comment := data.Comment
 	Manufacturer := data.Manufacturer
 
-	db := myDb.GetMyDbConnection()
+	tx := myDb.GetMyDbConnection().Begin()
 
 	// 出入库类型存在性判断
 	var iType model.InventoryType
@@ -78,6 +78,7 @@ func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
 	} else {
 		parsedDate, err = time.ParseInLocation("2006-01-02 15:04:05", Date, time.Local)
 		if err != nil {
+			tx.Rollback()
 			return "", http.StatusBadRequest, response.Response(404, "The date format is incorrect", nil)
 		}
 	}
@@ -117,9 +118,15 @@ func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
 		Manufacturer:  Manufacturer,
 	}
 	// 插入单据
-	err = db.Model(model.Inventory{}).Create(&inventory).Error
+	err = tx.Model(model.Inventory{}).Create(&inventory).Error
 	if err != nil {
+		tx.Rollback()
 		return "", http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add inventory", err.Error())
+	}
+	if submit {
+		tx.Commit()
+	} else {
+		tx.Rollback()
 	}
 	return Iid, http.StatusOK, response.Response(200, "Add inventory successfully", nil)
 }
