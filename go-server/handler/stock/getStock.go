@@ -13,7 +13,21 @@ func GetStockRequest(context *gin.Context) {
 	goods := context.Query("goods")
 	warehouse := context.Query("warehouse")
 	if warehouse == "" && goods == "" {
-		context.JSON(http.StatusBadRequest, response.Response(401, "Missing parameters", nil))
+		// 获取所有的仓库的所有物品库存信息
+		db := myDb.GetMyDbConnection()
+		type goodsSummary struct {
+			Goods    string  `json:"goods"`
+			Quantity float64 `json:"quantity"`
+		}
+		var result []goodsSummary
+		db.Table("stocks").
+			Select("goods, SUM(quantity) AS quantity").
+			Group("goods").
+			Find(&result)
+		context.JSON(http.StatusOK, response.Response(201, "Get stock success", gin.H{
+			"rows":  result,
+			"total": len(result),
+		}))
 		return
 	}
 	// 获取仓库的库存信息
@@ -27,7 +41,8 @@ func GetStockRequest(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, response.Response(202, "Get stock success", gin.H{
-			"rows": stocks,
+			"rows":  stocks,
+			"total": len(stocks),
 		}))
 		return
 	}
@@ -47,8 +62,8 @@ func GetStockRequest(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, response.Response(203, "Get stock success", gin.H{
-			"total": totalQuantity,
-			"rows":  stocks,
+			"total_quantity": totalQuantity,
+			"rows":           stocks,
 		}))
 		return
 	}
