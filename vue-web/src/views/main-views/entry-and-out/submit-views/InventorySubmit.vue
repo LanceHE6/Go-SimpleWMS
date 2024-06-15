@@ -27,7 +27,7 @@ const removeTab = () => {
  * 主页面中的列表表头
  * */
 const mainTableColList = [
-  {property: "image", label: "图片", sortable: false, isImage: true, width: 60},
+  {property: "images", label: "图片", sortable: false, isImage: true, width: 60},
   {property: "goods_code", label: "货品编码", sortable: false, width: 150},
   {property: "name", label: "货品名称", sortable: false, width: 150},
   {property: "model", label: "规格型号", sortable: false, width: 120},
@@ -50,7 +50,7 @@ const mainTableColList = [
  * 添加窗口中的列表表头
  * */
 const addTableColList = [
-  {property: "image", label: "图片", sortable: false, isImage: true, width: 80},
+  {property: "images", label: "图片", sortable: false, isImage: true, width: 80},
   {property: "name", label: "货品名称", sortable: false, width: 150},
   {property: "model", label: "规格型号", sortable: false, width: 120},
   {property: "manufacturer", label: "生产厂商", sortable: false, width: 120},
