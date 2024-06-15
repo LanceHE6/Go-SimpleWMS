@@ -165,10 +165,17 @@ smtp:						# 邮件发送相关
 
 ## inventories表
 
-| 字段 | id             |          iid           |    number    | goods_list |   inventory_type   | amount |    warehouse     | operator         | comment      | manufacturer | created_at | updated_at |
-| :--: | -------------- | :--------------------: | :----------: | ---------- | :----------------: | ------ | :--------------: | ---------------- | ------------ | ------------ | ---------- | ---------- |
-| 类型 | int            |      varchar(20)       | varchar(255) | json       |    varchar(255)    | int    |   varchar(255)   | varchar(255)     | varchar(255) | varchar(255) | datetime   | datetime   |
-| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |    订单号    | 货品列表   | 出入库类型id(外键) | 数量   | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 生产商       |            |            |
+| 字段 | id             |          iid           |    number    | goods_list | new_goods_list | old_goods_list |   inventory_type   |    warehouse     | operator         | comment      | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | ---------- | -------------- | -------------- | :----------------: | :--------------: | ---------------- | ------------ | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | json       | json           | json           |    varchar(255)    |   varchar(255)   | varchar(255)     | varchar(255) | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     单号     | 货品列表   | 更新后货品列表 | 更新前货品列表 | 出入库类型id(外键) | 所属仓库id(外键) | 操作员工id(外键) | 备注         | 创建时间   | 更新时间   |
+
+## transfers表
+
+| 字段 | id             |          tid           |    number    | goods_list | amount | source_warehouse | destination_warehouse | operator         | comment      | audited    | passed       | auditor      | audited_time | audit_comment | created_at | updated_at |
+| :--: | -------------- | :--------------------: | :----------: | ---------- | ------ | :--------------: | --------------------- | ---------------- | ------------ | ---------- | ------------ | ------------ | ------------ | ------------- | ---------- | ---------- |
+| 类型 | int            |      varchar(20)       | varchar(255) | json       | int    |   varchar(255)   | varchar(255)          | varchar(255)     | varchar(255) | bool       | bool         | varchar(255) | datetime     | varchar(255)  | datetime   | datetime   |
+| 说明 | 数据库内置索引 | 标识+8位唯一索引(主键) |     单号     | 货品列表   | 数量   | 调出仓库id(外键) | 调入仓库id(外键)      | 操作员工id(外键) | 备注         | 是否已审核 | 是否审核通过 | 审核员       | 审核时间     | 审核建议      | 创建时间   | 更新时间   |
 
 ## stocks表
 
@@ -176,8 +183,6 @@ smtp:						# 邮件发送相关
 | :--: | -------------- | :----------: | :----------: | :------: | :--------: | :--------: |
 | 类型 | int            | varchar(255) | varchar(255) |  float   |  datetime  |  datetime  |
 | 说明 | 数据库内置索引 | 仓库id(外键) | 货品id(外键) |   数量   |  创建时间  |  更新时间  |
-
-
 
 ## verification_codes表
 
