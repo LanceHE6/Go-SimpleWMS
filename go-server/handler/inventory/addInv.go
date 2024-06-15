@@ -57,8 +57,9 @@ func DoAddInv(context *gin.Context, data AddInvRequest, submit bool) (string, in
 
 	// 出入库类型存在性判断
 	var iType model.InventoryType
-	err = db.Model(&model.InventoryType{}).Where("itid=?", InventoryType).First(&iType).Error
+	err = tx.Model(&model.InventoryType{}).Where("itid=?", InventoryType).First(&iType).Error
 	if err != nil {
+		tx.Rollback()
 		return "", http.StatusOK, response.Response(403, "The inventory type does not exist", nil)
 	}
 
