@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+      key-data="unid"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'unid'"
-      :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
