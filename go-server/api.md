@@ -1,7 +1,5 @@
 # 后端接口文档
 
-
-
 *测试环境后台地址：*
 
 ```
@@ -2392,14 +2390,14 @@ headers:{
 | warehouse | string   | 否       | 仓库id(wid) |
 | goods     | string   | 否       | 货品id(gid) |
 
-*注：只提供warehouse返回该仓库所有货品信息，只提供goods返回该货品所有库存信息*
+*注：只提供warehouse返回该仓库所有货品信息，只提供goods返回该货品所有库存信息，都不提供返回所有货品的总库存*
 
 **返回结果示例**：
 
 ```json
-// 查询成功（1对1库存） 201
+// 查询成功（1对1库存） 200
 {
-    "code": 200,
+    "code": 204,
     "data": {
         "goods": "g097e2ee2",
         "quantity": 150,
@@ -2407,21 +2405,38 @@ headers:{
     },
     "msg": "Get stock success"
 }
-// 查询成功（1对多） 202
+// 查询成功（单仓库库存） 200
 {
     "code": 202,
-    "msg": "Get stock success",
-    "rows": [
-        {
-            "created_at": "2024-06-07T16:59:34+08:00",
-            "updated_at": "2024-06-07T17:00:58+08:00",
-            "goods": "g097e2ee2",
-            "warehouse": "_default_",
-            "quantity": 150
-        }
-    ]
+    "data": {
+        "rows": [
+            {
+                "created_at": "2024-06-14T10:51:54+08:00",
+                "updated_at": "2024-06-14T16:22:04+08:00",
+                "goods": "g8f270261",
+                "warehouse": "w66bb6bcb",
+                "quantity": 200
+            },
+            {
+                "created_at": "2024-06-14T10:51:54+08:00",
+                "updated_at": "2024-06-14T15:48:59+08:00",
+                "goods": "gec3de5ea",
+                "warehouse": "w66bb6bcb",
+                "quantity": 2400
+            },
+            {
+                "created_at": "2024-06-14T15:48:59+08:00",
+                "updated_at": "2024-06-14T15:48:59+08:00",
+                "goods": "gfb11a6ba",
+                "warehouse": "w66bb6bcb",
+                "quantity": 1500
+            }
+        ],
+        "total": 3
+    },
+    "msg": "Get stock success"
 }
-// 查询成功（总库存） 203
+// 查询成功（单物品总库存） 200
 {
     "code": 203,
     "data": {
@@ -2448,7 +2463,37 @@ headers:{
                 "quantity": 500
             }
         ],
-        "total": 800
+        "total_quantity": 800
+    },
+    "msg": "Get stock success"
+}
+// 查询成功 （所有物品总库存） 200
+{
+    "code": 201,
+    "data": {
+        "rows": [
+            {
+                "goods": "g407973ec",
+                "quantity": 3000
+            },
+            {
+                "goods": "g8f270261",
+                "quantity": 2200
+            },
+            {
+                "goods": "gdbee78f1",
+                "quantity": 1500
+            },
+            {
+                "goods": "gec3de5ea",
+                "quantity": 2400
+            },
+            {
+                "goods": "gfb11a6ba",
+                "quantity": 1500
+            }
+        ],
+        "total": 5
     },
     "msg": "Get stock success"
 }
@@ -2525,4 +2570,253 @@ headers:{
 
 ----
 
-### 
+
+
+### 查询
+
+**请求路径**：/api/trans/search
+
+**请求方法**：GET
+
+**是否需要鉴权：**是
+
+| 参数名                | 参数类型 | 是否必填 | 参数说明                            |
+| --------------------- | -------- | -------- | ----------------------------------- |
+| page                  | int      | 否       | 页数，默认为1 ；为-1时不分页        |
+| page_size             | int      | 否       | 单页大小，默认为10                  |
+| goods                 | string   | 否       | 依货品id(gid)查询                   |
+| number                | string   | 否       | 依订单编号查询                      |
+| amount                | int      | 否       | 依订单数量查询                      |
+| source_warehouse      | string   | 否       | 依货品调出仓库id（wid）查询         |
+| destination_warehouse | string   | 否       | 依货品调入仓库id（wid）查询         |
+| operator              | string   | 否       | 依操作员查询(sid)                   |
+| comment               | string   | 否       | 依备注查询                          |
+| date                  | string   | 否       | 依创建日期查询 格式：2024-06-03     |
+| audited               | String   | 否       | 依是否已审核查询 格式：true/false   |
+| passed                | String   | 否       | 依是否审核通过查询 格式：true/false |
+| keyword               | string   | 否       | 关键字模糊查询                      |
+
+**返回结果示例**：
+
+```json
+// 查询成功（有数据） 200
+{
+    "code": 201,
+    "data": {
+        "keyword": "",
+        "page": 1,
+        "page_size": 2,
+        "rows": [
+            {
+                "audit_comment": "1111",
+                "audited": true,
+                "audited_time": "0001-01-01T00:00:00Z",
+                "auditor": "u00000001",
+                "comment": "",
+                "created_at": "2024-06-15T14:07:09+08:00",
+                "date": "2024-06-15T14:07:09+08:00",
+                "destination_warehouse": "w76ff47f3",
+                "goods_list": [
+                    {
+                        "amount": 200,
+                        "comment": "",
+                        "goods": {
+                            "created_at": "2024-06-13T09:37:43+08:00",
+                            "updated_at": "2024-06-14T11:19:43+08:00",
+                            "gid": "g8f270261",
+                            "goods_code": "HP001",
+                            "name": "货品1",
+                            "model": "XPVZNC",
+                            "goods_type": "gt0a57f73a",
+                            "manufacturer": "生产商1",
+                            "unit": "una253ab83",
+                            "images": [
+                                {
+                                    "path": "static/res/goodsImage/goods_g8f270261_1.jpg"
+                                }
+                            ],
+                            "files": null,
+                            "unit_price": 86
+                        }
+                    }
+                ],
+                "number": "DB20240615140717f9",
+                "operator": "_default_",
+                "passed": true,
+                "source_warehouse": "w66bb6bcb",
+                "tid": "t59bd0b0f",
+                "update_at": "2024-06-15T14:07:51+08:00"
+            },
+            {
+                "audit_comment": "1111",
+                "audited": true,
+                "audited_time": "0001-01-01T00:00:00Z",
+                "auditor": "u00000001",
+                "comment": "",
+                "created_at": "2024-06-15T14:11:15+08:00",
+                "date": "2024-06-15T14:11:14+08:00",
+                "destination_warehouse": "w76ff47f3",
+                "goods_list": [
+                    {
+                        "amount": 200,
+                        "comment": "",
+                        "goods": {
+                            "created_at": "2024-06-13T09:37:43+08:00",
+                            "updated_at": "2024-06-14T11:19:43+08:00",
+                            "gid": "g8f270261",
+                            "goods_code": "HP001",
+                            "name": "货品1",
+                            "model": "XPVZNC",
+                            "goods_type": "gt0a57f73a",
+                            "manufacturer": "生产商1",
+                            "unit": "una253ab83",
+                            "images": [
+                                {
+                                    "path": "static/res/goodsImage/goods_g8f270261_1.jpg"
+                                }
+                            ],
+                            "files": null,
+                            "unit_price": 86
+                        }
+                    }
+                ],
+                "number": "DB202406151411b9ff",
+                "operator": "_default_",
+                "passed": true,
+                "source_warehouse": "w66bb6bcb",
+                "tid": "tafe1b273",
+                "update_at": "2024-06-15T14:11:38+08:00"
+            }
+        ],
+        "total": 2,
+        "total_pages": 1
+    },
+    "msg": "Query successfully"
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+|  rows  | array[]  |   仓库信息数组   |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+
+
+### 删除
+
+**请求路径**：/api/trans/delete
+
+**请求方法**：DELETE
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| tid    | String   | 是       | 调拨单id |
+
+**返回结果示例**：
+
+```json
+// 删除成功 200
+{
+    "code": 200,
+    "msg": "success",
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+| detail |  string  |     错误详情     |
+
+----
+
+
+
+### 审核
+
+**请求路径**：/api/trans/audit
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名        | 参数类型 | 是否必填 | 参数说明     |
+| ------------- | -------- | -------- | ------------ |
+| tid           | String   | 是       | 调拨单id     |
+| passed        | bool     | 是       | 是否审核通过 |
+| audit_comment | String   | 否       | 审核建议     |
+
+**返回结果示例**：
+
+```json
+// 审核成功 200
+{
+    "code": 200,
+    "msg": "Transfer audited",
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+|  data  |  string  |     返回数据     |
+
+----
+
+
+
+### 撤销审核
+
+**请求路径**：/api/trans/audit/revoke
+
+**请求方法**：PUT
+
+**是否需要鉴权：**是
+
+**请求参数**：
+
+| 参数名 | 参数类型 | 是否必填 | 参数说明 |
+| ------ | -------- | -------- | -------- |
+| tid    | String   | 是       | 调拨单id |
+
+**返回结果示例**：
+
+```json
+// 审核成功 200
+{
+    "code": 200,
+    "msg": "Audited revocation successful",
+    "data": null
+}
+```
+
+**返回数据说明**
+
+| 参数名 | 参数类型 |     参数说明     |
+| :----: | :------: | :--------------: |
+|  code  |   int    |      业务码      |
+|  msg   |  string  |     返回消息     |
+| error  |  string  | 后端内部错误消息 |
+|  data  |  string  |     返回数据     |
