@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+    key-data="wid"
+    search-data="name"
     :table-col-list="tableColList"
-    :key-data="'wid'"
-    :search-data="'name'"
     :add-form="addForm"
     :edit-form="editForm"
     :delete-data-body="deleteDataBody"
@@ -29,7 +29,7 @@ const tableColList = [
       {label: "禁用", value: 0},
       {label: "启用", value: 1},
     ]},
-  {property: "created_at", label: "创建时间", width: 240, sortable: true},
+  {property: "created_at", label: "创建时间", isDateFormat: true, width: 240, sortable: true},
   {property: "wid", label: "仓库ID", sortable: true, width: 120},
   {property: "comment", label: "备注", sortable: false},
 ]

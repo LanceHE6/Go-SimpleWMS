@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+      key-data="itid"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'itid'"
-      :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
@@ -25,7 +25,7 @@ const tableColList = [
       {label: "入库", value: 1},
       {label: "出库", value: 2},
     ]},
-  {property: "created_at", label: "创建时间", sortable: true, width: 240},
+  {property: "created_at", label: "创建时间", isDateFormat: true, sortable: true, width: 240},
   {property: "itid", label: "出入库类型ID", sortable: true, width: 140},
 ]
 

@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+    key-data="uid"
+    search-data="nickname"
     :table-col-list="tableColList"
-    :key-data="'uid'"
-    :search-data="'nickname'"
     :add-form="addForm"
     :edit-form="editForm"
     :delete-data-body="deleteDataBody"
@@ -27,7 +27,7 @@ const tableColList = [
       {label: '超级管理员', value: 3},
     ]},
   {property: "phone", label: "手机号码", sortable: false, width: 120},
-  {property: "created_at", label: "注册时间", sortable: true, width: 240},
+  {property: "created_at", label: "注册时间", sortable: true, isDateFormat: true, width: 240},
   {property: "uid", label: "用户ID", sortable: true, width: 120},
 ]
 
