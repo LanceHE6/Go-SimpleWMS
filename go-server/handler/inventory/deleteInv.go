@@ -8,16 +8,21 @@ import (
 	"net/http"
 )
 
-type delInvRequest struct {
+type DelInvRequest struct {
 	Iid string `json:"iid" form:"iid" binding:"required"`
 }
 
 func DeleteInv(context *gin.Context) {
-	var data delInvRequest
+	var data DelInvRequest
 	if err := context.ShouldBind(&data); err != nil {
 		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
+	code, resp := DoDeleteInv(data)
+	context.JSON(code, resp)
+}
+
+func DoDeleteInv(data DelInvRequest) (code int, resp gin.H) {
 	iid := data.Iid
 
 	db := myDb.GetMyDbConnection()
@@ -28,8 +33,7 @@ func DeleteInv(context *gin.Context) {
 	// 检查仓库是否存在
 	notExist := tx.Model(model.Inventory{}).Where("iid=?", iid).First(&inv).RecordNotFound()
 	if notExist {
-		context.JSON(http.StatusOK, response.Response(402, "Inventory not exist", nil))
-		return
+		return http.StatusOK, response.Response(402, "Inventory not exist", nil)
 	}
 	warehouse := inv.Warehouse
 	goodsList := inv.GoodsList
@@ -47,8 +51,7 @@ func DeleteInv(context *gin.Context) {
 			err := tx.Model(model.Stock{}).Where("warehouse=? and goods=?", warehouse, goodsOrder.Goods).Updates(updateData).Error
 			if err != nil {
 				tx.Rollback()
-				context.JSON(http.StatusInternalServerError, response.Response(503, "Cannot update the stock", nil))
-				return
+				return http.StatusInternalServerError, response.Response(503, "Cannot update the stock", nil)
 			}
 		}
 	} else {
@@ -61,7 +64,7 @@ func DeleteInv(context *gin.Context) {
 			err := tx.Model(model.Stock{}).Where("warehouse=? and goods=?", warehouse, goodsOrder.Goods).Updates(updateData).Error
 			if err != nil {
 				tx.Rollback()
-				context.JSON(http.StatusInternalServerError, response.Response(504, "Cannot update the stock", nil))
+				return http.StatusInternalServerError, response.Response(504, "Cannot update the stock", nil)
 			}
 
 		}
@@ -71,13 +74,11 @@ func DeleteInv(context *gin.Context) {
 	err := tx.Delete(model.Inventory{}, "iid=?", iid).Error
 	if err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, response.Response(505, "Cannot delete the inventory", nil))
-		return
+		return http.StatusInternalServerError, response.Response(505, "Cannot delete the inventory", nil)
 	}
 	err = tx.Commit().Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, response.Response(506, "Cannot commit the transaction", nil))
-		return
+		return http.StatusInternalServerError, response.Response(506, "Cannot commit the transaction", nil)
 	}
-	context.JSON(http.StatusOK, response.Response(200, "Success", nil))
+	return http.StatusOK, response.Response(200, "Success", nil)
 }
