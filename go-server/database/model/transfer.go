@@ -10,12 +10,13 @@ type Transfer struct {
 	GoodsList     GoodsList `gorm:"type:json" json:"goods_list"`
 	SourWarehouse string    `json:"source_warehouse"`
 	DestWarehouse string    `json:"destination_warehouse"`
-	OutIid        string    `json:"out_iid"`
-	InIid         string    `json:"in_iid"`
+	OutIid        string    `gorm:"default:null" json:"out_iid"`
+	InIid         string    `gorm:"default:null" json:"in_iid"`
 	Operator      string    `json:"operator"`
 	Comment       string    `gorm:"default:''" json:"comment"`
-	Checked       bool      `gorm:"default:false" json:"checked"`
-	Checker       string    `json:"checker"`
-	CheckTime     time.Time `gorm:"default:null" json:"check_time"`
-	CheckComment  string    `gorm:"default:''" json:"check_comment"`
+	Audited       bool      `gorm:"default:false" json:"audited"`
+	Passed        bool      `gorm:"default:false" json:"passed"`
+	Auditor       string    `gorm:"default:null" json:"auditor"`
+	AuditedTime   time.Time `gorm:"default:null" json:"audited_time"`
+	AuditComment  string    `gorm:"default:''" json:"audit_comment"`
 }
