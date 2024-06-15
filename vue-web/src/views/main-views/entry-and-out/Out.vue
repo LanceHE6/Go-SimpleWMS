@@ -1,7 +1,7 @@
 <template>
   <DataShowView
+      key-data="iid"
       :table-col-list="tableColList"
-      :key-data="'iid'"
       :urls="urls"
       :extra-params="extraParams"
       @addTab="addTab"
@@ -41,13 +41,45 @@ const extraParams = {
  * 表头属性列表
  * */
 const tableColList = [
+  {property: "goods_list", label: "货品信息", sortable: false, width:100, isExpand: true, children:[
+      {property: "goods", label: "图片", sortable: false, width: 120, isImage: true, isParent: true,
+        child:{
+          property: "images", isParent: false
+        }},
+      {property: "goods", label: "货品编码", sortable: false, width: 120, isParent: true,
+        child:{
+          property: "goods_code", isParent: false
+        }},
+      {property: "goods", label: "货品名称", sortable: false, width: 120, isParent: true,
+        child:{
+          property: "name", isParent: false
+        }},
+      {property: "goods", label: "规格型号", sortable: false, width: 120, isParent: true,
+        child:{
+          property: "model", isParent: false
+        }},
+      {property: "goods", label: "计量单位", sortable: false, width: 120, isParent: true,
+        child:{
+          property: "unit", isParent: false, isFK: true, FKData:{
+            url: "/unit/list",
+            property: "unid",
+            label: "name"
+          },
+        }},
+      {property: "amount", label: "数量", sortable: false, width: 120},
+      {property: "goods", label: "单价", sortable: false, width: 120, isParent: true,
+        child:{
+          property: "unit_price", isParent: false
+        }},
+      {property: "comment", label: "备注", sortable: false, width: 240},
+    ]},
   {property: "number", label: "单号", sortable: false},
   {property: "inventory_type", label: "类型", sortable: false, isFK: true, FKData:{
       url: "/invt/list",
       property: "itid",
       label: "name"
     }},
-  {property: "date", label: "单据日期", sortable: false},
+  {property: "date", label: "单据日期", isDateFormat: true, sortable: false},
   {property: "warehouse", label: "仓库名称", sortable: false, isFK: true, FKData:{
       url: "/warehouse/list",
       property: "wid",
