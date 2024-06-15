@@ -3,6 +3,7 @@ package stock
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"net/http"
@@ -42,20 +43,12 @@ func UpdateStocks(GoodsList model.GoodsList, Warehouse string, inventoryType mod
 		} else {
 			if notExist {
 				// 无仓库货品映射，无法执行出库操作
-				context.JSON(http.StatusBadRequest, gin.H{
-					"message": "The goods is not included in the warehouse and cannot be outbound",
-					"code":    405,
-					"detail":  "",
-				})
+				context.JSON(http.StatusBadRequest, response.Response(405, "No warehouse-goods mapping", nil))
 				return 1
 			} else {
 				// 存在就更新记录
 				if stock.Quantity < goodsOrder.Amount {
-					context.JSON(http.StatusBadRequest, gin.H{
-						"message": "Including outbound goods with insufficient stock",
-						"code":    406,
-						"detail":  "",
-					})
+					context.JSON(http.StatusBadRequest, response.Response(406, "Insufficient inventory", nil))
 					return 1
 				} else {
 					var updateData = map[string]interface{}{
