@@ -1,46 +1,48 @@
 <template>
-  <el-button v-if="operations.add || hasSubmitPage" type="primary" icon="Plus" @click="add">
-    添加
-  </el-button>
-
-  <el-button v-if="operations.upload" type="primary" icon="Download" @click="upload" plain>
-    导入
-  </el-button>
-
-
-  <el-button v-if="operations.download" type="primary" icon="Upload" @click="download" plain>
-    导出
-  </el-button>
-
-  <el-button v-if="operations.print" type="warning" icon="Printer" @click="print" plain>
-    打印
-  </el-button>
-
-  <span v-if="!large">
-  <el-input
-      v-model="search"
-      style="width: 240px; margin-left: 20px"
-      placeholder="在当前页搜索"
-      prefix-icon="Search"
-      @input="searchChange"
-      clearable
-  />
-  </span>
-  <span v-else>
-    <el-input
-        v-model="search"
-        style="width: 240px; margin-left: 20px; margin-right: 10px;"
-        placeholder="关键字搜索"
-        clearable
-    />
-    <el-button type="success" icon="Search" @click="searchChange">
-      搜索
+  <div class="my-table-header">
+    <el-button v-if="operations.add || hasSubmitPage" type="primary" icon="Plus" @click="add">
+      添加
     </el-button>
-  </span>
 
-  <el-button type="primary" icon="Refresh" @click="refresh" plain style="margin-left: 10px">
-    刷新
-  </el-button>
+    <el-button v-if="operations.upload" type="primary" icon="Download" @click="upload" plain>
+      导入
+    </el-button>
+
+
+    <el-button v-if="operations.download" type="primary" icon="Upload" @click="download" plain>
+      导出
+    </el-button>
+
+    <el-button v-if="operations.print" type="warning" icon="Printer" @click="print" plain>
+      打印
+    </el-button>
+
+    <span class="my-table-header" v-if="!large">
+      <el-input
+          v-model="search"
+          style="width: 240px; margin-left: 20px"
+          placeholder="在当前页搜索"
+          prefix-icon="Search"
+          @input="searchChange"
+          clearable
+      />
+    </span>
+    <span class="my-table-header" v-else>
+      <el-input
+          v-model="search"
+          style="width: 240px; margin-left: 20px; margin-right: 10px;"
+          placeholder="关键字搜索"
+          clearable
+      />
+      <el-button type="success" icon="Search" @click="searchChange">
+        搜索
+      </el-button>
+    </span>
+
+    <el-button type="primary" icon="Refresh" @click="refresh" plain style="margin-left: 10px">
+      刷新
+    </el-button>
+  </div>
 </template>
 
 <script setup>
@@ -96,4 +98,10 @@ function refresh(){
 </script>
 
 <style scoped>
+.my-table-header {
+  display: flex;
+
+  /* 防止flex子项换行 */
+  flex-wrap: nowrap; /* 仅当使用flex布局时 */
+}
 </style>
