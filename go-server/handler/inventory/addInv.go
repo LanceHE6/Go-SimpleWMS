@@ -30,10 +30,14 @@ func AddInv(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
-	_, code, resp := DoAddInv(context, data)
-	context.JSON(code, resp)
+	str, code, resp := DoAddInv(context, data, true)
+	if str != "UPDATE_ERROR" {
+		context.JSON(code, resp)
+	}
 }
-func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
+
+// DoAddInv 添加库存操作，通过设置submit为false可以在添加调拨单时不会立即变更库存
+func DoAddInv(context *gin.Context, data AddInvRequest, submit bool) (string, int, gin.H) {
 	Date := data.Date
 	Number := data.Number
 	Department := data.Department
@@ -101,7 +105,10 @@ func DoAddInv(context *gin.Context, data AddInvRequest) (string, int, gin.H) {
 		newGoodsList = append(newGoodsList, newGoodsOrder)
 	}
 	// 更新库存
-	stock.UpdateStocks(GoodsList, Warehouse, iType, context, db)
+	if result := stock.UpdateStocks(GoodsList, Warehouse, iType, context, tx); result != 0 {
+		tx.Rollback()
+		return "UPDATE_ERROR", http.StatusBadRequest, response.Response(405, "Failed to update stock", nil)
+	}
 
 	var inventory = model.Inventory{
 		Iid:           Iid,
