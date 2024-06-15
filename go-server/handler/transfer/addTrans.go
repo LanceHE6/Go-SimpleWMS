@@ -74,9 +74,11 @@ func AddTrans(context *gin.Context) {
 		Comment:      Comment,
 		Operator:     Sid,
 	}
-	outIid, code, resp := inventory.DoAddInv(context, outAddInvRequest)
+	outIid, code, resp := inventory.DoAddInv(context, outAddInvRequest, false)
 	if outIid == "" {
 		context.JSON(code, resp)
+		return
+	} else if outIid == "UPDATE_ERROR" {
 		return
 	}
 
@@ -90,9 +92,11 @@ func AddTrans(context *gin.Context) {
 		Comment:      Comment,
 		Operator:     Sid,
 	}
-	inIid, code, resp := inventory.DoAddInv(context, inAddInvRequest)
+	inIid, code, resp := inventory.DoAddInv(context, inAddInvRequest, false)
 	if inIid == "" {
 		context.JSON(code, resp)
+		return
+	} else if inIid == "UPDATE_ERROR" {
 		return
 	}
 
@@ -102,8 +106,6 @@ func AddTrans(context *gin.Context) {
 		GoodsList:     GoodsList,
 		SourWarehouse: SourWarehouse,
 		DestWarehouse: DestWarehouse,
-		InIid:         inIid,
-		OutIid:        outIid,
 		Number:        Number,
 		Operator:      Sid,
 		Comment:       Comment,
