@@ -53,8 +53,8 @@
 <script setup>
 import {computed, onMounted, reactive, ref} from 'vue';
 import WarehouseCard from "@/components/cards/WarehouseCard.vue";
-import axios from "axios";
 import {ElMessage} from "element-plus";
+import {axios_get} from "@/utils/axiosUtil.js";
 
 // 使用 ref 创建响应式数据
 const data = ref(getRandomData());
@@ -104,25 +104,33 @@ onMounted(async () => {
   //今日入库总价
   let entryPrice = 0
   for(const item of entry.rows){
-    entryPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      entryPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //今日出库总价
   let outPrice = 0
   for(const item of out.rows){
-    outPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      outPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //昨日入库总价
   let yEntryPrice = 0
   for(const item of yEntry.rows){
-    yEntryPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      yEntryPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //昨日出库总价
   let yOutPrice = 0
   for(const item of yOut.rows){
-    yOutPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      yOutPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   warehouseCardDataList.push({
@@ -165,30 +173,36 @@ onMounted(async () => {
       yItemOutPromise
     ]);
 
-    console.log("entry", itemEntry)
-
     //今日入库总价
     let entryPrice = 0
-    for(const j in itemEntry.rows){
-      entryPrice += itemEntry.rows[j]['goods']['quantity'] * itemEntry.rows[j]['goods']['unit_price']
+    for(const item of itemEntry.rows){
+      for(const good of item.goods_list){
+        entryPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //今日出库总价
     let outPrice = 0
-    for(const j in itemOut.rows){
-      outPrice += itemOut.rows[j]['goods']['quantity'] * itemOut.rows[j]['goods']['unit_price']
+    for(const item of itemOut.rows){
+      for(const good of item.goods_list){
+        outPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //昨日入库总价
     let yEntryPrice = 0
-    for(const j in yItemEntry.rows){
-      yEntryPrice += yItemEntry.rows[j]['goods']['quantity'] * yItemEntry.rows[j]['goods']['unit_price']
+    for(const item of yItemEntry.rows){
+      for(const good of item.goods_list){
+        yEntryPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //昨日出库总价
     let yOutPrice = 0
-    for(const j in yItemOut.rows){
-      yOutPrice += yItemOut.rows[j]['goods']['quantity'] * yItemOut.rows[j]['goods']['unit_price']
+    for(const item of yItemOut.rows){
+      for(const good of item.goods_list){
+        yOutPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     warehouseCardDataList.push({
@@ -258,8 +272,6 @@ const option = computed(() => {
   }
 });
 
-const token="bearer "+localStorage.getItem("token");
-
 /**
  * getData()
  * 获取数据的请求
@@ -268,25 +280,13 @@ const token="bearer "+localStorage.getItem("token");
 
 const getData = async (url, params = {}) => {
   let resultObj = {}
-  await axios.get('/api' + url, {
-    headers: {
-      'Authorization': token
-    },
-    params: params
-  })
-      .then(result => {
-        console.log("homepage-getData:", result)
-        if (result && result.data && result.data.data && result.data.data.rows) {
-          for (let i = 0; i < result.data.data.rows.length; i++){
-            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
-          }
-          resultObj = result.data.data;
-        }
-      })
-      .catch(error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("homepage-getData:", error)
-      })
+  const result = await axios_get({url: url, params: params, name: 'home_getData'})
+  if(result){
+    resultObj = result.data
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   return resultObj
 }
 
