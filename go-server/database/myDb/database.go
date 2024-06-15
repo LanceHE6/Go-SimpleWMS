@@ -88,14 +88,27 @@ func Init() {
 	db.AutoMigrate(&model.Department{})
 	db.AutoMigrate(&model.Unit{})
 	// 声明外键，级联删除和更新
-	db.AutoMigrate(&model.Staff{}).AddForeignKey("department", "departments(did)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Staff{}).
+		AddForeignKey("department", "departments(did)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.InventoryType{})
-	db.AutoMigrate(&model.Warehouse{}).AddForeignKey("manager", "staffs(sid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Warehouse{}).
+		AddForeignKey("manager", "staffs(sid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.GoodsType{})
-	db.AutoMigrate(&model.Goods{}).AddForeignKey("goods_type", "goods_types(gtid)", "SET NULL", "CASCADE").AddForeignKey("unit", "units(unid)", "SET NULL", "CASCADE")
-	db.AutoMigrate(&model.Inventory{}).AddForeignKey("inventory_type", "inventory_types(itid)", "SET NULL", "CASCADE").AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
-	db.AutoMigrate(&model.Transfer{}).AddForeignKey("sour_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").AddForeignKey("dest_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").AddForeignKey("in_iid", "inventories(iid)", "SET NULL", "CASCADE").AddForeignKey("out_iid", "inventories(iid)", "SET NULL", "CASCADE")
-	db.AutoMigrate(&model.Stock{}).AddForeignKey("goods", "goods(gid)", "SET NULL", "CASCADE").AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Goods{}).
+		AddForeignKey("goods_type", "goods_types(gtid)", "SET NULL", "CASCADE").
+		AddForeignKey("unit", "units(unid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Inventory{}).
+		AddForeignKey("inventory_type", "inventory_types(itid)", "SET NULL", "CASCADE").
+		AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Transfer{}).
+		AddForeignKey("sour_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").
+		AddForeignKey("dest_warehouse", "warehouses(wid)", "SET NULL", "CASCADE").
+		AddForeignKey("in_iid", "inventories(iid)", "SET NULL", "CASCADE").
+		AddForeignKey("out_iid", "inventories(iid)", "SET NULL", "CASCADE").
+		AddForeignKey("auditor", "users(uid)", "SET NULL", "CASCADE")
+	db.AutoMigrate(&model.Stock{}).
+		AddForeignKey("goods", "goods(gid)", "SET NULL", "CASCADE").
+		AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.VerificationCode{})
 
 	// 初始化数据
