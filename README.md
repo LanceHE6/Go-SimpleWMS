@@ -118,7 +118,7 @@ docker build -t simple-wms-web:latest .
 docker run --name simple-wms-web -p 5173:80 -d simple-wms-web:latest
 ```
 
-##### 后端端
+##### 后端
 
 ```bash
 # 进入项目目录

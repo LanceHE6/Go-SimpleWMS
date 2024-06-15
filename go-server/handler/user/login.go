@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,11 +17,7 @@ type loginRequest struct {
 func Login(context *gin.Context) {
 	var data loginRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	account := data.Account
@@ -29,41 +26,29 @@ func Login(context *gin.Context) {
 	db := myDb.GetMyDbConnection()
 	var user model.User
 
-	err := db.Where("account=? and password=?", account, password).First(&user).Error
+	err := db.Where("(account=? and password=?) OR (email=? and password=?)", account, password, account, password).First(&user).Error
 
 	if err != nil {
-		context.JSON(http.StatusNonAuthoritativeInfo, gin.H{"message": "Incorrect account or password"})
+		context.JSON(http.StatusOK, response.Response(202, "Account or password is incorrect", nil))
 		return
 	} else {
 		token, err := utils.GenerateToken(user.Uid, user.Permission, user.CreatedAt.String())
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot generate token",
-				"detail": err.Error(),
-				"code":   501,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Cannot generate token", err.Error()))
 			return
 		}
 
 		// token写入数据库
 		err = db.Model(&user).Update("token", token).Error
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error":  "Cannot update token",
-				"detail": err.Error(),
-				"code":   502,
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Cannot update token", err.Error()))
 			return
 		}
 
-		context.JSON(http.StatusOK, gin.H{
-			"message": "Login successfully",
-			"data": gin.H{
-				"token": token,
-				"user":  user,
-			},
-			"code": 201,
-		})
+		context.JSON(http.StatusOK, response.Response(201, "Login successfully", gin.H{
+			"token": token,
+			"user":  user,
+		}))
 	}
 
 }

@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/model"
 	db2 "Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"net/http"
 	"strings"
@@ -50,29 +51,20 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "No Authorization header provided",
-				"code":    101,
-			})
+			c.JSON(http.StatusUnauthorized, response.Response(101, "No Authorization header provided", nil))
 			c.Abort()
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid Authorization header format",
-				"code":    102,
-			})
+			c.JSON(http.StatusUnauthorized, response.Response(102, "Invalid token", nil))
 			c.Abort()
 			return
 		}
 		uid, _, createdAt, err := GetUserInfoByContext(c)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid token",
-				"code":    103,
-			})
+			c.JSON(http.StatusUnauthorized, response.Response(103, "Invalid token", nil))
 			c.Abort()
 			return
 		}
@@ -86,16 +78,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			if errors.As(err, &ve) {
 				if ve.Errors&jwt.ValidationErrorExpired != 0 {
 					// Token is expired
-					c.JSON(http.StatusUnauthorized, gin.H{
-						"message": "Expired token",
-						"code":    104,
-					})
+					c.JSON(http.StatusUnauthorized, response.Response(104, "Token is expired", nil))
 				} else {
 					// Other errors
-					c.JSON(http.StatusUnauthorized, gin.H{
-						"message": "Invalid token",
-						"code":    105,
-					})
+					c.JSON(http.StatusUnauthorized, response.Response(105, "Invalid token", nil))
 				}
 			}
 			c.Abort()
@@ -136,10 +122,7 @@ func IsAdminMiddleware() gin.HandlerFunc {
 		// 根据token判断permission是否大于等于2
 		_, permission, _, err := GetUserInfoByContext(context)
 		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid token",
-				"code":    108,
-			})
+			context.JSON(http.StatusUnauthorized, response.Response(108, "Invalid token", nil))
 			context.Abort()
 			return
 		}
@@ -147,10 +130,7 @@ func IsAdminMiddleware() gin.HandlerFunc {
 		if permission >= 2 {
 			context.Next()
 		} else {
-			context.JSON(http.StatusForbidden, gin.H{
-				"message": "Permission denied",
-				"code":    110,
-			})
+			context.JSON(http.StatusForbidden, response.Response(110, "Permission denied", nil))
 			context.Abort()
 			return
 		}
@@ -163,10 +143,7 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		// 根据token判断permission是否为3
 		_, permission, _, err := GetUserInfoByContext(context)
 		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid token",
-				"code":    108,
-			})
+			context.JSON(http.StatusUnauthorized, response.Response(109, "Invalid token", nil))
 			context.Abort()
 			return
 		}
@@ -174,10 +151,7 @@ func IsSuperAdminMiddleware() gin.HandlerFunc {
 		if permission == 3 {
 			context.Next()
 		} else {
-			context.JSON(http.StatusForbidden, gin.H{
-				"message": "Permission denied",
-				"code":    110,
-			})
+			context.JSON(http.StatusForbidden, response.Response(111, "Permission denied", nil))
 			context.Abort()
 			return
 		}

@@ -8,5 +8,6 @@ type User struct {
 	Permission int    `json:"permission"`
 	Nickname   string `json:"nickname"`
 	Phone      string `gorm:"type:varchar(100);default:''" json:"phone"`
+	Email      string `gorm:"type:varchar(100);default:''" json:"email"`
 	Token      string `gorm:"type:varchar(255);default:''" json:"-"`
 }

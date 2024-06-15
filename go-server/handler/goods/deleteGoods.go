@@ -3,6 +3,7 @@ package goods
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,11 +15,7 @@ type deleteGoodsRequest struct {
 func DeleteGoods(context *gin.Context) {
 	var data deleteGoodsRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	gid := data.Gid
@@ -30,16 +27,9 @@ func DeleteGoods(context *gin.Context) {
 	db.Model(&model.Goods{}).Where("gid=?", gid).First(&goods)
 	err := db.Delete(&goods).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the Goods",
-			"detail": err.Error(),
-			"code":   502,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to delete goods", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods deleted successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Successfully deleted goods", nil))
 }

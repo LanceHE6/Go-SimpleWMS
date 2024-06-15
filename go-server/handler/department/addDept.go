@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -17,11 +18,7 @@ type addDepartmentRequest struct {
 func AddDepartment(context *gin.Context) {
 	var data addDepartmentRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	depName := data.Name
@@ -32,10 +29,7 @@ func AddDepartment(context *gin.Context) {
 	var dep model.Department
 	err := db.Where("name = ?", depName).First(&dep).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The department name already exists",
-			"code":    402,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "The department name already exists", nil))
 		return
 	}
 	newDid := "d" + utils.GenerateUuid(8) // 转换为 8 位字符串
@@ -47,16 +41,9 @@ func AddDepartment(context *gin.Context) {
 
 	err = db.Create(&dep).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert new department",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Cannot insert new department", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Department added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Successfully added new department", nil))
 }

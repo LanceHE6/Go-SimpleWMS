@@ -3,6 +3,7 @@ package goodsType
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,11 +15,7 @@ type deleteGoodsTypeRequest struct {
 func DeleteGoodsType(context *gin.Context) {
 	var data deleteGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	gtid := data.GTid
@@ -28,16 +25,9 @@ func DeleteGoodsType(context *gin.Context) {
 	// 删除仓库
 	err := db.Delete(&model.GoodsType{}, "gtid=?", gtid).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot delete the Goods type",
-			"detail": err.Error(),
-			"code":   502,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to delete goods type", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods type deleted successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Successfully deleted goods type", nil))
 }

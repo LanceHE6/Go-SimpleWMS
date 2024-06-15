@@ -3,6 +3,7 @@ package staff
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -17,11 +18,7 @@ type updateRequest struct {
 func UpdateStaff(context *gin.Context) {
 	var data updateRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	sid := data.Sid
@@ -42,10 +39,7 @@ func UpdateStaff(context *gin.Context) {
 	var staff model.Staff
 	notFound := db.Model(&model.Staff{}).Where("sid=?", sid).First(&staff).RecordNotFound()
 	if notFound {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The staff does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "The staff does not exist", nil))
 		return
 	}
 
@@ -54,10 +48,7 @@ func UpdateStaff(context *gin.Context) {
 	if deptId != "" {
 		err := db.Model(&model.Department{}).Where("did=?", deptId).Find(&dep).Error
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": "The staff's department does not exist",
-				"code":    404,
-			})
+			context.JSON(http.StatusOK, response.Response(403, "The department does not exist", nil))
 			return
 		}
 	}
@@ -69,15 +60,8 @@ func UpdateStaff(context *gin.Context) {
 	}
 	err := db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update staff",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.Response(501, "Update Error", nil))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Staff updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Success", nil))
 }

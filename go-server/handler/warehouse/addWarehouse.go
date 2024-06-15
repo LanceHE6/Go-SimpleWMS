@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -20,11 +21,7 @@ type addWarehouseRequest struct {
 func AddWarehouse(context *gin.Context) {
 	var data addWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	warehouseName := data.Name
@@ -39,10 +36,7 @@ func AddWarehouse(context *gin.Context) {
 	err := db.Model(&model.Warehouse{}).Where("name=?", warehouseName).First(&warehouse).Error
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusConflict, gin.H{
-			"message": "The warehouse already exists",
-			"code":    402,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Warehouse already exists", nil))
 		return
 	}
 
@@ -56,16 +50,9 @@ func AddWarehouse(context *gin.Context) {
 	}
 	err = db.Create(&warehouse).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert the warehouse",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add warehouse", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusCreated, gin.H{
-		"message": "Warehouse added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Successfully added warehouse", nil))
 }

@@ -4,6 +4,7 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
 	"Go_simpleWMS/utils"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -17,11 +18,7 @@ type addUnitRequest struct {
 func AddUnit(context *gin.Context) {
 	var data addUnitRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	unitName := data.Name
@@ -32,10 +29,7 @@ func AddUnit(context *gin.Context) {
 	var unit model.Unit
 	err := db.Where("name = ?", unitName).First(&unit).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The unit already exists",
-			"code":    402,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Unit already exists", nil))
 		return
 	}
 	newUnid := "un" + utils.GenerateUuid(8) // 转换为 8 位字符串
@@ -47,16 +41,9 @@ func AddUnit(context *gin.Context) {
 
 	err = db.Create(&unit).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot insert new unit",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to add unit", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Unit added successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Unit added successfully", nil))
 }

@@ -3,6 +3,7 @@ package goodsType
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -19,11 +20,7 @@ type updateGoodsTypeRequest struct {
 func UpdateGoodsType(context *gin.Context) {
 	var data updateGoodsTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	gTid := data.GTid
@@ -44,10 +41,7 @@ func UpdateGoodsType(context *gin.Context) {
 	var gt model.GoodsType
 	err := db.Model(&model.GoodsType{}).Where("gtid=?", gTid).First(&gt).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The goods type does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Goods type not found", nil))
 		return
 	}
 
@@ -59,22 +53,11 @@ func UpdateGoodsType(context *gin.Context) {
 	err = db.Model(&model.GoodsType{}).Where("gtid=?", gTid).Updates(updateData).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"error":  "The name is already exists",
-				"detail": err.Error(),
-				"code":   404,
-			})
+			context.JSON(http.StatusOK, response.Response(403, "Goods type already exists", nil))
 			return
 		}
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update the goods type",
-			"detail": err.Error(),
-			"code":   504,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Update failed", err.Error()))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Goods type updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Update success", nil))
 }

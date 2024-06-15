@@ -3,6 +3,7 @@ package user
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,11 +14,7 @@ func ListUsers(context *gin.Context) {
 	var users []model.User
 	err := db.Select("*").Find(&users).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the list of users",
-			"detail": err.Error(),
-			"code":   "501",
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Get user list failed", err.Error()))
 		return
 	}
 
@@ -26,9 +23,7 @@ func ListUsers(context *gin.Context) {
 		usersRes = append(usersRes, user)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Get user list successfully",
-		"rows":    usersRes,
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Get user list success", gin.H{
+		"rows": usersRes,
+	}))
 }
