@@ -3,6 +3,7 @@ package warehouse
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -20,11 +21,7 @@ type updateWarehouseRequest struct {
 func UpdateWarehouse(context *gin.Context) {
 	var data updateWarehouseRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	wid := data.Wid
@@ -38,10 +35,7 @@ func UpdateWarehouse(context *gin.Context) {
 	// 判断该仓库是否已存在
 	err := db.Model(&model.Warehouse{}).Where("wid=?", wid).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The department does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Warehouse not found", nil))
 		return
 	}
 
@@ -56,15 +50,8 @@ func UpdateWarehouse(context *gin.Context) {
 	err = db.Model(&model.Warehouse{}).Where("wid=?", wid).Updates(updateData).Error
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update the warehouse",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to update warehouse", err.Error()))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Warehouse updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Successfully updated warehouse", nil))
 }

@@ -3,6 +3,7 @@ package unit
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,11 +15,7 @@ func ListUnit(context *gin.Context) {
 
 	err := db.Select("*").Find(&units).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Can not get the list of units",
-			"detail": err.Error(),
-			"code":   201,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Get units list failed", err.Error()))
 	}
 	// 封装返回列表
 	var res []model.Unit
@@ -26,9 +23,7 @@ func ListUnit(context *gin.Context) {
 		res = append(res, unit)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Get units list successfully",
-		"rows":    res,
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Get units list successfully", gin.H{
+		"rows": res,
+	}))
 }

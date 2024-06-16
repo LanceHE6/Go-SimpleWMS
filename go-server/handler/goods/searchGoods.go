@@ -3,6 +3,7 @@ package goods
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"math"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 func SearchGoods(context *gin.Context) {
 	var goods []model.Goods
+	var total int64
 	page, _ := strconv.Atoi(context.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(context.DefaultQuery("page_size", "10"))
 	gid := context.Query("gid")
@@ -22,9 +24,6 @@ func SearchGoods(context *gin.Context) {
 	keyword := context.Query("keyword")
 
 	query := myDb.GetMyDbConnection().Table("goods") //.Joins("left join warehouses on goods.warehouse = warehouses.wid").Where("warehouses.status = 1")
-
-	// 计算偏移量
-	offset := (page - 1) * limit
 
 	if gid != "" {
 		query = query.Where("goods.gid = ?", gid)
@@ -53,33 +52,33 @@ func SearchGoods(context *gin.Context) {
 	}
 
 	// 获取总记录数
-	var total int64
-	query.Model(&model.Goods{}).Count(&total)
+	query.Count(&total)
 
-	// 计算总页数
-	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+	var totalPages = 0
 
-	// 设置分页参数
-	query = query.Offset(offset).Limit(limit)
-
-	result := query.Offset(offset).Limit(limit).Find(&goods)
+	// page 为-1不分页
+	if page != -1 {
+		// 计算总页数
+		totalPages = int(math.Ceil(float64(total) / float64(limit)))
+		// 计算偏移量
+		offset := (page - 1) * limit
+		// 设置分页参数
+		query = query.Offset(offset).Limit(limit)
+	}
+	// 执行查询
+	result := query.Find(&goods)
 	if result.Error != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": result.Error.Error(),
-			"code":  401,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Database query error", result.Error.Error()))
 		return
 	}
 	if len(goods) == 0 {
-		context.JSON(http.StatusOK, gin.H{
-			"code":        202,
-			"message":     "No data",
+		context.JSON(http.StatusOK, response.Response(202, "No data", gin.H{
 			"page":        page,
 			"page_size":   limit,
 			"total":       total,
 			"total_pages": totalPages,
 			"rows":        goods,
-		})
+		}))
 		return
 	}
 
@@ -88,15 +87,13 @@ func SearchGoods(context *gin.Context) {
 		goodsRes = append(goodsRes, g)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"code":        201,
-		"message":     "Query successfully",
+	context.JSON(http.StatusOK, response.Response(201, "Query successfully", gin.H{
 		"page":        page,
 		"page_size":   limit,
 		"total":       total,
 		"total_pages": totalPages,
+		"rows":        goods,
 		"keyword":     keyword,
-		"rows":        goodsRes,
-	})
+	}))
 
 }

@@ -3,6 +3,8 @@ package inventory
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/handler/stock"
+	"Go_simpleWMS/utils/response"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -27,11 +29,7 @@ type updateInvRequest struct {
 func UpdateInv(context *gin.Context) {
 	var data updateInvRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 
@@ -43,11 +41,7 @@ func UpdateInv(context *gin.Context) {
 	var goodsList model.GoodsList
 	err := json.Unmarshal([]byte(data.GoodsList), &goodsList)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "The format of the goods_list is incorrect",
-			"code":    402,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.Response(402, "Invalid goods list", nil))
 		return
 	}
 	iTid := data.InventoryType
@@ -62,11 +56,7 @@ func UpdateInv(context *gin.Context) {
 	// 开始事务
 	tx := db.Begin()
 	if tx.Error != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to start transaction",
-			"code":    501,
-			"detail":  tx.Error.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to start transaction", tx.Error.Error()))
 		return
 	}
 
@@ -74,11 +64,7 @@ func UpdateInv(context *gin.Context) {
 	var oldInv model.Inventory
 	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).First(&oldInv).Error; err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get original inventory record",
-			"code":    502,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Failed to get inventory", err.Error()))
 		return
 	}
 
@@ -87,11 +73,7 @@ func UpdateInv(context *gin.Context) {
 	var oldInventoryType model.InventoryType
 	if err := tx.Model(&model.InventoryType{}).Where("itid = ?", itid).First(&oldInventoryType).Error; err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get inventory type",
-			"code":    503,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(503, "Failed to get inventory type", err.Error()))
 		return
 	}
 
@@ -104,10 +86,7 @@ func UpdateInv(context *gin.Context) {
 		notExist := tx.Model(&model.Stock{}).Where("goods = ? AND warehouse = ?", oldStock.Goods, oldInv.Warehouse).First(&oldStock).RecordNotFound()
 		if notExist {
 			tx.Rollback()
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": "Contains invalid Stock records",
-				"code":    403,
-			})
+			context.JSON(http.StatusOK, response.Response(403, "Failed to get stock", nil))
 			return
 		}
 		// 根据出入库类型回退数量
@@ -122,11 +101,7 @@ func UpdateInv(context *gin.Context) {
 		fmt.Println("old:", oldStock)
 		if err := tx.Model(&model.Stock{}).Where("goods = ? AND warehouse = ?", oldStock.Goods, oldStock.Warehouse).Updates(updateData).Error; err != nil {
 			tx.Rollback()
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Failed to update stock",
-				"code":    504,
-				"detail":  err.Error(),
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(504, "Failed to update stock", err.Error()))
 			return
 		}
 	}
@@ -135,11 +110,7 @@ func UpdateInv(context *gin.Context) {
 	var newInventoryType model.InventoryType
 	if err := tx.Model(&model.InventoryType{}).Where("itid = ?", iTid).First(&newInventoryType).Error; err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get new inventory type",
-			"code":    505,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(505, "Failed to get inventory type", err.Error()))
 		return
 	}
 	// 构造更新后库存数据
@@ -148,24 +119,19 @@ func UpdateInv(context *gin.Context) {
 	for _, g := range oldGoodsList {
 		var newGoodsOrder model.GoodsOrder
 		newGoodsOrder.Goods = g.Goods
-		oldStock := GetGoodsListAmountByGoods(oldGoodsList, g.Goods)
+		oldStock := stock.GetGoodsListAmountByGoods(oldGoodsList, g.Goods)
 		if newInventoryType.Type == 1 {
 			newGoodsOrder.Amount = oldStock + g.Amount
 		} else {
 			newGoodsOrder.Amount = oldStock - g.Amount
 		}
-		fmt.Println("oldStock:", oldStock)
-		fmt.Println("amount:", g.Amount)
 		newGoodsList = append(newGoodsList, newGoodsOrder)
 	}
 	// 如果新库存数据中有库存不足的情况：存在负数
 	for _, g := range newGoodsList {
 		if g.Amount < 0 {
 			tx.Rollback()
-			context.JSON(http.StatusBadRequest, gin.H{
-				"message": "Contains invalid Stock records",
-				"code":    405,
-			})
+			context.JSON(http.StatusBadRequest, response.Response(404, "Contains invalid Stock records", nil))
 			return
 		}
 	}
@@ -188,18 +154,10 @@ func UpdateInv(context *gin.Context) {
 	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).Updates(inv).Error; err != nil {
 		tx.Rollback()
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"error":  "The Number already exists",
-				"detail": err.Error(),
-				"code":   404,
-			})
+			context.JSON(http.StatusOK, response.Response(405, "Duplicate inventory number", nil))
 			return
 		} else {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Failed to update inventory record",
-				"code":    505,
-				"detail":  err.Error(),
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(506, "Failed to update inventory", err.Error()))
 			return
 		}
 	}
@@ -208,30 +166,19 @@ func UpdateInv(context *gin.Context) {
 	var newInv model.Inventory
 	if err := tx.Model(&model.Inventory{}).Where("iid = ?", iid).First(&newInv).Error; err != nil {
 		tx.Rollback()
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get updated inventory record",
-			"code":    506,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(507, "Failed to get inventory", err.Error()))
 		return
 	}
 
 	// 更新货品数量
-	if UpdateStocks(newInv.GoodsList, newInv.Warehouse, newInventoryType, context, tx) == 0 {
+	if stock.UpdateStocks(newInv.GoodsList, newInv.Warehouse, newInventoryType, context, tx) == 0 {
 		// 提交事务
 		if err := tx.Commit().Error; err != nil {
 			tx.Rollback()
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Failed to commit transaction",
-				"code":    508,
-				"detail":  err.Error(),
-			})
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(508, "Failed to commit transaction", err.Error()))
 			return
 		}
 
-		context.JSON(http.StatusOK, gin.H{
-			"message": "Inventory updated successfully",
-			"code":    201,
-		})
+		context.JSON(http.StatusOK, response.Response(200, "Successfully updated inventory", nil))
 	}
 }

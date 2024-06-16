@@ -3,6 +3,7 @@ package inventoryType
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -19,11 +20,7 @@ type updateInventoryTypeRequest struct {
 func UpdateInventoryType(context *gin.Context) {
 	var data updateInventoryTypeRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	ITid := data.ITid
@@ -50,24 +47,14 @@ func UpdateInventoryType(context *gin.Context) {
 	// 判断该类型是否已存在
 	err := db.Model(&model.InventoryType{}).Where("itid=?", ITid).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The inventory type does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Inventory type not found", nil))
 		return
 	}
 	err = db.Model(&model.InventoryType{}).Where("itid=?", ITid).Updates(updateData).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot get the number of inventory type for this itid",
-			"detail": err.Error(),
-			"code":   502,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to update inventory type", err.Error()))
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Inventory type updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Inventory type updated successfully", nil))
 }

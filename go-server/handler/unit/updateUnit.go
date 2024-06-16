@@ -3,6 +3,7 @@ package unit
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,11 +16,7 @@ type updateUnitRequest struct {
 func UpdateUnit(context *gin.Context) {
 	var data updateUnitRequest
 	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing parameters or incorrect format",
-			"code":    401,
-			"detail":  err.Error(),
-		})
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	unid := data.Unid
@@ -31,10 +28,7 @@ func UpdateUnit(context *gin.Context) {
 	notFound := db.Model(&model.Unit{}).Where("unid=?", unid).First(&unit).RecordNotFound()
 
 	if notFound {
-		context.JSON(http.StatusForbidden, gin.H{
-			"message": "The unit does not exist",
-			"code":    403,
-		})
+		context.JSON(http.StatusOK, response.Response(402, "Unit not found", nil))
 		return
 	}
 
@@ -43,15 +37,8 @@ func UpdateUnit(context *gin.Context) {
 	}
 	err := db.Model(&model.Unit{}).Where("unid=?", unid).Updates(updateData).Error
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Cannot update unit",
-			"detail": err.Error(),
-			"code":   501,
-		})
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Update unit failed", err.Error()))
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Unit updated successfully",
-		"code":    201,
-	})
+	context.JSON(http.StatusOK, response.Response(200, "Update unit success", nil))
 }

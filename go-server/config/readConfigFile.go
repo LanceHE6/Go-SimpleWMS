@@ -28,6 +28,12 @@ type Config struct {
 			DBNAME   string `yaml:"dbname"`
 		} `yaml:"mysql"`
 	} `yaml:"db"`
+	SMTP struct {
+		HOST     string `yaml:"host"`
+		PORT     int    `yaml:"port"`
+		USERNAME string `yaml:"user_name"`
+		PASSWORD string `yaml:"password"`
+	} `yaml:"smtp"`
 }
 
 var ServerConfig Config
@@ -89,6 +95,17 @@ func init() {
 					PASSWORD: "root",
 					DBNAME:   "simple_wms",
 				},
+			},
+			SMTP: struct {
+				HOST     string `yaml:"host"`
+				PORT     int    `yaml:"port"`
+				USERNAME string `yaml:"user_name"`
+				PASSWORD string `yaml:"password"`
+			}{
+				HOST:     "smtp.example.com",
+				PORT:     465,
+				USERNAME: "your_email@example.com",
+				PASSWORD: "your_password",
 			},
 		}
 
