@@ -25,16 +25,18 @@ func InitData() {
 		Type:     2,
 	}, "_default2_", "itid")
 	createIfNotExists(db, &model.InventoryType{
-		Itid:     "_default-db1_",
-		Name:     "调拨入库",
-		TypeCode: "default_in",
-		Type:     1,
+		Itid:         "_default-db1_",
+		Name:         "调拨入库",
+		TypeCode:     "default_in",
+		Type:         1,
+		IsSystemType: 1,
 	}, "_default-db1_", "itid")
 	createIfNotExists(db, &model.InventoryType{
-		Itid:     "_default-db2_",
-		Name:     "调拨出库",
-		TypeCode: "default_out",
-		Type:     2,
+		Itid:         "_default-db2_",
+		Name:         "调拨出库",
+		TypeCode:     "default_out",
+		Type:         2,
+		IsSystemType: 1,
 	}, "_default-db2_", "itid")
 
 	// 初始化部门
