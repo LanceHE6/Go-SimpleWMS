@@ -91,8 +91,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 判断是否在数据库中
 		var user model.User
 		db := db2.GetMyDbConnection()
-
-		err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
+		err = db.Where("uid=? and created_at=? and token=?", uid, createdAt, bearerToken[1]).First(&user).Error
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
