@@ -166,6 +166,9 @@ const submitForm = async (form) => {
           ElMessage.success("登录成功")
           await router.push("/home/homePage")
         }
+        else if(result && result.data.code === 202){
+          ElMessage.error("账号或密码错误！")
+        }
         else{
           ElMessage.error("网络请求出错了！")
         }
