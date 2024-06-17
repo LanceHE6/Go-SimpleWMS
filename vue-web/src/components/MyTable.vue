@@ -79,8 +79,7 @@
               >
                 <template #error>
                   <div
-                      :class="['error-image-slot', operations.uploadImg ? 'is_upload_img' : '']"
-                      @click="uploadImg(scope.row[keyData])"
+                      class="error-image-slot"
                   >
                     <el-icon><Picture /></el-icon>
                   </div>
