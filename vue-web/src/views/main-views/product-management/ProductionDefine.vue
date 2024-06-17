@@ -1,7 +1,8 @@
 <template>
   <DataShowView
+      key-data="gid"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'gid'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"

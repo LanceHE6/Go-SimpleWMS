@@ -89,6 +89,7 @@ import { ElMessage } from 'element-plus'
 const axios = inject("axios")
 const loginForm = ref(null)
 import {Lock, User} from "@element-plus/icons-vue";
+import {axios_post} from "@/utils/axiosUtil.js";
 
 onMounted(initialize)
 const state = reactive({
@@ -146,39 +147,33 @@ const submitForm = async (form) => {
       };
 
       if (state.ruleForm.account && state.ruleForm.password) {
-        await axios.post('/api/user/login', data)
-            .then(async result => {
-              if (result.data.code === 201) {
-                // 需要将返回的数据存入Store中
-                localStorage.setItem("token", result.data.data.token)
-                localStorage.setItem("user", JSON.stringify(result.data.data.user))
-                console.log("user", localStorage.getItem('user'))
-                // 记住账号密码
-                if (state.remember) {
-                  localStorage.setItem("account", state.ruleForm.account)
-                  localStorage.setItem("password", state.ruleForm.password)
-                  localStorage.setItem("remember", state.remember ? '1' : '0')
-                } else {
-                  localStorage.setItem("account", '')
-                  localStorage.setItem("password", '')
-                  localStorage.setItem("remember", '0')
-                }
+        const result = await axios_post({url: '/user/login', data: data, name: 'login'})
+        if(result && result.data.code === 201){
+          // 需要将返回的数据存入Store中
+          localStorage.setItem("token", result.data.data.token)
+          localStorage.setItem("user", JSON.stringify(result.data.data.user))
+          // 记住账号密码
+          if (state.remember) {
+            localStorage.setItem("account", state.ruleForm.account)
+            localStorage.setItem("password", state.ruleForm.password)
+            localStorage.setItem("remember", state.remember ? '1' : '0')
+          } else {
+            localStorage.setItem("account", '')
+            localStorage.setItem("password", '')
+            localStorage.setItem("remember", '0')
+          }
 
-                ElMessage.success("登录成功")
-                await router.push("/home/homePage")
-              } else {
-                localStorage.setItem("token", "")
-                ElMessage.error("账号或密码错误")
-              }
-              console.log("login", result)
-            })
-            .catch(error => {
-                  ElMessage.error("网络请求出错了！")
-                  console.error("login", error)
-                  state.loading = false
-                }
-            )
-      } else {
+          ElMessage.success("登录成功")
+          await router.push("/home/homePage")
+        }
+        else if(result && result.data.code === 202){
+          ElMessage.error("账号或密码错误！")
+        }
+        else{
+          ElMessage.error("网络请求出错了！")
+        }
+      }
+      else {
         ElMessage.error("账号和密码不能为空！")
       }
       state.loading = false

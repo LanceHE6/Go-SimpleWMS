@@ -61,34 +61,41 @@
           v-for="item in tableColList"
           align="center"
           header-align="center"
+          :type="item.isExpand ? 'expand' : 'default'"
           :property="item.property"
           :label="item.label"
           :width="item.width"
           :sortable="item.sortable"
-          :formatter="mapping(item.property)">
+          :formatter="mapping(item.property, item)">
           <template #default="scope" v-if="item.isImage">
-            <div style="display: flex; align-items: center">
+            <div style="display: flex; align-items: center; justify-content: center">
               <el-image
                   class="table-col-img"
-                  v-if="scope.row.images && scope.row.images.length > 0"
-                  :src="`${axios.defaults.baseURL}/${scope.row.images[0].path}`"
+                  v-if="scope.row[item.property] && scope.row[item.property].length > 0"
+                  :src="`${axios.defaults.baseURL}/${scope.row[item.property][0].path}`"
                   fit="cover"
-                  :preview-src-list="scope.row.images.map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
+                  :preview-src-list="scope.row[item.property].map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
                   preview-teleported
               >
                 <template #error>
-                  <div class="error-image-slot" @click="uploadImg(scope.row[keyData])">
+                  <div
+                      :class="['error-image-slot', operations.uploadImg ? 'is_upload_img' : '']"
+                      @click="uploadImg(scope.row[keyData])"
+                  >
                     <el-icon><Picture /></el-icon>
                   </div>
                 </template>
               </el-image>
 
-              <div class="error-image-slot" v-else @click="uploadImg(scope.row[keyData])">
+              <div
+                  v-else
+                  :class="['error-image-slot', operations.uploadImg ? 'is_upload_img' : '']"
+                  @click="uploadImg(scope.row[keyData])">
                 <el-icon><Plus /></el-icon>
               </div>
 
               <el-button
-                  v-if="scope.row.images && scope.row.images.length > 0 && operations.uploadImg"
+                  v-if="scope.row[item.property] && scope.row[item.property].length > 0 && operations.uploadImg"
                   type="success"
                   icon="Edit"
                   @click="uploadImg(scope.row[keyData])"
@@ -96,6 +103,52 @@
                   plain
                   style="margin-left: 10px"
               />
+            </div>
+          </template>
+          <template #default="scope" v-if="item.isExpand">
+            <div class="child_table_div">
+              <el-table
+                  :data="scope.row[item.property]"
+                  :stripe="true"
+                  max-height="30vh"
+              >
+                <el-table-column
+                    v-for="child_item in item.children"
+                    align="center"
+                    header-align="center"
+                    :label="child_item.label"
+                    :prop="child_item.property"
+                    :width="child_item.width"
+                    :sortable="child_item.sortable"
+                    :formatter="mapping(child_item.property, child_item)">
+                  <template #default="prop" v-if="child_item.isImage">
+                    <div style="display: flex; align-items: center; justify-content: center">
+                      <el-image
+                          class="table-col-img"
+                          v-if="prop.row[child_item.property]['images'] && prop.row[child_item.property]['images'].length > 0"
+                          :src="`${axios.defaults.baseURL}/${prop.row[child_item.property]['images'][0].path}`"
+                          fit="cover"
+                          :preview-src-list="prop.row[child_item.property]['images'].map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
+                          preview-teleported
+                      >
+                        <template #error>
+                          <div
+                              class="error-image-slot"
+                          >
+                            <el-icon><Picture /></el-icon>
+                          </div>
+                        </template>
+                      </el-image>
+                      <div
+                          v-else
+                          class="error-image-slot"
+                      >
+                        <el-icon><Picture /></el-icon>
+                      </div>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
             </div>
           </template>
         </el-table-column>
@@ -300,7 +353,8 @@
       <el-icon><Plus /></el-icon>
       <template #tip>
         <div class="el-upload__tip">
-          <el-text type="info">支持jpg、png、svg、webp等图片类型文件</el-text>
+          <el-text type="info">支持jpg、png、svg、webp等图片类型文件，</el-text>
+          <el-text type="warning">最多上传五张图片。</el-text>
         </div>
       </template>
     </el-upload>
@@ -508,44 +562,45 @@ let editDialogClass = prop.operations.edit
 
 
 // 数据显示转换(映射)
-function mapping(property){
+function mapping(property, item){
   return (row) => {
-    //遍历每一个属性
-    for(const i of prop.tableColList){
-      let item = i
-      if(item.property === property){
-        //多层对象, 一层层解开
-        while(item.isParent){
-          row = row[item.property]
-          item = item['child']
+    let currentRow = row
+    let currentItem = item
+    let currentProp = property
+    //多层对象, 一层层解开
+    while(currentItem.isParent){
+      currentRow = currentRow[currentItem.property]
+      currentItem = currentItem['child']
+      currentProp = currentItem.property
+    }
+    //外键映射
+    if(currentItem.isFK){
+      //从外键map中获取对应的外键表
+      const fkList = prop.showFKMap.get(currentItem.FKData.property)
+      for(const item2 of fkList){
+        // 映射
+        if(currentRow[currentProp] === item2[currentItem.FKData.property]){
+          return item2[currentItem.FKData.label]
         }
-        //外键映射
-        if(item.isFK){
-          //从外键map中获取对应的外键表
-          const fkList = prop.showFKMap.get(item.FKData.property)
-          for(const item2 of fkList){
-            // 映射
-            if(row[property] === item2[item.FKData.property]){
-              return item2[item.FKData.label]
-            }
-          }
-        }
-        //普通映射
-        else if(item.isMapping){
-          //从映射表获取映射对象
-          for(const j of item.mappingList){
-            const item2 = j
-            // 映射
-            if(row[property] === item2.value){
-              return item2.label
-            }
-          }
-        }
-
-        //不需要映射或者没有匹配的映射则返回原值
-        return row[item.property]
       }
     }
+    //普通映射
+    if(currentItem.isMapping){
+      //从映射表获取映射对象
+      for(const j of currentItem.mappingList){
+        const item2 = j
+        // 映射
+        if(currentRow[currentProp] === item2.value){
+          return item2.label
+        }
+      }
+    }
+    //日期转换
+    if(currentItem.isDateFormat){
+      currentRow[currentProp] = new Date(currentRow[currentProp]).toLocaleString()
+    }
+    //不需要映射或者没有匹配的映射则返回原值
+    return currentRow[currentItem.property]
   }
 }
 
@@ -844,6 +899,8 @@ const handleSelectionChange = (val) => {
   background: var(--el-fill-color-light);
   color: var(--el-text-color-secondary);
   font-size: 15px;
+}
+.is_upload_img{
   cursor: pointer;
 }
 
@@ -866,5 +923,8 @@ const handleSelectionChange = (val) => {
   width: 178px;
   height: 178px;
   text-align: center;
+}
+.child_table_div{
+  padding: 10px;
 }
 </style>

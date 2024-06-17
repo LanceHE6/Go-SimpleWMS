@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+      key-data="gtid"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'gtid'"
-      :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
@@ -20,7 +20,7 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "name", label: "货品类型名", sortable: false, width: 180},
   {property: "type_code", label: "货品类型编号", sortable: true, width: 180},
-  {property: "created_at", label: "创建时间", sortable: true, width: 240},
+  {property: "created_at", label: "创建时间", isDateFormat: true, sortable: true, width: 240},
   {property: "gtid", label: "货品类型ID", sortable: true, width: 130},
 ]
 

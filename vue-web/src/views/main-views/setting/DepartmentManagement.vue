@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+      key-data="did"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'did'"
-      :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
@@ -19,7 +19,7 @@ import DataShowView from "@/components/DataShowView.vue";
  * */
 const tableColList = [
   {property: "name", label: "部门名", sortable: false, width: 120},
-  {property: "created_at", label: "添加时间", sortable: true, width: 240},
+  {property: "created_at", label: "添加时间", isDateFormat: true, sortable: true, width: 240},
   {property: "did", label: "部门ID", sortable: true, width: 120},
 ]
 

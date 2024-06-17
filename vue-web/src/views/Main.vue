@@ -28,7 +28,7 @@
               alt="Logo"
           />
         </a>
-        <el-text size="large" style="color: white; margin-right: 10px;">
+        <el-text size="large" style="color: white; margin-right: 10px; white-space: nowrap">
           简行云仓库
         </el-text>
 
@@ -125,8 +125,8 @@
 import {h, onMounted, reactive} from 'vue'
 import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
-import axios from "axios";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {axios_get} from "@/utils/axiosUtil.js";
 
 onMounted(initialize)
 
@@ -145,17 +145,14 @@ async function about(){
   let go_simpleWMS_version = 'unknown'
   let go_server_version = 'unknown'
   let vue_web_version = 'v0.2.0.20240614_Alpha'
-  await axios.get('/api/ping')
-      .then(result => {
-        console.log("ping:", result)
-        if(result.status === 200){
-          go_server_version = result.data.data.version
-        }
-      })
-      .catch(error => {
-        ElMessage.error("获取后端版本号失败！")
-        console.error("ping:", error.message)
-      })
+  const result = await axios_get({url: '/ping'})
+  if(result){
+    go_server_version = result.data.version
+  }
+  else{
+    ElMessage.error("获取后端版本号失败！")
+  }
+
   await ElMessageBox({
     title: '关于',
     message: h('p', null, [
@@ -213,28 +210,11 @@ async function initialize(){
   else{
     state.user = JSON.parse(userJson)
   }
-  console.log("user", state.user)
-  const token="bearer "+localStorage.getItem("token");
-  await axios.get('/api/auth', {
-    headers: {
-      'Authorization': token
-    }
-  })
-      .then(result => {
-        console.log("auth:", result)
-        if(result.status === 200){
-          //ignore
-        }
-        else{
-          ElMessage.error("操作失败，请先登录！")
-          router.push('/')
-        }
-      })
-      .catch(error => {
-        ElMessage.error("操作失败，请先登录！")
-        console.error("auth:", error.message)
-        router.push('/')
-      })
+  const result = await axios_get({url: '/auth', name: 'auth'})
+  if(!result){
+    ElMessage.error("操作失败，请先登录！")
+    await router.push('/')
+  }
 }
 </script>
 
@@ -258,6 +238,7 @@ async function initialize(){
   max-width: 100%;
 }
 .head-menu {
+  width: 100vw;
   border: 0 !important;
 }
 .main-logo {

@@ -7,8 +7,23 @@
         v-model="activeNames"
     >
       <el-collapse-item
-          title="仓库概况"
           name="1">
+        <template #title>
+          <el-icon class="header-icon">
+            <price-tag />
+          </el-icon>
+          <el-text size="large">仓库概况</el-text>
+        </template>
+        <div>
+          <el-button
+              type="primary"
+              size="small"
+              text
+              @click="warehouseCardLimitChange"
+          >
+            {{ state.warehouseCardBtnStr }}
+          </el-button>
+        </div>
         <div
             v-loading="state.warehouseCardDataList.length === 0"
             class="card-body"
@@ -37,8 +52,49 @@
         </div>
       </el-collapse-item>
       <el-collapse-item
-          title="货品相关"
           name="2">
+        <template #title>
+          <el-icon class="header-icon">
+            <box />
+          </el-icon>
+          <el-text size="large">货品相关</el-text>
+        </template>
+        <div
+            v-loading="false"
+            class="card-body"
+        >
+          <goods-type-card
+            :option-amount-data="state.optionAmountData"
+            :option-price-data="state.optionPriceData"
+          />
+          <inventory-card
+
+          />
+        </div>
+      </el-collapse-item>
+      <el-collapse-item
+          name="3">
+        <template #title>
+          <el-icon class="header-icon">
+            <folder-add />
+          </el-icon>
+          <el-text size="large">入库相关</el-text>
+        </template>
+        <div
+            v-loading="false"
+            class="card-body"
+        >
+
+        </div>
+      </el-collapse-item>
+      <el-collapse-item
+          name="4">
+        <template #title>
+          <el-icon class="header-icon">
+            <folder-remove />
+          </el-icon>
+          <el-text size="large">出库相关</el-text>
+        </template>
         <div
             v-loading="false"
             class="card-body"
@@ -53,20 +109,27 @@
 <script setup>
 import {computed, onMounted, reactive, ref} from 'vue';
 import WarehouseCard from "@/components/cards/WarehouseCard.vue";
-import axios from "axios";
 import {ElMessage} from "element-plus";
+import {axios_get} from "@/utils/axiosUtil.js";
+import {Box, FolderAdd, FolderRemove, PriceTag} from "@element-plus/icons-vue";
+import GoodsTypeCard from "@/components/cards/GoodsTypeCard.vue";
+import InventoryCard from "@/components/cards/InventoryCard.vue";
 
 // 使用 ref 创建响应式数据
-const data = ref(getRandomData());
-const activeNames = ref(['1','2'])  // 初始化时的活动界面
+const activeNames = ref(['1', '2', '3', '4'])  // 初始化时的活动界面
 
 const state =  reactive({
   selectWid: '0',  //选中的仓库id(如果是所有仓库则为0)
   isLoading: false,  //数据是否正在加载
   warehouseCardDataList:[],  //仓库信息卡片数据列表
   hasExtraWarehouse: false,  //是否还有仓库卡片未显示
+  warehouseCardBtnStr: '显示所有仓库',  //仓库概况上方的按钮文字
+  warehouseCardLimit: 3,  //显示多少个仓库卡片
+  optionAmountData: [],  //图表中的数据(数量占比)
+  optionPriceData: [], //图表中的数据(金额占比)
 })
 
+//获取出入库表请求参数
 function getInvParams(wid = '', type = -1, date = 0){
   const w = wid === '' ? {} : {warehouse : wid}
   const t = type === -1 ? {} : {type : type}
@@ -78,15 +141,13 @@ function getInvParams(wid = '', type = -1, date = 0){
   }
 }
 
-// 初始化函数
-onMounted(async () => {
-  data.value = getRandomData();
-
+//获取仓库卡片信息
+async function getWarehouseCardData(){
   const warehouseList = (await getData("/warehouse/list")).rows
   const warehouseCardDataList = []  //仓库信息卡片数据列表缓存
 
   // 并发执行多个请求
-  const typeQuantityPromise = getData("/goods/search");
+  const typeQuantityPromise = getData("/stock/get");
   const entryPromise = getData("/inv/search", getInvParams(undefined,1,undefined));
   const outPromise = getData("/inv/search", getInvParams(undefined,2,undefined));
   const yEntryPromise = getData("/inv/search", getInvParams(undefined,1,-1));
@@ -104,25 +165,33 @@ onMounted(async () => {
   //今日入库总价
   let entryPrice = 0
   for(const item of entry.rows){
-    entryPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      entryPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //今日出库总价
   let outPrice = 0
   for(const item of out.rows){
-    outPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      outPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //昨日入库总价
   let yEntryPrice = 0
   for(const item of yEntry.rows){
-    yEntryPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      yEntryPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   //昨日出库总价
   let yOutPrice = 0
   for(const item of yOut.rows){
-    yOutPrice += item['goods']['quantity'] * item['goods']['unit_price']
+    for(const good of item.goods_list){
+      yOutPrice += good['amount'] * good['goods']['unit_price']
+    }
   }
 
   warehouseCardDataList.push({
@@ -142,14 +211,14 @@ onMounted(async () => {
 
   let i = 1  //限制显示个数
   for(const item of warehouseList){
-    if(i > 3){
+    if(i > state.warehouseCardLimit){
       break
     }
     else{
       i++
     }
     const wid = item['wid']
-    const itemTypeQuantityPromise = getData("/goods/search",{
+    const itemTypeQuantityPromise = getData("/stock/get",{
       warehouse: wid
     })
     const itemEntryPromise = getData("/inv/search", getInvParams(wid,1,undefined))
@@ -165,30 +234,36 @@ onMounted(async () => {
       yItemOutPromise
     ]);
 
-    console.log("entry", itemEntry)
-
     //今日入库总价
     let entryPrice = 0
-    for(const j in itemEntry.rows){
-      entryPrice += itemEntry.rows[j]['goods']['quantity'] * itemEntry.rows[j]['goods']['unit_price']
+    for(const item of itemEntry.rows){
+      for(const good of item.goods_list){
+        entryPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //今日出库总价
     let outPrice = 0
-    for(const j in itemOut.rows){
-      outPrice += itemOut.rows[j]['goods']['quantity'] * itemOut.rows[j]['goods']['unit_price']
+    for(const item of itemOut.rows){
+      for(const good of item.goods_list){
+        outPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //昨日入库总价
     let yEntryPrice = 0
-    for(const j in yItemEntry.rows){
-      yEntryPrice += yItemEntry.rows[j]['goods']['quantity'] * yItemEntry.rows[j]['goods']['unit_price']
+    for(const item of yItemEntry.rows){
+      for(const good of item.goods_list){
+        yEntryPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     //昨日出库总价
     let yOutPrice = 0
-    for(const j in yItemOut.rows){
-      yOutPrice += yItemOut.rows[j]['goods']['quantity'] * yItemOut.rows[j]['goods']['unit_price']
+    for(const item of yItemOut.rows){
+      for(const good of item.goods_list){
+        yOutPrice += good['amount'] * good['goods']['unit_price']
+      }
     }
 
     warehouseCardDataList.push({
@@ -208,35 +283,62 @@ onMounted(async () => {
   }
   state.warehouseCardDataList = warehouseCardDataList
   console.log("total", state.warehouseCardDataList)
-});
-
-const onWarehouseCardSelect = (wid) =>{
-  state.selectWid = wid
-  for(const item of state.warehouseCardDataList){
-    item.selected = item.wid === wid
-  }
 }
 
-// 定义方法
-function getRandomData() {
-  return [
-    {
-      time: '2022-9-11',
-      value: Math.random() * 100
-    },
-    {
-      time: '2022-9-11',
-      value: Math.random() * 100
-    },
-    {
-      time: '2022-9-11',
-      value: Math.random() * 100
-    },
-    {
-      time: '2022-9-11',
-      value: Math.random() * 100
-    }
-  ]
+//获取货品占比卡片信息
+async function getGoodsTypeCardData(){
+  const params = state.selectWid === '0' ? {} : {
+    warehouse: state.selectWid
+  }
+  const stockDataRow = (await getData('/stock/get',params)).rows
+  const amountObjList = []
+  const priceObjList = []
+  for(const item of stockDataRow){
+    const amountObj = {}
+    const priceObj = {}
+    amountObj.name = item['goods'].name
+    amountObj.value = item['quantity']
+    amountObjList.push(amountObj)
+
+    priceObj.name = item['goods'].name
+    priceObj.value = item['quantity'] * item['goods'].unit_price
+    priceObjList.push(priceObj)
+  }
+  state.optionAmountData = amountObjList
+  state.optionPriceData = priceObjList
+  console.log('233', state.optionPriceData, state.optionAmountData)
+}
+
+// 初始化函数
+onMounted(async () => {
+  await getWarehouseCardData()
+  await getGoodsTypeCardData()
+});
+
+//点击仓库卡片
+const onWarehouseCardSelect = async (wid) => {
+  state.selectWid = wid
+  for (const item of state.warehouseCardDataList) {
+    item.selected = item.wid === wid
+  }
+  await getGoodsTypeCardData()
+}
+
+//点击显示更多仓库按钮
+const warehouseCardLimitChange = async () => {
+  state.isLoading = true
+  if(state.warehouseCardLimit === 3){
+    state.warehouseCardLimit = 3000
+    state.warehouseCardBtnStr = '显示前3个仓库'
+    await getWarehouseCardData()
+  }
+  else{
+    state.warehouseCardLimit = 3
+    state.warehouseCardBtnStr = '显示所有仓库'
+    await getWarehouseCardData()
+  }
+  state.selectWid = '0'
+  state.isLoading = false
 }
 
 // 使用 computed 创建计算属性
@@ -258,38 +360,23 @@ const option = computed(() => {
   }
 });
 
-const token="bearer "+localStorage.getItem("token");
-
 /**
  * getData()
  * 获取数据的请求
- * 结果：result
  * */
-
 const getData = async (url, params = {}) => {
   let resultObj = {}
-  await axios.get('/api' + url, {
-    headers: {
-      'Authorization': token
-    },
-    params: params
-  })
-      .then(result => {
-        console.log("homepage-getData:", result)
-        if (result && result.data && result.data.data && result.data.data.rows) {
-          for (let i = 0; i < result.data.data.rows.length; i++){
-            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
-          }
-          resultObj = result.data.data;
-        }
-      })
-      .catch(error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("homepage-getData:", error)
-      })
+  const result = await axios_get({url: url, params: params, name: 'home_getData'})
+  if(result){
+    resultObj = result.data
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   return resultObj
 }
 
+//获取时间字符串
 const getDate = (extraDay = 0) => {
   // 创建一个Date对象表示当前时间
   const now = new Date();
@@ -309,23 +396,21 @@ const getDate = (extraDay = 0) => {
 </script>
 
 <style scoped>
-.chart {
-  padding: 10px;
-  height: 100%;
-  width: 100%;
-}
 .main-body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* 子元素在父容器中垂直分布 */
   width: 100%;
-  height: 95%;
+  height: 100%;
   padding: 10px;
 }
 .card-body{
   display: flex;
   flex-wrap: wrap; /* 允许容器内子元素换行 */
   justify-content: flex-start; /* 水平分布，两端对齐 */
+}
+.header-icon{
+  margin-right: 5px;
 }
 
 </style>

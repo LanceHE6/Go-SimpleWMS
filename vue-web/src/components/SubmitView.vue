@@ -56,7 +56,7 @@
             type="datetime"
             placeholder="选择日期和时间"
             :shortcuts="shortcuts"
-            value-format="YYYY-MM-DD h:m:s"
+            value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
     </el-form>
@@ -111,7 +111,7 @@
           <div style="display: flex; align-items: center">
             <el-image
                 class="table-col-img"
-                v-if="scope.row.images && scope.row.images.length > 0"
+                v-if="scope.row[item.property] && scope.row[item.property].length > 0"
                 :src="`${axios.defaults.baseURL}/${scope.row.images[0].path}`"
                 fit="cover"
                 :preview-src-list="scope.row.images.map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
@@ -213,6 +213,7 @@ import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Picture} from "@element-plus/icons-vue";
 import DataShowView from "@/components/DataShowView.vue";
 import {getObjectArrayDifference, getObjectArrayUnionByKey} from "@/utils/arrayUtil"
+import {axios_get, axios_post} from "@/utils/axiosUtil.js";
 
 const hasFKData = computed(() => (key) => FKMap.value.has(key));
 const tableData = ref([])  //表格数据
@@ -222,7 +223,7 @@ const myForm = ref(null)  //首部表单
 let multipleSelection = []  //用户选择的主窗口元素
 
 //对外事件列表
-const emit = defineEmits(["removeTab"]);
+const emit = defineEmits(["addTab", "removeTab"]);
 
 const state =  reactive({
   isLoading: true,  //数据是否正在加载
@@ -258,23 +259,42 @@ const prop = defineProps({
   }
 });
 
+//日期选择器的便携选项
 const shortcuts = [
   {
-    text: '选择今天',
+    text: '今天',
     value: new Date(),
   },
   {
-    text: '选择昨天',
+    text: '昨天',
     value: () => {
       const date = new Date()
       date.setDate(date.getDate() - 1)
       return date
     },
+  },
+  {
+    text: '前天',
+    value: () => {
+      const date = new Date()
+      date.setDate(date.getDate() - 2)
+      return date
+    },
+  },
+  {
+    text: '大前天',
+    value: () => {
+      const date = new Date()
+      date.setDate(date.getDate() - 3)
+      return date
+    },
   }
 ]
 
+//提交表单及其配置
 const form = ref(prop.submitForm)
 
+//添加窗口是否可见
 const addFormVisible = ref(false)
 
 //提交表单外键
@@ -335,8 +355,6 @@ async function getFKList() {
   }
 }
 
-const token="bearer "+localStorage.getItem("token");
-
 /**
  * getData()
  * 获取数据的请求
@@ -344,49 +362,31 @@ const token="bearer "+localStorage.getItem("token");
  * */
 
 const getData = async (url, params = {}) => {
-  let resultList = []
-  url = '/api' + url
-  await axios.get(url, {
-    headers: {
-      'Authorization': token
-    },
-    params: params
-  })
-      .then(result => {
-        console.log("submitViewGetData:", result)
-        if (result && result.data && result.data.data && result.data.data.rows) {
-          for (let i = 0; i < result.data.data.rows.length; i++){
-            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
-          }
-          resultList = result.data.data.rows;
-        }
-      })
-      .catch(error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("submitViewGetData:", error)
-      })
-  return resultList
+  const result = await axios_get({url: url, params: params, name: 'getData'})
+  if(result){
+    if (result && result.data && result.data.rows) {
+      return result.data.rows;
+    }
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+    return undefined
+  }
 }
 
 /**
  * addData()
  * 新增数据 param: newData对象
  * */
-const addData=async (newData) => {
+const addData=async (data) => {
   state.isLoading = true
-  await axios.post('/api' + prop.urls.addData, newData, {
-    headers: {
-      'Authorization': token
-    }
-  })
-      .then( async message => {
-        ElMessage.success("数据添加成功！")
-        console.log("addData:", message)
-      })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("addData:", error)
-      })
+  const result = axios_post({url: prop.urls['addData'], data: data, name: 'addData'})
+  if(result){
+    ElMessage.success("数据添加成功！")
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   state.isLoading = false
 }
 
@@ -414,7 +414,7 @@ function mapping(property){
           }
         }
         //普通映射
-        else if(item.isMapping){
+        if(item.isMapping){
           //从映射表获取映射对象
           for(const j of item.mappingList){
             const item2 = j
@@ -423,6 +423,10 @@ function mapping(property){
               return item2.label
             }
           }
+        }
+        //日期转换
+        if(item.isDateFormat){
+          row[property] = new Date(row[property]).toLocaleString()
         }
         //不需要映射或者没有匹配的映射则返回原值
         return row[item.property]

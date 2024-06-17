@@ -1,8 +1,8 @@
 <template>
   <DataShowView
+      key-data="sid"
+      search-data="name"
       :table-col-list="tableColList"
-      :key-data="'sid'"
-      :search-data="'name'"
       :add-form="addForm"
       :edit-form="editForm"
       :delete-data-body="deleteDataBody"
@@ -25,7 +25,7 @@ const tableColList = [
       property: "did",
       label: "name"
     }},
-  {property: "created_at", label: "注册时间", sortable: true, width: 240},
+  {property: "created_at", label: "注册时间", isDateFormat: true, sortable: true, width: 240},
   {property: "sid", label: "员工ID", sortable: true, width: 120},
 ]
 

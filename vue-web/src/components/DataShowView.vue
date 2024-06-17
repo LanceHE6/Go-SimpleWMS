@@ -29,10 +29,10 @@
 </template>
 
 <script setup>
-import axios from "axios";
 import {ElMessage, ElNotification} from "element-plus";
 import {onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
+import {axios_delete, axios_get, axios_post, axios_put} from "@/utils/axiosUtil.js";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
@@ -139,7 +139,7 @@ const state =  reactive({
 })
 
 //对外事件列表
-const emit = defineEmits(["addTab"]);
+const emit = defineEmits(["addTab", "removeTab"]);
 
 //获取当前已选项列表
 const getMultipleSelection = () => myTable.value.getMultipleSelection()
@@ -154,79 +154,59 @@ defineExpose({
 //初始化函数
 async function initialize(){
   state.isLoading = true
-  await getFKList()
+  await getAllFKList()
   if(!prop.large) {
-    state.allDataArray = await getData()
+    state.allDataArray = await getData(prop.urls['getData'])
   }
   await update(state.currentPage)
   state.isLoading = false
 }
 onMounted(initialize)
 
+
+async function getDataAndSet(url, propName, stateMap, FKDataMap) {
+  if (!FKDataMap.has(propName)) {
+    const data = await getData(url);
+    stateMap.set(propName, data);
+    FKDataMap.set(propName, data);
+  } else {
+    stateMap.set(propName, FKDataMap.get(propName));
+  }
+}
+
+async function getFKList(form, targetFKMap, FKDataMap) {
+  for (const item of (form || [])) {
+    let currentItem = item
+    //多层对象，先解开
+    while (currentItem.isParent){
+      currentItem = currentItem['child']
+    }
+    if (currentItem.isFK) {
+      await getDataAndSet(currentItem.FKData.url, currentItem.FKData.property, targetFKMap, FKDataMap);
+    }
+  }
+}
+
 //获取外键列表
-async function getFKList() {
-  const addFormItem = prop.addForm && prop.addForm.item  //添加窗口外键数据
-  const editFormItem = prop.editForm && prop.editForm.item  //编辑窗口外键数据
-  const tableColItem = prop.tableColList  //表格显示外键映射
-  const urlList = []  //外键url列表
-  const FKDataMap = new Map()  //当前已获取外键, 避免重复请求
+async function getAllFKList() {
+  const addFormItem = prop.addForm && prop.addForm.item;  // 添加窗口外键数据
+  const editFormItem = prop.editForm && prop.editForm.item;  // 编辑窗口外键数据
+  const tableColItem = prop.tableColList;  // 表格显示外键映射
+  const FKDataMap = new Map();  // 当前已获取外键, 避免重复请求
 
-  //添加窗口外键获取
-  for (const i in addFormItem) {
-    if (addFormItem[i].isFK === true) {
-      const addUrl = addFormItem[i].FKData.url  //外键url
-      const addProp = addFormItem[i].FKData.property  //外键名
+  // 添加窗口外键获取
+  await getFKList(addFormItem, state.addFKMap, FKDataMap)
 
-      //如果外键url不在列表中, 说明还没有请求过该外键
-      if(!urlList.includes(addUrl)){
-        urlList.push(addUrl)
-        const data = await getData(addUrl)
-        state.addFKMap.set(addProp, data)
-        FKDataMap.set(addProp, data)
-      }
-      //第一个for循环不需要else判断
+  // 编辑窗口外键获取
+  await getFKList(editFormItem, state.editFKMap, FKDataMap)
 
-    }
-  }
+  // 表格显示外键映射
+  await getFKList(tableColItem, state.showFKMap, FKDataMap)
 
-  //编辑窗口外键获取
-  for (const i in editFormItem) {
-    if (editFormItem[i].isFK === true) {
-      const editUrl = editFormItem[i].FKData.url
-      const editProp = editFormItem[i].FKData.property
-
-      //如果外键url不在列表中, 说明还没有请求过该外键
-      if(!urlList.includes(editUrl)){
-        urlList.push(editUrl)
-        const data = await getData(editUrl)
-        state.editFKMap.set(editProp, data)
-        FKDataMap.set(editProp, data)
-      }
-      //如果已经请求过该外键, 则在已获取外键中取值, 无需反复请求
-      else{
-        state.editFKMap.set(editProp, FKDataMap.get(editProp))
-      }
-
-    }
-  }
-
-  //表格显示外键映射
-  for (const i in tableColItem){
-    if (tableColItem[i].isFK === true) {
-      const showUrl = tableColItem[i].FKData.url
-      const showProp = tableColItem[i].FKData.property
-
-      if(!urlList.includes(showUrl)){
-        urlList.push(showUrl)
-        const data = await getData(showUrl)
-        state.showFKMap.set(showProp, data)
-        FKDataMap.set(showProp, data)
-      }
-      //如果已经请求过该外键, 则在已获取外键中取值, 无需反复请求
-      else{
-        state.showFKMap.set(showProp, FKDataMap.get(showProp))
-      }
-
+  //子表格显示外键映射
+  for (const item of tableColItem) {
+    if ('children' in item) {
+      await getFKList(item.children, state.showFKMap, FKDataMap)
     }
   }
 }
@@ -259,7 +239,7 @@ async function update(currentPage) {
       page_size: PAGE_SIZE,
       keyword: state.searchWord
     }
-    state.currentDataArray = await getData(undefined, {...defaultParams, ...prop.extraParams})
+    state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams})
     //判断数据更新后当前页数是否大于总页数
     if (currentPage > state.pageCount) {
       currentPage = state.pageCount
@@ -279,7 +259,7 @@ async function startSearch(s) {
     page_size: PAGE_SIZE,
     keyword: state.searchWord
   }
-  state.currentDataArray = await getData(undefined, {...defaultParams, ...prop.extraParams})
+  state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams})
   state.isLoading = false
 }
 
@@ -332,181 +312,133 @@ const token="bearer "+localStorage.getItem("token");
 /**
  * getData()
  * 获取数据的请求
- * 打开网页时自动调用一次
- * 结果：dataArray中包含一到多个data对象
  * */
 
-const getData = async (url = prop.urls.getData, params = {}) => {
-  let resultList = []
-  url = '/api' + url
-  await axios.get(url, {
-    headers: {
-      'Authorization': token
-    },
-    params: params
-  })
-      .then(result => {
-        console.log("getData:", result)
-        if (result && result.data && result.data.data && result.data.data.rows) {
-          for (let i = 0; i < result.data.data.rows.length; i++){
-            result.data.data.rows[i].created_at = new Date(result.data.data.rows[i].created_at).toLocaleString()
-            result.data.data.rows[i].date = new Date(result.data.data.rows[i].date).toLocaleString()
-          }
-          resultList = result.data.data.rows;
-          if(prop.large){
-            state.pageCount = Math.max(result.data.data.total_pages, 1)
-          }
-        }
-      })
-      .catch(error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("getData:", error)
-      })
-  return resultList
+const getData = async (url, params = {}) => {
+  const result = await axios_get({url: url, params: params, name: 'getData'})
+  if (result && result.data && result.data.rows) {
+    if(prop.large){
+      state.pageCount = Math.max(result.data['total_pages'], 1)
+    }
+    return result.data.rows
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+    return undefined
+  }
 }
 
 /**
  * deleteData()
- * 删除数据的请求，param: data 类型:Object
+ * 删除数据的请求
  * */
 const deleteData=async (data) => {
   state.isLoading = true
-  await axios.delete('/api' + prop.urls.deleteData, {
-        headers: {
-          'Authorization': token
-        },
-        data: data
-      }
-  )
-      .then( async message => {
-        ElMessage.success("数据已被删除！")
-        console.log("deleteData:", message)
-        state.allDataArray = await getData()
-      })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("deleteData:", error)
-      })
-  await update(state.currentPage)
+  const result = await axios_delete({url: prop.urls['deleteData'], data: data, name: 'deleteData'})
+  if(result){
+    ElMessage.success("数据已被删除！")
+    state.allDataArray = await getData(prop.urls['getData'])
+    await update(state.currentPage)
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   state.isLoading = false
 }
 
 /**
  * addData()
- * 新增数据 param: newData对象
+ * 新增数据
  * */
-const addData=async (newData) => {
+const addData=async (data) => {
   state.isLoading = true
-  await axios.post('/api' + prop.urls.addData, newData, {
-    headers: {
-      'Authorization': token
-    }
-  })
-      .then( async message => {
-        ElMessage.success("数据添加成功！")
-        console.log("addData:", message)
-        state.allDataArray = await getData()
-      })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("addData:", error)
-      })
-  await update(state.currentPage)
+  const result = await axios_post({url: prop.urls['addData'], data: data, name: 'addData'})
+  if(result){
+    ElMessage.success("数据添加成功！")
+    state.allDataArray = await getData(prop.urls['getData'])
+    await update(state.currentPage)
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   state.isLoading = false
 }
 
 /**
  * updateData()
- * 修改数据  param: newData对象
+ * 修改数据
  * */
-const updateData=async (newData) => {
+const updateData=async (data) => {
   state.isLoading = true
-  await axios.put('/api' + prop.urls.updateData, newData, {
-        headers: {
-          'Authorization': token
-        },
-      }
-  ).then( async message => {
+  const result = await axios_put({url: prop.urls['updateData'], data: data, name: 'updateData'})
+  if(result){
     ElMessage.success("数据修改成功！")
-    console.log("updateData:", message)
-    state.allDataArray = await getData()
-  })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("updateData:", error)
-      })
-  await update(state.currentPage)
+    state.allDataArray = await getData(prop.urls['getData'])
+    await update(state.currentPage)
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   state.isLoading = false
 }
 
 
 /**
  * uploadData()
- * 批量上传数据  param: list
+ * 批量上传数据
  * */
 const uploadData=async (list) => {
-  console.log(list)
   state.isLoading = true
-  await axios.post('/api' + prop.urls.uploadData, {list: list}, {
-    headers: {
-      'Authorization': token
+  const result = await axios_post({url: prop.urls['uploadData'], data: {list: list}, name: 'uploadData'})
+  if(result){
+    if(result.status === 200) {
+      ElMessage.success("批量导入成功！")
     }
-  })
-      .then( async message => {
-        if(message.status === 200) {
-          ElMessage.success("批量导入成功！")
+    else if(result.status === 217){
+      ElMessage.warning("部分导入成功")
+      let errMessage = ""
+      let offset = 0
+      for(const item in result.data.detail){
+        if(result.data.detail[item].code === 402){
+          errMessage += (result.data.detail[item].message + "\n")
+          ElNotification({
+            title: '失败信息',
+            message: result.data.detail[item].message,
+            type: 'error',
+            duration: 10000,
+            offset: offset,
+          })
+          offset += 100
         }
-        else if(message.status === 217){
-          ElMessage.warning("部分导入成功")
-          let errMessage = ""
-          let offset = 0
-          for(const item in message.data.detail){
-            if(message.data.detail[item].code === 402){
-              errMessage += (message.data.detail[item].message + "\n")
-              ElNotification({
-                title: '失败信息',
-                message: message.data.detail[item].message,
-                type: 'error',
-                duration: 10000,
-                offset: offset,
-              })
-              offset += 100
-            }
-          }
-        }
-        console.log("uploadData:", message)
-        state.allDataArray = await getData()
-      })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！数据是否已被添加过？")
-        console.error("uploadData:", error)
-      })
-  await update(state.currentPage)
+      }
+    }
+    state.allDataArray = await getData(prop.urls['getData'])
+    await update(state.currentPage)
+  }
+  else{
+    ElMessage.error("网络请求出错了！数据是否已被添加过？")
+  }
   state.isLoading = false
 }
 
 /**
  * uploadImage()
- * 上传图片 param: data
+ * 上传图片
  * */
 const uploadImage=async (data) => {
   state.isLoading = true
-  await axios.post('/api' + prop.urls.uploadImage, data, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': token
-    }
-  })
-      .then( async message => {
-        ElMessage.success("图片上传成功！")
-        console.log("uploadImage:", message)
-        state.allDataArray = await getData()
-      })
-      .catch( error => {
-        ElMessage.error("网络请求出错了！")
-        console.error("uploadImage:", error)
-      })
-  await update(state.currentPage)
+  const headers = {
+    'Content-Type': 'multipart/form-data'
+  }
+  const result = axios_post({url: prop.urls['uploadImage'], data: data, headers: headers, name: 'uploadImage'})
+  if(result){
+    ElMessage.success("图片上传成功！")
+    state.allDataArray = await getData(prop.urls['getData'])
+    await update(state.currentPage)
+  }
+  else{
+    ElMessage.error("网络请求出错了！")
+  }
   state.isLoading = false
 }
 </script>
