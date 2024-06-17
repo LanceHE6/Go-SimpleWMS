@@ -8,7 +8,7 @@
         <span>
           <el-avatar :icon="isSelected ? 'Select' : 'SemiSelect'"
                      style="margin-right: 10px; width: 15px; height: 15px; --el-avatar-icon-size: 10px;"/>
-          <el-text>{{name}}</el-text>
+          <el-text><b>{{name}}</b></el-text>
         </span>
         <el-text type="info">共{{typeQuantity}}种货物</el-text>
       </div>
