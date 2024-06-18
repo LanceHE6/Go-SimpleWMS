@@ -16,6 +16,7 @@
         :label="item.label"
         :prop="item.prop"
         :class="item.isLong ? 'form-long-item' : 'form-item'"
+
       >
         <el-input
             v-if="item.isInput === true"
@@ -26,6 +27,7 @@
         <el-select
             v-if="item.isMapping === true"
             v-model.trim="form.data[item.dataName]"
+            :disabled="item.isKey && tableData.length > 0"
             placeholder="请选择"
             filterable
         >
@@ -39,6 +41,7 @@
         <el-select
             v-if="item.isFK === true && hasFKData(item.FKData.property)"
             v-model.trim="form.data[item.dataName]"
+            :disabled="item.isKey && tableData.length > 0"
             placeholder="请选择"
             filterable
         >
@@ -106,15 +109,15 @@
           :label="item.label"
           :width="item.width"
           :sortable="item.sortable"
-          :formatter="mapping(item.property)">
+          :formatter="mapping(item.property, item)">
         <template #default="scope" v-if="item.isImage">
           <div style="display: flex; align-items: center">
             <el-image
                 class="table-col-img"
-                v-if="scope.row[item.property] && scope.row[item.property].length > 0"
-                :src="`${axios.defaults.baseURL}/${scope.row.images[0].path}`"
+                v-if="isArrNotEmpty(scope.row, item)"
+                :src="`${axios.defaults.baseURL}/${getArrData(scope.row, item)[0].path}`"
                 fit="cover"
-                :preview-src-list="scope.row.images.map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
+                :preview-src-list="getArrData(scope.row, item).map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
                 preview-teleported
             >
               <template #error>
@@ -185,6 +188,7 @@
     :table-col-list="addTableColList"
     :key-data="keyData"
     :urls="urls"
+    :extra-params="state.extraParams"
     height="40vh"
     large
   />
@@ -217,7 +221,6 @@ import {axiosGet, axiosPost} from "@/utils/axiosUtil.js";
 
 const hasFKData = computed(() => (key) => FKMap.value.has(key));
 const tableData = ref([])  //表格数据
-const addTableData = ref([])  //添加窗口表格数据
 const myDataShowView = ref(null)  //数据展示窗口子组件
 const myForm = ref(null)  //首部表单
 let multipleSelection = []  //用户选择的主窗口元素
@@ -227,15 +230,15 @@ const emit = defineEmits(["addTab", "removeTab"]);
 
 const state =  reactive({
   isLoading: true,  //数据是否正在加载
-  dialogIsLoading: true,  //添加窗口是否正在加载
   itemCount: 0,  //已选元素数量
+  extraParams: {} //getData的额外参数
 })
 
 const prop = defineProps({
   keyData:{
-    type: String,
-    default: () => '',
-    description: '主键'
+    type: [String, Array],
+    default: () => undefined,
+    description: '数据主键, 如有多层则用列表封装, 格式如: ["key", "p1", "p2", ...]'
   },
   submitForm: {
     type: Object,
@@ -256,6 +259,11 @@ const prop = defineProps({
     type: Object,
     default: () => {},
     description: '请求url'
+  },
+  extraParams:{
+    type: Array,
+    default: () => [],
+    description: 'getData请求的额外参数'
   }
 });
 
@@ -301,56 +309,55 @@ const addFormVisible = ref(false)
 const FKMap = ref(new Map())
 //主表格外键
 const mainFKMap = ref(new Map())
+
 onMounted(async () => {
-  state.dialogIsLoading = true
   state.isLoading = true
-  await getFKList()
-  addTableData.value = await getData(prop.urls.getData)
+
+  await getAllFKList()
+
   state.isLoading = false
-  state.dialogIsLoading = false
 })
 
-//获取外键列表
-async function getFKList() {
-  const mainFormItem = prop.mainTableColList  //主表格外键数据
-  const formItem = prop.submitForm && prop.submitForm.item  //提交表单外键数据
-  const urlList = []  //外键url列表
-  const FKDataMap = new Map()  //当前已获取外键, 避免重复请求
+async function getDataAndSet(url, propName, stateMap, FKDataMap) {
+  if (!FKDataMap.has(propName)) {
+    const data = await getData(url);
+    stateMap.set(propName, data);
+    FKDataMap.set(propName, data);
+  } else {
+    stateMap.set(propName, FKDataMap.get(propName));
+  }
+}
 
-  //提交表单外键获取
-  for (const i in formItem) {
-    if (formItem[i].isFK === true) {
-      const url = formItem[i].FKData.url  //外键url
-      const property = formItem[i].FKData.property  //外键名
-
-      //如果外键url不在列表中, 说明还没有请求过该外键
-      if (!urlList.includes(url)) {
-        urlList.push(url)
-        const data = await getData(url)
-        FKMap.value.set(property, data)
-        FKDataMap.set(property, data)
-      }
+async function getFKList(form, targetFKMap, FKDataMap) {
+  for (const item of (form || [])) {
+    let currentItem = item
+    //多层对象，先解开
+    while (currentItem.isParent){
+      currentItem = currentItem['child']
+    }
+    if (currentItem.isFK) {
+      await getDataAndSet(currentItem.FKData.url, currentItem.FKData.property, targetFKMap, FKDataMap);
     }
   }
+}
 
-  //主表格外键获取
-  for (const i in mainFormItem) {
-    if (mainFormItem[i].isFK === true) {
-      const addUrl = mainFormItem[i].FKData.url
-      const addProp = mainFormItem[i].FKData.property
+//获取外键列表
+async function getAllFKList() {
+  const mainFormItem = prop.mainTableColList  //主表格外键数据
+  const formItem = prop.submitForm && prop.submitForm.item  //提交表单外键数据
+  const FKDataMap = new Map()  //当前已获取外键, 避免重复请求
 
-      //如果外键url不在列表中, 说明还没有请求过该外键
-      if(!urlList.includes(addUrl)){
-        urlList.push(addUrl)
-        const data = await getData(addUrl)
-        mainFKMap.value.set(addProp, data)
-        FKDataMap.set(addProp, data)
-      }
-      //如果已经请求过该外键, 则在已获取外键中取值, 无需反复请求
-      else{
-        mainFKMap.value.set(addProp, FKDataMap.get(addProp))
-      }
+  // 主窗口外键获取
+  await getFKList(mainFormItem, mainFKMap.value, FKDataMap)
 
+  // 提交窗口外键获取
+  await getFKList(formItem, FKMap.value, FKDataMap)
+
+
+  //子表格显示外键映射
+  for (const item of mainFormItem) {
+    if ('children' in item) {
+      await getFKList(item.children, mainFKMap.value, FKDataMap)
     }
   }
 }
@@ -379,6 +386,7 @@ const getData = async (url, params = {}) => {
  * */
 const addData=async (data) => {
   state.isLoading = true
+  console.log("add", data)
   const result = axiosPost({url: prop.urls['addData'], data: data, name: 'addData'})
   if(result){
     ElMessage.success("数据添加成功！")
@@ -387,48 +395,81 @@ const addData=async (data) => {
 }
 
 // 数据显示转换(映射)
-function mapping(property){
+function mapping(property, item){
   return (row) => {
-    //遍历每一个属性
-    for(const i of prop.mainTableColList){
-      let item = i
-      if(item.property === property){
-        //多层对象, 一层层解开
-        while(item.isParent){
-          row = row[item.property]
-          item = item['child']
+    let currentRow = row
+    let currentItem = item
+    let currentProp = property
+    //多层对象, 一层层解开
+    while(currentItem.isParent){
+      currentRow = currentRow[currentItem.property]
+      currentItem = currentItem['child']
+      currentProp = currentItem.property
+    }
+    //外键映射
+    if(currentItem.isFK){
+      //从外键map中获取对应的外键表
+      const fkList = mainFKMap.value.get(currentItem.FKData.property)
+      for(const item2 of fkList){
+        // 映射
+        if(currentRow[currentProp] === item2[currentItem.FKData.property]){
+          return item2[currentItem.FKData.label]
         }
-        //外键映射
-        if(item.isFK){
-          //从外键map中获取对应的外键表
-          const fkList = mainFKMap.value.get(item.FKData.property)
-          for(const item2 of fkList){
-            // 映射
-            if(row[property] === item2[item.FKData.property]){
-              return item2[item.FKData.label]
-            }
-          }
-        }
-        //普通映射
-        if(item.isMapping){
-          //从映射表获取映射对象
-          for(const j of item.mappingList){
-            const item2 = j
-            // 映射
-            if(row[property] === item2.value){
-              return item2.label
-            }
-          }
-        }
-        //日期转换
-        if(item.isDateFormat){
-          row[property] = new Date(row[property]).toLocaleString()
-        }
-        //不需要映射或者没有匹配的映射则返回原值
-        return row[item.property]
       }
     }
+    //普通映射
+    if(currentItem.isMapping){
+      //从映射表获取映射对象
+      for(const j of currentItem.mappingList){
+        const item2 = j
+        // 映射
+        if(currentRow[currentProp] === item2.value){
+          return item2.label
+        }
+      }
+    }
+    //日期转换
+    if(currentItem.isDateFormat){
+      currentRow[currentProp] = new Date(currentRow[currentProp]).toLocaleString()
+    }
+    //不需要映射或者没有匹配的映射则返回原值
+    return currentRow[currentItem.property]
   }
+}
+
+//判断数据数组内是否有数据
+const isArrNotEmpty = (row, item) =>{
+  if (row === null || typeof row !== 'object' || Object.keys(row).length === 0) {
+    return false;
+  }
+
+  //嵌套对象则逐层解开
+  while (item && ('isParent' in item) && item.isParent){
+    if(!(item.property in row)){
+      return false
+    }
+    row = row[item.property]
+    item = item.child
+  }
+
+  return Array.isArray(row[item.property]) && row[item.property].length > 0
+}
+
+const getArrData = (row, item) =>{
+  if (row === null || typeof row !== 'object' || Object.keys(row).length === 0) {
+    return [];
+  }
+
+  //嵌套对象则逐层解开
+  while (item && ('isParent' in item) && item.isParent){
+    if(!(item.property in row)){
+      return false
+    }
+    row = row[item.property]
+    item = item.child
+  }
+
+  return row[item.property]
 }
 
 const submitAddForm = () => {
@@ -453,11 +494,24 @@ const handleSelectionChange = (val) => {
 }
 
 //用户打开新增窗口时回调此方法
-const handleAddDialogOpen = () =>{
+const handleAddDialogOpen = async () => {
+  await myDataShowView.value.update(1)
   myDataShowView.value.clearSelection()
 }
 
-const addItem = () => {
+const addItem = async () => {
+  const params = {}
+  if (prop.extraParams.length > 0) {
+    for (const item of prop.extraParams) {
+      if (!prop.submitForm.data[item.dataName]) {
+        ElMessage.error(`请先选择${item.label}`)
+        return
+      } else {
+        params[item.prop] = prop.submitForm.data[item.dataName]
+      }
+    }
+    state.extraParams = params
+  }
   addFormVisible.value = true
 }
 
@@ -531,8 +585,18 @@ const save = async () => {
       // 遍历children数组来动态设置新对象的属性
       i.children.forEach(child => {
         // 使用child.dataName从原始对象中提取值，并使用child.prop作为新对象的属性名
-        newObj[child.prop] = item[child.dataName];
+        if(Array.isArray(child.dataName)){
+          let val = item
+          for(const i of child.dataName){
+            val = val[i]
+          }
+          newObj[child.prop] = val
+        }
+        else{
+          newObj[child.prop] = item[child.dataName];
+        }
       });
+
       // 返回构建好的新对象
       return newObj;
     })
