@@ -33,6 +33,7 @@ import {ElMessage, ElNotification} from "element-plus";
 import {onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
 import {axiosDelete, axiosGet, axiosPost, axiosPut} from "@/utils/axiosUtil.js";
+import {editObjKeyData, getObjKeyData} from "@/utils/objectUtil.js";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
@@ -53,9 +54,9 @@ const prop = defineProps({
     description: '表头属性列表'
   },
   keyData:{
-    type: String,
-    default: () => '',
-    description: '主键'
+    type: [String, Array],
+    default: () => undefined,
+    description: '数据主键, 如有多层则用列表封装, 格式如: ["key", "p1", "p2", ...]'
   },
   searchData:{
     type: String,
@@ -148,7 +149,8 @@ const clearSelection = () => myTable.value.clearSelection()
 //暴露函数，可供父组件调用
 defineExpose({
   getMultipleSelection,
-  clearSelection
+  clearSelection,
+  update
 });
 
 //初始化函数
@@ -281,7 +283,12 @@ function upload(form){
 //点击子组件的删除按钮
 function del(row){
   console.log(JSON.stringify(row))
-  prop.deleteDataBody[prop.keyData] = row[prop.keyData]
+  if(typeof prop.keyData === "string") {
+    prop.deleteDataBody[prop.keyData] = row[prop.keyData]
+  }
+  else{
+    prop.deleteDataBody = editObjKeyData(prop.deleteDataBody, getObjKeyData(row, prop.keyData), prop.keyData)
+  }
   deleteData(prop.deleteDataBody)
 }
 
