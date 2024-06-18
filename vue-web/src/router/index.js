@@ -14,6 +14,7 @@ import Out from '@/views/main-views/entry-and-out/Out.vue'
 import Check from '@/views/main-views/entry-and-out/Check.vue'
 import Allocate from '@/views/main-views/entry-and-out/Allocate.vue'
 import InventorySubmit from "@/views/main-views/entry-and-out/submit-views/InventorySubmit.vue";
+import AllocateSubmit from "@/views/main-views/entry-and-out/submit-views/AllocateSubmit.vue";
 
 
 import Setting from  '@/views/main-views/Setting.vue'
@@ -44,6 +45,7 @@ const routes = [
                     { path: 'check', component: Check , name: 'check'},
                     { path: 'allocate', component: Allocate , name: 'allocate'},
                     { path: 'inventorySubmit', component: InventorySubmit , name: 'inventorySubmit', props: true},
+                    { path: 'allocateSubmit', component: AllocateSubmit , name: 'allocateSubmit', props: true},
                 ]
             },
             { path: 'setting', component: Setting , name: 'setting',
