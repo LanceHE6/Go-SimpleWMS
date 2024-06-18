@@ -20,6 +20,7 @@
               size="small"
               text
               @click="warehouseCardLimitChange"
+              :disabled="state.warehouseCardDataList.length === 0"
           >
             {{ state.warehouseCardBtnStr }}
           </el-button>
@@ -109,7 +110,6 @@
 <script setup>
 import {computed, onMounted, reactive, ref} from 'vue';
 import WarehouseCard from "@/components/cards/WarehouseCard.vue";
-import {ElMessage} from "element-plus";
 import {axiosGet} from "@/utils/axiosUtil.js";
 import {Box, FolderAdd, FolderRemove, PriceTag} from "@element-plus/icons-vue";
 import GoodsTypeCard from "@/components/cards/GoodsTypeCard.vue";
@@ -405,6 +405,9 @@ const getDate = (extraDay = 0) => {
   display: flex;
   flex-wrap: wrap; /* 允许容器内子元素换行 */
   justify-content: flex-start; /* 水平分布，两端对齐 */
+}
+.card-body :deep(.el-loading-mask){
+  z-index: 20;
 }
 .header-icon{
   margin-right: 5px;
