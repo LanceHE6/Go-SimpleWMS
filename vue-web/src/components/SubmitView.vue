@@ -213,7 +213,7 @@ import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Picture} from "@element-plus/icons-vue";
 import DataShowView from "@/components/DataShowView.vue";
 import {getObjectArrayDifference, getObjectArrayUnionByKey} from "@/utils/arrayUtil"
-import {axios_get, axios_post} from "@/utils/axiosUtil.js";
+import {axiosGet, axiosPost} from "@/utils/axiosUtil.js";
 
 const hasFKData = computed(() => (key) => FKMap.value.has(key));
 const tableData = ref([])  //表格数据
@@ -362,14 +362,13 @@ async function getFKList() {
  * */
 
 const getData = async (url, params = {}) => {
-  const result = await axios_get({url: url, params: params, name: 'getData'})
+  const result = await axiosGet({url: url, params: params, name: 'getData'})
   if(result){
     if (result && result.data && result.data.rows) {
       return result.data.rows;
     }
   }
   else{
-    ElMessage.error("网络请求出错了！")
     return undefined
   }
 }
@@ -380,12 +379,9 @@ const getData = async (url, params = {}) => {
  * */
 const addData=async (data) => {
   state.isLoading = true
-  const result = axios_post({url: prop.urls['addData'], data: data, name: 'addData'})
+  const result = axiosPost({url: prop.urls['addData'], data: data, name: 'addData'})
   if(result){
     ElMessage.success("数据添加成功！")
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   state.isLoading = false
 }
