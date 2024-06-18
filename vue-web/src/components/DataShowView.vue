@@ -32,7 +32,7 @@
 import {ElMessage, ElNotification} from "element-plus";
 import {onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
-import {axios_delete, axios_get, axios_post, axios_put} from "@/utils/axiosUtil.js";
+import {axiosDelete, axiosGet, axiosPost, axiosPut} from "@/utils/axiosUtil.js";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
@@ -315,7 +315,7 @@ const token="bearer "+localStorage.getItem("token");
  * */
 
 const getData = async (url, params = {}) => {
-  const result = await axios_get({url: url, params: params, name: 'getData'})
+  const result = await axiosGet({url: url, params: params, name: 'getData'})
   if (result && result.data && result.data.rows) {
     if(prop.large){
       state.pageCount = Math.max(result.data['total_pages'], 1)
@@ -323,7 +323,6 @@ const getData = async (url, params = {}) => {
     return result.data.rows
   }
   else{
-    ElMessage.error("网络请求出错了！")
     return undefined
   }
 }
@@ -334,14 +333,11 @@ const getData = async (url, params = {}) => {
  * */
 const deleteData=async (data) => {
   state.isLoading = true
-  const result = await axios_delete({url: prop.urls['deleteData'], data: data, name: 'deleteData'})
+  const result = await axiosDelete({url: prop.urls['deleteData'], data: data, name: 'deleteData'})
   if(result){
     ElMessage.success("数据已被删除！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   state.isLoading = false
 }
@@ -352,14 +348,11 @@ const deleteData=async (data) => {
  * */
 const addData=async (data) => {
   state.isLoading = true
-  const result = await axios_post({url: prop.urls['addData'], data: data, name: 'addData'})
+  const result = await axiosPost({url: prop.urls['addData'], data: data, name: 'addData'})
   if(result){
     ElMessage.success("数据添加成功！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   state.isLoading = false
 }
@@ -370,14 +363,11 @@ const addData=async (data) => {
  * */
 const updateData=async (data) => {
   state.isLoading = true
-  const result = await axios_put({url: prop.urls['updateData'], data: data, name: 'updateData'})
+  const result = await axiosPut({url: prop.urls['updateData'], data: data, name: 'updateData'})
   if(result){
     ElMessage.success("数据修改成功！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   state.isLoading = false
 }
@@ -389,7 +379,7 @@ const updateData=async (data) => {
  * */
 const uploadData=async (list) => {
   state.isLoading = true
-  const result = await axios_post({url: prop.urls['uploadData'], data: {list: list}, name: 'uploadData'})
+  const result = await axiosPost({url: prop.urls['uploadData'], data: {list: list}, name: 'uploadData'})
   if(result){
     if(result.status === 200) {
       ElMessage.success("批量导入成功！")
@@ -415,9 +405,6 @@ const uploadData=async (list) => {
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
   }
-  else{
-    ElMessage.error("网络请求出错了！数据是否已被添加过？")
-  }
   state.isLoading = false
 }
 
@@ -430,14 +417,11 @@ const uploadImage=async (data) => {
   const headers = {
     'Content-Type': 'multipart/form-data'
   }
-  const result = axios_post({url: prop.urls['uploadImage'], data: data, headers: headers, name: 'uploadImage'})
+  const result = axiosPost({url: prop.urls['uploadImage'], data: data, headers: headers, name: 'uploadImage'})
   if(result){
     ElMessage.success("图片上传成功！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   state.isLoading = false
 }
