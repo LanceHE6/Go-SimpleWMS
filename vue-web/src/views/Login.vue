@@ -89,7 +89,7 @@ import { ElMessage } from 'element-plus'
 const axios = inject("axios")
 const loginForm = ref(null)
 import {Lock, User} from "@element-plus/icons-vue";
-import {axios_post} from "@/utils/axiosUtil.js";
+import {axiosPost} from "@/utils/axiosUtil.js";
 
 onMounted(initialize)
 const state = reactive({
@@ -147,7 +147,7 @@ const submitForm = async (form) => {
       };
 
       if (state.ruleForm.account && state.ruleForm.password) {
-        const result = await axios_post({url: '/user/login', data: data, name: 'login'})
+        const result = await axiosPost({url: '/user/login', data: data, name: 'login'})
         if(result && result.data.code === 201){
           // 需要将返回的数据存入Store中
           localStorage.setItem("token", result.data.data.token)
@@ -168,9 +168,6 @@ const submitForm = async (form) => {
         }
         else if(result && result.data.code === 202){
           ElMessage.error("账号或密码错误！")
-        }
-        else{
-          ElMessage.error("网络请求出错了！")
         }
       }
       else {
