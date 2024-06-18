@@ -110,7 +110,7 @@
 import {computed, onMounted, reactive, ref} from 'vue';
 import WarehouseCard from "@/components/cards/WarehouseCard.vue";
 import {ElMessage} from "element-plus";
-import {axios_get} from "@/utils/axiosUtil.js";
+import {axiosGet} from "@/utils/axiosUtil.js";
 import {Box, FolderAdd, FolderRemove, PriceTag} from "@element-plus/icons-vue";
 import GoodsTypeCard from "@/components/cards/GoodsTypeCard.vue";
 import InventoryCard from "@/components/cards/InventoryCard.vue";
@@ -366,12 +366,9 @@ const option = computed(() => {
  * */
 const getData = async (url, params = {}) => {
   let resultObj = {}
-  const result = await axios_get({url: url, params: params, name: 'home_getData'})
+  const result = await axiosGet({url: url, params: params, name: 'home_getData'})
   if(result){
     resultObj = result.data
-  }
-  else{
-    ElMessage.error("网络请求出错了！")
   }
   return resultObj
 }
