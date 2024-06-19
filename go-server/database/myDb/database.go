@@ -110,6 +110,8 @@ func Init() {
 		AddForeignKey("goods", "goods(gid)", "SET NULL", "CASCADE").
 		AddForeignKey("warehouse", "warehouses(wid)", "SET NULL", "CASCADE")
 	db.AutoMigrate(&model.VerificationCode{})
+	db.AutoMigrate(&model.OPLog{}).
+		AddForeignKey("uid", "users(uid)", "SET NULL", "CASCADE")
 
 	// 初始化数据
 	fmt.Println("Init data...")
