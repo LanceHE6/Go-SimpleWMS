@@ -24,6 +24,7 @@
       @search="startSearch"
       @refresh="initialize"
       @upload-img="uploadImg"
+      @upload-file="uploadFile"
   >
   </my-table>
 </template>
@@ -73,11 +74,6 @@ const prop = defineProps({
     default: () => null,
     description: '编辑界面数据'
   },
-  deleteDataBody:{
-    type: Object,
-    default: () => null,
-    description: '删除请求体'
-  },
   urls:{
     type: Object,
     default: () => {},
@@ -87,6 +83,11 @@ const prop = defineProps({
     type: Object,
     default: () => {},
     description: '数据获取请求体中的额外参数'
+  },
+  delete:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持删除功能'
   },
   upload:{
     type: Boolean,
@@ -107,6 +108,11 @@ const prop = defineProps({
     type: Boolean,
     default: () => false,
     description: '是否支持图片上传功能'
+  },
+  uploadFile:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持附件上传功能'
   },
   hasSubmitPage:{
     type: Boolean,
@@ -130,12 +136,13 @@ const state =  reactive({
   showFKMap: new Map(),  //显示映射外键
   operations: {
     add: prop.addForm !== null,
-    del: prop.deleteDataBody !== null,
     edit: prop.editForm !== null,
+    del: prop.delete,
     upload: prop.upload,
     download: prop.download,
     print: prop.print,
-    uploadImg: prop.uploadImg
+    uploadImg: prop.uploadImg,
+    uploadFile: prop.uploadFile
   }
 })
 
@@ -282,14 +289,14 @@ function upload(form){
 
 //点击子组件的删除按钮
 function del(row){
-  console.log(JSON.stringify(row))
+  let deleteDataBody = {}
   if(typeof prop.keyData === "string") {
-    prop.deleteDataBody[prop.keyData] = row[prop.keyData]
+    deleteDataBody[prop.keyData] = row[prop.keyData]
   }
   else{
-    prop.deleteDataBody = editObjKeyData(prop.deleteDataBody, getObjKeyData(row, prop.keyData), prop.keyData)
+    deleteDataBody = editObjKeyData(deleteDataBody, getObjKeyData(row, prop.keyData), prop.keyData)
   }
-  deleteData(prop.deleteDataBody)
+  deleteData(deleteDataBody)
 }
 
 //上传图片
@@ -305,8 +312,25 @@ async function uploadImg(id, fileList) {
   });
 
 
-  // 调用uploadImage函数并传入formData
-  await uploadImage(formData);
+  // 调用uploadFiles函数并传入formData
+  await uploadFiles(prop.urls['uploadImg'], formData);
+}
+
+//上传附件
+async function uploadFile(id, fileList) {
+
+  // 创建一个新的FormData对象
+  const formData = new FormData();
+  formData.append('goods', id);
+
+  // 遍历文件列表并添加到FormData中
+  fileList.forEach((file, _) => {
+    formData.append('file', file);
+  });
+
+
+  // 调用uploadFiles函数并传入formData
+  await uploadFiles(prop.urls['uploadFile'],formData);
 }
 
 //点击子组件的编辑按钮, 子组件处理完返回的可提交表单
@@ -414,17 +438,17 @@ const uploadData=async (list) => {
 }
 
 /**
- * uploadImage()
- * 上传图片
+ * uploadFiles()
+ * 上传文件
  * */
-const uploadImage=async (data) => {
+const uploadFiles=async (url, data) => {
   state.isLoading = true
   const headers = {
     'Content-Type': 'multipart/form-data'
   }
-  const result = axiosPost({url: prop.urls['uploadImage'], data: data, headers: headers, name: 'uploadImage'})
+  const result = axiosPost({url: url, data: data, headers: headers, name: 'uploadFiles'})
   if(result){
-    ElMessage.success("图片上传成功！")
+    ElMessage.success("文件上传成功！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
   }

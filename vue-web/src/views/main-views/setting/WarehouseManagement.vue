@@ -5,8 +5,8 @@
     :table-col-list="tableColList"
     :add-form="addForm"
     :edit-form="editForm"
-    :delete-data-body="deleteDataBody"
     :urls="urls"
+    delete
     download
   />
 </template>
@@ -126,13 +126,6 @@ const addForm = reactive({
       }},
   ],
 })
-
-/**
- * 删除请求体
- * */
-const deleteDataBody = {
-  wid: ""
-}
 
 /**
  * 网络请求url

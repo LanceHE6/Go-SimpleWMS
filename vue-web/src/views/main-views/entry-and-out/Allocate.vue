@@ -55,7 +55,7 @@ const audit = (tid, isAudit) =>{
         data: {
           tid: tid,
           passed: passed.value,
-          comment: comment.value
+          audit_comment: comment.value
         },
         name: 'audit'
       })
@@ -137,7 +137,7 @@ const tableColList = [
         }},
       {property: "comment", label: "备注", sortable: false, width: 240},
     ]},
-  {property: "audited", label: "审核状态", sortable: false, operable: true, operationEvent: audit, width: 100, isMapping: true, mappingList:[
+  {property: "audited", label: "审核状态", sortable: false, isFixed:true, operable: true, operationEvent: audit, width: 100, isMapping: true, mappingList:[
       {label: '已审核', value: true},
       {label: '待审核', value: false},
     ]},

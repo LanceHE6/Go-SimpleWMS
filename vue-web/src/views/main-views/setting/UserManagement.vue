@@ -5,8 +5,8 @@
     :table-col-list="tableColList"
     :add-form="addForm"
     :edit-form="editForm"
-    :delete-data-body="deleteDataBody"
     :urls="urls"
+    delete
     upload
     download
   />
@@ -123,13 +123,6 @@ const addForm = {
       ]},
     {label: '电话', prop: 'phone', dataName: 'phone', isInput: true, type: 'number'},
   ],
-}
-
-/**
- * 删除请求体
- * */
-const deleteDataBody = {
-  uid: ""
 }
 
 /**

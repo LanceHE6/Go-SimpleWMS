@@ -5,8 +5,8 @@
       :table-col-list="tableColList"
       :add-form="addForm"
       :edit-form="editForm"
-      :delete-data-body="deleteDataBody"
       :urls="urls"
+      delete
       download
   />
 </template>
@@ -94,13 +94,6 @@ const addForm = {
         {label: '出库', value: 2},
       ]},
   ],
-}
-
-/**
- * 删除请求体
- * */
-const deleteDataBody = {
-  itid: ""
 }
 
 /**

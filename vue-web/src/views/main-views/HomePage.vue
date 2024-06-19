@@ -61,10 +61,10 @@
           <el-text size="large">货品相关</el-text>
         </template>
         <div
-            v-loading="false"
             class="card-body"
         >
           <goods-type-card
+            v-loading="state.goodsTypeIsLoading"
             :option-amount-data="state.optionAmountData"
             :option-price-data="state.optionPriceData"
           />
@@ -120,7 +120,8 @@ const activeNames = ref(['1', '2', '3', '4'])  // 初始化时的活动界面
 
 const state =  reactive({
   selectWid: '0',  //选中的仓库id(如果是所有仓库则为0)
-  isLoading: false,  //数据是否正在加载
+  isLoading: false,  //主页面是否正在加载
+  goodsTypeIsLoading: false,  //类型分布卡片是否正在加载
   warehouseCardDataList:[],  //仓库信息卡片数据列表
   hasExtraWarehouse: false,  //是否还有仓库卡片未显示
   warehouseCardBtnStr: '显示所有仓库',  //仓库概况上方的按钮文字
@@ -293,7 +294,7 @@ async function getGoodsTypeCardData(){
   const stockDataRow = (await getData('/stock/get',params)).rows
   const amountObjList = []
   const priceObjList = []
-  for(const item of stockDataRow){
+  for(const item of stockDataRow || []){
     const amountObj = {}
     const priceObj = {}
     amountObj.name = item['goods'].name
@@ -306,7 +307,6 @@ async function getGoodsTypeCardData(){
   }
   state.optionAmountData = amountObjList
   state.optionPriceData = priceObjList
-  console.log('233', state.optionPriceData, state.optionAmountData)
 }
 
 // 初始化函数
@@ -321,12 +321,14 @@ const onWarehouseCardSelect = async (wid) => {
   for (const item of state.warehouseCardDataList) {
     item.selected = item.wid === wid
   }
+  state.goodsTypeIsLoading = true
   await getGoodsTypeCardData()
+  state.goodsTypeIsLoading = false
 }
 
 //点击显示更多仓库按钮
 const warehouseCardLimitChange = async () => {
-  state.isLoading = true
+  state.warehouseCardDataList.length = 0
   if(state.warehouseCardLimit === 3){
     state.warehouseCardLimit = 3000
     state.warehouseCardBtnStr = '显示前3个仓库'
@@ -338,7 +340,6 @@ const warehouseCardLimitChange = async () => {
     await getWarehouseCardData()
   }
   state.selectWid = '0'
-  state.isLoading = false
 }
 
 // 使用 computed 创建计算属性

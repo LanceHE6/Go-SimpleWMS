@@ -15,25 +15,27 @@
         v-if="operations.edit || operations.del"
         align="center"
         header-align="center"
-        width="135"
+        width="105"
         label="操作"
         fixed
     >
       <template #default="scope">
-        <el-button
-            v-if="operations.edit"
-            size="small"
-            type="success"
-            @click="edit(scope.row)"
-            plain
-        >编辑</el-button>
-        <el-button
-            v-if="operations.del"
-            size="small"
-            type="warning"
-            @click="del(scope.row)"
-            plain
-        >删除</el-button>
+        <el-button-group class="operation-btn-group">
+          <el-button
+              v-if="operations.edit"
+              icon="Edit"
+              type="primary"
+              @click="edit(scope.row)"
+              text
+          />
+          <el-button
+              v-if="operations.del"
+              icon="Delete"
+              type="danger"
+              @click="del(scope.row)"
+              text
+          />
+        </el-button-group>
       </template>
     </el-table-column>
 
@@ -75,7 +77,7 @@
 
           <div
               v-else
-              :class="['error-image-slot', operations.uploadImg ? 'is_upload_img' : '']"
+              :class="['error-image-slot', operations.uploadImg ? 'is_upload' : '']"
               @click="uploadImg(getObjKeyData(scope.row, keyData))">
             <el-icon v-if="operations.uploadImg"><Plus /></el-icon>
             <el-icon v-else><Picture /></el-icon>
@@ -90,6 +92,27 @@
               plain
               style="margin-left: 10px"
           />
+        </div>
+      </template>
+
+      <template #default="scope" v-if="item.isFile">
+        <div style="display: flex; align-items: center; justify-content: center">
+          <el-icon
+              class="table-col-file"
+              v-if="isArrNotEmpty(scope.row, item)"
+              @click="viewFiles(getArrData(scope.row, item), getObjKeyData(scope.row, keyData))"
+          >
+            <Document />
+          </el-icon>
+
+          <div
+              v-else
+              :class="['error-file-slot', operations.uploadFile ? 'is_upload' : '']"
+              @click="viewFiles(getArrData(scope.row, item), getObjKeyData(scope.row, keyData))">
+            <el-icon v-if="operations.uploadFile"><DocumentAdd /></el-icon>
+            <el-icon v-else><DocumentDelete /></el-icon>
+          </div>
+
         </div>
       </template>
 
@@ -163,7 +186,7 @@
 <script setup>
 
 import axios from "axios";
-import {Plus, Picture} from "@element-plus/icons-vue";
+import {Plus, Picture, DocumentAdd, DocumentDelete, Document} from "@element-plus/icons-vue";
 import {getObjKeyData} from "@/utils/objectUtil.js";
 import {computed, ref, watch} from "vue";
 
@@ -219,7 +242,7 @@ const prop = defineProps({
 
 //对外事件列表
 const emit = defineEmits([
-  "edit", "delete", "uploadImg", "selectionChange", "operation"
+  "edit", "delete", "uploadImg", "selectionChange", "operation", "viewFiles"
 ]);
 
 //表格
@@ -274,7 +297,7 @@ function itemMapping(row, property, item){
   if(currentItem.isFK){
     //从外键map中获取对应的外键表
     const fkList = prop.showFKMap.get(currentItem.FKData.property)
-    for(const item2 of fkList){
+    for(const item2 of fkList || []){
       // 映射
       if(currentRow[currentProp] === item2[currentItem.FKData.property]){
         return item2[currentItem.FKData.label]
@@ -350,12 +373,25 @@ const del = (row) =>{
 const uploadImg = (id) =>{
   emit("uploadImg", id)
 }
+
+const viewFiles = (data, id) =>{
+  emit("viewFiles", data, id)
+}
 </script>
 
 <style scoped>
 .table-col-img{
   height: 50px;
   width: 50px;
+}
+
+.table-col-file{
+  height: 50px;
+  width: 50px;
+  font-size: 25px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
 }
 
 .error-image-slot{
@@ -368,15 +404,32 @@ const uploadImg = (id) =>{
   color: var(--el-text-color-secondary);
   font-size: 15px;
 }
+
+.error-file-slot{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 25px;
+}
+
 .blue-font-color {
   color: #409eff;
   border-bottom: 1px solid #409eff;
   cursor: pointer;
 }
-.is_upload_img{
+.is_upload{
   cursor: pointer;
 }
 .child_table_div{
   padding: 10px;
+}
+.operation-btn-group .el-button{
+  height: 30px;
+  width: 40px;
+  font-size: 18px;
 }
 </style>
