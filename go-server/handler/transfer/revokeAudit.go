@@ -37,7 +37,7 @@ func RevokeAudit(context *gin.Context) {
 	var updateData = map[string]interface{}{
 		"audited":       false,
 		"passed":        nil,
-		"audit_time":    nil,
+		"audited_time":  nil,
 		"auditor":       nil,
 		"audit_comment": "",
 	}
