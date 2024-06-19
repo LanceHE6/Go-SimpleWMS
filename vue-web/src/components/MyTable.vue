@@ -35,6 +35,7 @@
         @edit="edit"
         @delete="confirmDel"
         @upload-img="uploadImg"
+        @view-files="viewFiles"
         @selection-change="handleSelectionChange"
       />
     </el-main>
@@ -230,8 +231,8 @@
         :limit="5"
         :on-preview="handlePictureCardPreview"
         :on-change="handleImgChange"
-        :on-remove="handleRemove"
-        :on-exceed="uploadImgExceed"
+        :on-remove="(file) => handleRemove(file, imgList)"
+        :on-exceed="uploadExceed"
     >
       <el-icon><Plus /></el-icon>
       <template #tip>
@@ -245,6 +246,75 @@
       <div class="dialog-footer">
         <el-button @click="uploadImgVisible = false">取消</el-button>
         <el-button type="primary" @click="submitUploadImgData()">
+          上传
+        </el-button>
+      </div>
+    </template>
+
+  </el-dialog>
+  <el-dialog
+      v-model="viewFileVisible"
+      title="附件列表"
+      width="800"
+      center
+  >
+    <div>
+      <el-button
+        type="primary"
+        icon="Upload"
+        style="margin-bottom: 10px"
+        :disabled="!operations.uploadFile"
+        @click="uploadFileVisible = true"
+        plain
+      >
+        上传附件
+      </el-button>
+    </div>
+    <table-body
+      :table-col-list="[
+          {property: 'path', label: '文件名', sortable: false, operable: true, operationEvent: previewFile},
+      ]"
+      :default-data="viewFileList"
+      :operations="{
+        edit: false,
+        delete: false,
+      }"
+      height="50vh"
+    />
+  </el-dialog>
+  <el-dialog
+      v-if="operations.uploadFile"
+      v-model="uploadFileVisible"
+      title="上传附件"
+      width="700"
+      @opened="uploadFileDialogOpen"
+      center
+  >
+    <el-upload
+        ref="myUploadFileForm"
+        accept=""
+        :auto-upload="false"
+        :limit="5"
+        :on-change="handleFileChange"
+        :on-remove="handleRemove"
+        :on-exceed="uploadExceed"
+        drag
+    >
+      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+      <div class="el-upload__text">
+        拖拽文件到此处或 <em>点击此处上传</em>
+      </div>
+      <template #tip>
+        <div class="el-upload__tip">
+          <el-text type="info">支持txt、doc、xls、ppt、pdf等类型文件，</el-text>
+          <el-text type="warning">最多上传五个文件。</el-text>
+        </div>
+      </template>
+    </el-upload>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="uploadFileVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitUploadFileData()">
           上传
         </el-button>
       </div>
@@ -265,6 +335,7 @@ import * as XLSX from "xlsx";
 import TableHeader from "@/components/TableHeader.vue";
 import {editObjKeyData, getObjKeyData} from "@/utils/objectUtil.js";
 import TableBody from "@/components/TableBody.vue";
+import axios from "axios";
 
 const prop = defineProps({
   large:{
@@ -354,7 +425,7 @@ const emit = defineEmits([
   "add", "download", "upload",
   "edit", "del", "update",
   "search", "refresh", "uploadImg",
-  "selectionChange"
+  "selectionChange", "uploadFile"
 ]);
 
 //表格当前已选内容
@@ -370,6 +441,8 @@ defineExpose({
 
 //上传图片列表
 const imgList = ref([])
+//上传附件列表
+const fileList = ref([])
 
 //表格高度
 //const tableHeight = document.documentElement.clientHeight * 0.6
@@ -417,6 +490,20 @@ const myUploadImgForm = ref(null)
 let uploadImgVisible = ref(false)
 //上传图片的对应列id
 let uploadImgId = ref('')
+
+//查看文件窗口组件
+const myViewFileForm = ref(null)
+//查看文件窗口是否可见
+let viewFileVisible = ref(false)
+//文件列表
+let viewFileList = ref([])
+
+//上传文件窗口是否可见
+let uploadFileVisible = ref(false)
+//上传文件窗口组件
+const myUploadFileForm = ref(null)
+//上传文件的对应列id
+let uploadFileId = ref('')
 
 //监听数据变化并实时更新表格
 watch(() => prop.defaultData, (newValue) => {
@@ -522,6 +609,14 @@ function uploadImg(id){
   }
 }
 
+function viewFiles(data, id){
+  if(prop.operations.uploadFile === true){
+    viewFileVisible.value = true
+    viewFileList.value = data
+    uploadFileId.value = id
+  }
+}
+
 function submitUploadData(){
   myUploadForm.value.submit()
   uploadFormVisible.value = false
@@ -529,9 +624,15 @@ function submitUploadData(){
 
 function submitUploadImgData(){
   myUploadImgForm.value.clearFiles()
-  console.log("submit", imgList.value)
   emit("uploadImg",uploadImgId.value ,imgList.value)
   uploadImgVisible.value = false
+}
+
+function submitUploadFileData(){
+  console.log("2333")
+  myUploadFileForm.value.clearFiles()
+  emit("uploadFile",uploadFileId.value ,fileList.value)
+  uploadFileVisible.value = false
 }
 //提交编辑表单
 async function submitEditForm(form){
@@ -660,6 +761,11 @@ function uploadDialogClosed(){
   myUploadForm.value.clearFiles()
 }
 
+function previewFile(_, val){
+  const path = `${axios.defaults.baseURL}/${val}`
+  window.open(path, '_blank');
+}
+
 const handleImgChange = (uploadFile) => {
   if (!/\.(jfif|pjpeg|jpeg|pjp|jpg|png|gif|bmp|webp|tif|tiff|svgz|svg)$/.test(uploadFile.name.toLowerCase())) {
     // 格式根据自己需求定义
@@ -670,14 +776,29 @@ const handleImgChange = (uploadFile) => {
   imgList.value.push(uploadFile.raw)
 }
 
+const handleFileChange = (uploadFile) => {
+  if (!/\.(txt|doc|docx|xls|xlsx|ppt|pptx|pdf|md)$/.test(uploadFile.name.toLowerCase())) {
+    // 格式根据自己需求定义
+    ElMessage.error('上传格式不正确，请上传支持的文件格式')
+    myUploadFileForm.value.handleRemove(uploadFile)
+    return false
+  }
+  fileList.value.push(uploadFile.raw)
+}
+
 const uploadImgDialogOpen = () => {
   myUploadImgForm.value.clearFiles()
   imgList.value.length = 0  //清空图片数组
 }
 
-//上传图片超限时调用此函数
-const uploadImgExceed = () => {
-  ElMessage.error("图片上传量已达上限！")
+const uploadFileDialogOpen = () => {
+  myUploadFileForm.value.clearFiles()
+  fileList.value.length = 0  //清空附件数组
+}
+
+//上传图片或附件超限时调用此函数
+const uploadExceed = () => {
+  ElMessage.error("上传量已达上限！")
 }
 
 const handlePictureCardPreview = (uploadFile) => {
@@ -685,10 +806,10 @@ const handlePictureCardPreview = (uploadFile) => {
   imgDialogVisible.value = true
 }
 
-const handleRemove = (f) => {
-  const index = imgList.value.indexOf(f.raw)
+const handleRemove = (f, list) => {
+  const index = list.indexOf(f.raw)
   if(index !== -1){
-    imgList.value.splice(index, 1)
+    list.splice(index, 1)
   }
 }
 
