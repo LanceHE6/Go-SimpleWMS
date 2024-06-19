@@ -27,6 +27,7 @@ func GetStockRequest(context *gin.Context) {
 		var result []goodsQuery
 		db.Table("stocks").
 			Select("goods AS gid, SUM(quantity) AS quantity").
+			Where("quantity > 0").
 			Group("goods").
 			Find(&result)
 		var goodsResponseList []goodsResponse
@@ -58,7 +59,7 @@ func GetStockRequest(context *gin.Context) {
 	if goods == "" {
 
 		var stocks []model.Stock
-		err := db.Model(model.Stock{}).Where("warehouse = ?", warehouse).Find(&stocks).Error
+		err := db.Model(model.Stock{}).Where("warehouse = ? AND quantity > 0", warehouse).Find(&stocks).Error
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Get stock failed", err.Error()))
 			return
@@ -87,7 +88,7 @@ func GetStockRequest(context *gin.Context) {
 	// 获取商品的总库存信息
 	if warehouse == "" {
 		var stocks []model.Stock
-		err := db.Model(model.Stock{}).Where("goods = ?", goods).Find(&stocks).Error
+		err := db.Model(model.Stock{}).Where("goods = ? AND quantity > 0", goods).Find(&stocks).Error
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Get stock failed", err.Error()))
 			return
