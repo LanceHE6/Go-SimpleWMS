@@ -48,7 +48,7 @@ var fileExt = map[string]bool{
 }
 
 type uploadGoodsImageRequest struct {
-	Gid string `json:"goods" form:"goods" binding:"required"`
+	Goods string `json:"goods" form:"goods" binding:"required"`
 }
 
 // GoodsAttachmentUpload 上传货品相关附件
@@ -88,7 +88,7 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		return
 	}
 	fileHeaders := form.File[requestKey]
-	gid := data.Gid
+	gid := data.Goods
 
 	// 获取数据库连接
 	db := myDb.GetMyDbConnection()
