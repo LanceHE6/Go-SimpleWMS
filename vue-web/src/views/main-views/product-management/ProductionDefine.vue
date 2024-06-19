@@ -11,6 +11,7 @@
       download
       print
       upload-img
+      upload-file
   />
 </template>
 
@@ -39,7 +40,7 @@ const tableColList = [
     }},
   {property: "unit_price", label: "单价", width: 80, sortable: true},
   {property: "manufacturer", label: "生产厂商", width: 150, sortable: false},
-  {property: "files", label: "附件", sortable: false, isFile: true, width: 120},
+  {property: "files", label: "附件", sortable: false, isFile: true, width: 100},
 ]
 
 /**
