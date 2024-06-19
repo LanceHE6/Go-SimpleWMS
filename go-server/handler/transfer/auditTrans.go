@@ -7,7 +7,6 @@ import (
 	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -47,15 +46,13 @@ func AuditTrans(context *gin.Context) {
 	var updateData = map[string]interface{}{
 		"audited":       true,
 		"passed":        passed,
-		"audit_time":    nowDateTime,
+		"audited_time":  nowDateTime,
 		"auditor":       uid,
 		"audit_comment": auditComment,
 	}
 
 	if passed {
 		goodsList, _ := json.Marshal(trans.GoodsList)
-		fmt.Println(string(goodsList))
-		fmt.Println(nowDateTime)
 		var outAddInvRequest = inventory.AddInvRequest{
 			Date:         nowDateTime,
 			Number:       trans.Number + "CK",
