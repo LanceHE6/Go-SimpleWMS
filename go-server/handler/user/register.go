@@ -45,7 +45,7 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	// 判断该账户是否已被注册
 	var user model.User
 	if err := db.Where("account = ?", account).First(&user).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
-		return http.StatusOK, response.Response(202, fmt.Sprintf("The account '%s' has been registered", account), nil)
+		return http.StatusBadRequest, response.Response(202, fmt.Sprintf("The account '%s' has been registered", account), nil)
 	}
 
 	// 插入新用户
