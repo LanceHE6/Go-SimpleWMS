@@ -1,9 +1,33 @@
 import axios from "axios";
+import {ElMessage} from "element-plus";
+import {router} from "@/router/index.js";
+
+// 错误映射和定时器存储
+const errorMap = new Map();
+
+// 网络请求失败的回调函数
+const showErrMessage = (errStr) => {
+    const currentTime = Date.now();
+
+    // 检查是否已经在短时间内报告过相同的错误
+    if (!errorMap.has(errStr) || currentTime - errorMap.get(errStr) > 5000) {
+        // 如果没有，显示提示框并将错误添加到映射中
+        ElMessage.error(errStr);
+        errorMap.set(errStr, currentTime);
+
+        // 设置一个定时器，在3秒后从映射中删除该错误
+        setTimeout(() => {
+            if (errorMap.get(errStr) === currentTime) {
+                errorMap.delete(errStr);
+            }
+        }, 3000);
+    }
+}
 
 /**
  * @description 请求头中需要附带的鉴权token
  * */
-let token = "bearer " + localStorage.getItem("token");
+let token = ''
 
 const getToken = () => {
     token = "bearer " + localStorage.getItem("token");
@@ -17,7 +41,7 @@ const getToken = () => {
  * @description 发送get请求的函数
  * @return resultObj 请求结果
  * */
-export const axios_get = async ({url, params = {}, headers = {}, name = 'axios_get'}) => {
+export const axiosGet = async ({url, params = {}, headers = {}, name = 'axios_get'}) => {
     getToken()
     let resultObj = false
     const defaultHeaders = {
@@ -34,6 +58,7 @@ export const axios_get = async ({url, params = {}, headers = {}, name = 'axios_g
         }
     })
     .catch(error => {
+        catchError(error)
         console.error(`${name}:`, error)
     })
     return resultObj
@@ -47,7 +72,7 @@ export const axios_get = async ({url, params = {}, headers = {}, name = 'axios_g
  * @description 发送delete请求的函数
  * @return result 请求是否成功
  * */
-export const axios_delete = async ({url, data, headers = {}, name = 'axios_delete'}) => {
+export const axiosDelete = async ({url, data, headers = {}, name = 'axiosDelete'}) => {
     getToken()
     let result = false
     const defaultHeaders = {
@@ -62,6 +87,7 @@ export const axios_delete = async ({url, data, headers = {}, name = 'axios_delet
         result = message
     })
     .catch( error => {
+        catchError(error)
         console.error(`${name}:`, error)
     })
     return result
@@ -75,7 +101,7 @@ export const axios_delete = async ({url, data, headers = {}, name = 'axios_delet
  * @description 发送post请求的函数
  * @return result 请求是否成功
  * */
-export const axios_post = async ({url, data, headers = {}, name = 'axios_post'}) => {
+export const axiosPost = async ({url, data, headers = {}, name = 'axiosPost'}) => {
     getToken()
     let result = false
     const defaultHeaders = {
@@ -89,6 +115,7 @@ export const axios_post = async ({url, data, headers = {}, name = 'axios_post'})
         result = message
     })
     .catch( error => {
+        catchError(error)
         console.error(`${name}:`, error)
     })
     return result
@@ -102,7 +129,7 @@ export const axios_post = async ({url, data, headers = {}, name = 'axios_post'})
  * @description 发送put请求的函数
  * @return result 请求是否成功
  * */
-export const axios_put = async ({url, data, headers = {}, name = 'axios_put'}) => {
+export const axiosPut = async ({url, data, headers = {}, name = 'axiosPut'}) => {
     getToken()
     let result = false
     const defaultHeaders = {
@@ -116,7 +143,28 @@ export const axios_put = async ({url, data, headers = {}, name = 'axios_put'}) =
         result = message
     })
     .catch( error => {
+        catchError(error)
         console.error(`${name}:`, error)
     })
     return result
+}
+
+const catchError = async (err) => {
+    let status = 0
+    if (err && err.response && err.response.status) {
+        status = err.response.status
+    }
+    if (status) {
+        switch (status) {
+            case 401: {
+                showErrMessage("用户信息已过期，请重新登录！")
+                await router.push('/')
+                break
+            }
+            default: {
+                showErrMessage("网络请求出错了！")
+                break
+            }
+        }
+    }
 }

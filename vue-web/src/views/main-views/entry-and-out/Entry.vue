@@ -73,19 +73,19 @@ const tableColList = [
         }},
       {property: "comment", label: "备注", sortable: false, width: 240},
     ]},
-  {property: "number", label: "单号", sortable: false},
-  {property: "inventory_type", label: "类型", sortable: false, isFK: true, FKData:{
+  {property: "number", label: "单号", width: 180, sortable: false},
+  {property: "inventory_type", label: "类型", width: 120, sortable: false, isFK: true, FKData:{
       url: "/invt/list",
       property: "itid",
       label: "name"
     }},
-  {property: "date", label: "单据日期", isDateFormat: true, sortable: false},
-  {property: "warehouse", label: "仓库名称", sortable: false, isFK: true, FKData:{
+  {property: "date", label: "单据日期", width: 180, isDateFormat: true, sortable: false},
+  {property: "warehouse", label: "仓库名称", width: 150, sortable: false, isFK: true, FKData:{
       url: "/warehouse/list",
       property: "wid",
       label: "name"
     }},
-  {property: "operator", label: "操作员", sortable: false, isFK: true, FKData:{
+  {property: "operator", label: "操作员", width: 100, sortable: false, isFK: true, FKData:{
       url: "/staff/list",
       property: "sid",
       label: "name"

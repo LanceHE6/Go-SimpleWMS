@@ -22,7 +22,7 @@
 
 import {router} from "@/router/index.js";
 import {ref, watch} from "vue";
-import {objectToUrl} from "@/utils/objectToUrl"
+import {objectToUrl} from "@/utils/objectUtil.js"
 
 const prop = defineProps({
   defaultTab: {

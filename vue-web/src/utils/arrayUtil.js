@@ -12,20 +12,44 @@ export function getObjectArrayUnion(arr1, arr2) {
 }
 
 //对象数组求并集(由对象中的key属性判断两对象是否相同, 优先取arr1的值)
-export function getObjectArrayUnionByKey(arr1, arr2, key) {
+export function getObjectArrayUnionByKey(arr1, arr2, keyData) {
+    const key = [...keyData]
+    let isArrKey = (typeof keyData !== 'string')
+    if(isArrKey){
+        key.reverse()
+    }
     // 创建一个 Map 来存储已经看到的对象
     const map = new Map();
-
     // 遍历第一个数组，将对象存储在 Map 中
     for (const item of arr1) {
-        map.set(item[key], item);
+        if(isArrKey){
+            let i = item
+            for(const k of key){
+                i = i[k]
+            }
+            map.set(i, item);
+        }
+        else{
+            map.set(item[keyData], item);
+        }
     }
-    console.log("map1", map)
 
     // 遍历第二个数组，如果对象不在 Map 中，则添加到 Map 中
     for (const item of arr2) {
-        if (!map.has(item[key])) {
-            map.set(item[key], item);
+        if(isArrKey){
+            let i = item
+            //前面已经用key.reverse()翻转过一次数组，所以这里就不需要了
+            for(const k of key){
+                i = i[k]
+            }
+            if (!map.has(i)) {
+                map.set(i, item);
+            }
+        }
+        else{
+            if (!map.has(item[keyData])) {
+                map.set(item[keyData], item);
+            }
         }
     }
 

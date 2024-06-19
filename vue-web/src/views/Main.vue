@@ -126,7 +126,7 @@ import {h, onMounted, reactive} from 'vue'
 import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
-import {axios_get} from "@/utils/axiosUtil.js";
+import {axiosGet} from "@/utils/axiosUtil.js";
 
 onMounted(initialize)
 
@@ -142,10 +142,10 @@ function help(){
 }
 
 async function about(){
-  let go_simpleWMS_version = 'unknown'
+  let go_simpleWMS_version = 'v0.0.0_Alpha'
   let go_server_version = 'unknown'
-  let vue_web_version = 'v0.2.0.20240614_Alpha'
-  const result = await axios_get({url: '/ping'})
+  let vue_web_version = 'v0.4.3.20240619_Alpha'
+  const result = await axiosGet({url: '/ping'})
   if(result){
     go_server_version = result.data.version
   }
@@ -210,9 +210,8 @@ async function initialize(){
   else{
     state.user = JSON.parse(userJson)
   }
-  const result = await axios_get({url: '/auth', name: 'auth'})
+  const result = await axiosGet({url: '/auth', name: 'auth'})
   if(!result){
-    ElMessage.error("操作失败，请先登录！")
     await router.push('/')
   }
 }

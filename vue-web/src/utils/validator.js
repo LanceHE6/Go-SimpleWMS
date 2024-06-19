@@ -47,6 +47,19 @@ export const pNumValidatorNRequire = (rule, value, callback) => {
     }
 }
 
+//字符串不相等约束
+export const strValidatorNEqual = (rule, value, callback, otherValue, errStr) => {
+    if (value === '') {
+        callback(); // 如果为空，则通过验证
+    }
+    else if (value === otherValue) {
+        callback(new Error(errStr)); // 如果值相同，则显示错误
+    }
+    else {
+        callback(); // 如果满足所有条件，则通过验证
+    }
+}
+
 function isNumeric(str) {
     const pattern = /^\d+(\.\d+)?$/; // 匹配整数和小数
     return pattern.test(str);
