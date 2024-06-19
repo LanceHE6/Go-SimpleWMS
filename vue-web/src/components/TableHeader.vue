@@ -4,12 +4,12 @@
       添加
     </el-button>
 
-    <el-button v-if="operations.upload" type="primary" icon="Download" @click="upload" plain>
+    <el-button v-if="operations.upload" type="primary" icon="Upload" @click="upload" plain>
       导入
     </el-button>
 
 
-    <el-button v-if="operations.download" type="primary" icon="Upload" @click="download" plain>
+    <el-button v-if="operations.download" type="primary" icon="Download" @click="download" plain>
       导出
     </el-button>
 
