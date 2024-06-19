@@ -36,4 +36,5 @@ func Route(ginServer *gin.Engine, sem *semaphore.Weighted) {
 	group.StockGroup(ginApi)         // 库存路由
 	group.TransferGroup(ginApi)      // 调拨路由
 	group.UploadGroup(ginApi)        // 上传路由
+	group.OPLogGroup(ginApi)         // 操作日志路由
 }

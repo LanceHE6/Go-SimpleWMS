@@ -9,21 +9,38 @@ import (
 func UserGroup(ginApi *gin.RouterGroup) {
 	userGroup := ginApi.Group("/user")
 
-	userGroup.POST("/register", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		user.Register(c)
-	})
-	userGroup.POST("/upload", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		user.UploadUsers(c)
-	})
-	userGroup.POST("/login", func(c *gin.Context) {
-		user.Login(c)
-	})
-	userGroup.DELETE("/delete", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		user.DeleteUser(c)
-	})
-	userGroup.PUT("/update", utils.AuthMiddleware(), utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		user.UpdateUser(c)
-	})
+	userGroup.POST("/register",
+		utils.AuthMiddleware(),
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("用户", "注册"),
+		func(c *gin.Context) {
+			user.Register(c)
+		})
+	userGroup.POST("/upload",
+		utils.AuthMiddleware(),
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("用户", "导入"),
+		func(c *gin.Context) {
+			user.UploadUsers(c)
+		})
+	userGroup.POST("/login",
+		func(c *gin.Context) {
+			user.Login(c)
+		})
+	userGroup.DELETE("/delete",
+		utils.AuthMiddleware(),
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("用户", "删除"),
+		func(c *gin.Context) {
+			user.DeleteUser(c)
+		})
+	userGroup.PUT("/update",
+		utils.AuthMiddleware(),
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("用户", "更新"),
+		func(c *gin.Context) {
+			user.UpdateUser(c)
+		})
 	userGroup.GET("/list", utils.AuthMiddleware(), func(c *gin.Context) {
 		user.ListUsers(c)
 	})
@@ -33,19 +50,31 @@ func UserGroup(ginApi *gin.RouterGroup) {
 
 	emailGroup := userGroup.Group("/email")
 
-	emailGroup.POST("/bind", utils.AuthMiddleware(), func(c *gin.Context) {
-		user.BindEmail(c)
-	})
-	emailGroup.POST("/verify", utils.AuthMiddleware(), func(c *gin.Context) {
-		user.VerifyEmail(c)
-	})
+	emailGroup.POST("/bind",
+		utils.AuthMiddleware(),
+		utils.OPLoggerMiddleware("用户", "绑定邮箱"),
+		func(c *gin.Context) {
+			user.BindEmail(c)
+		})
+	emailGroup.POST("/verify",
+		utils.AuthMiddleware(),
+		utils.OPLoggerMiddleware("用户", "验证邮箱"),
+		func(c *gin.Context) {
+			user.VerifyEmail(c)
+		})
 
 	pswGroup := userGroup.Group("/psw")
 
-	pswGroup.POST("/reset", utils.AuthMiddleware(), func(c *gin.Context) {
-		user.ResetPassword(c)
-	})
-	pswGroup.POST("/verify", utils.AuthMiddleware(), func(c *gin.Context) {
-		user.VerifyResetPasswordEmail(c)
-	})
+	pswGroup.POST("/reset",
+		utils.AuthMiddleware(),
+		utils.OPLoggerMiddleware("用户", "重置密码"),
+		func(c *gin.Context) {
+			user.ResetPassword(c)
+		})
+	pswGroup.POST("/verify",
+		utils.AuthMiddleware(),
+		utils.OPLoggerMiddleware("用户", "重置密码验证"),
+		func(c *gin.Context) {
+			user.VerifyResetPasswordEmail(c)
+		})
 }
