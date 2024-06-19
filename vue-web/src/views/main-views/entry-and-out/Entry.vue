@@ -73,7 +73,7 @@ const tableColList = [
         }},
       {property: "comment", label: "备注", sortable: false, width: 240},
     ]},
-  {property: "number", label: "单号", width: 180, sortable: false},
+  {property: "number", label: "单号", width: 200, sortable: false},
   {property: "inventory_type", label: "类型", width: 120, sortable: false, isFK: true, FKData:{
       url: "/invt/list",
       property: "itid",
