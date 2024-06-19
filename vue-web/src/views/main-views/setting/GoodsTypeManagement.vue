@@ -5,8 +5,8 @@
       :table-col-list="tableColList"
       :add-form="addForm"
       :edit-form="editForm"
-      :delete-data-body="deleteDataBody"
       :urls="urls"
+      delete
       download
   />
 </template>
@@ -72,13 +72,6 @@ const addForm = {
     {label: '货品类型名', prop: 'name', dataName: 'name', isInput: true},
     {label: '货品类型编码', prop: 'type_code', dataName: 'type_code', isInput: true},
   ],
-}
-
-/**
- * 删除请求体
- * */
-const deleteDataBody = {
-  gtid: ""
 }
 
 /**

@@ -5,8 +5,8 @@
       :table-col-list="tableColList"
       :add-form="addForm"
       :edit-form="editForm"
-      :delete-data-body="deleteDataBody"
       :urls="urls"
+      delete
       download
   />
 </template>
@@ -61,13 +61,6 @@ const addForm = {
   item:[
     {label: '计量单位名', prop: 'name', dataName: 'name', isInput: true},
   ],
-}
-
-/**
- * 删除请求体
- * */
-const deleteDataBody = {
-  unid: ""
 }
 
 /**

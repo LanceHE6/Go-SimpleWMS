@@ -73,11 +73,6 @@ const prop = defineProps({
     default: () => null,
     description: '编辑界面数据'
   },
-  deleteDataBody:{
-    type: Object,
-    default: () => null,
-    description: '删除请求体'
-  },
   urls:{
     type: Object,
     default: () => {},
@@ -87,6 +82,11 @@ const prop = defineProps({
     type: Object,
     default: () => {},
     description: '数据获取请求体中的额外参数'
+  },
+  delete:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持删除功能'
   },
   upload:{
     type: Boolean,
@@ -107,6 +107,11 @@ const prop = defineProps({
     type: Boolean,
     default: () => false,
     description: '是否支持图片上传功能'
+  },
+  uploadFile:{
+    type: Boolean,
+    default: () => false,
+    description: '是否支持附件上传功能'
   },
   hasSubmitPage:{
     type: Boolean,
@@ -130,12 +135,13 @@ const state =  reactive({
   showFKMap: new Map(),  //显示映射外键
   operations: {
     add: prop.addForm !== null,
-    del: prop.deleteDataBody !== null,
     edit: prop.editForm !== null,
+    del: prop.delete,
     upload: prop.upload,
     download: prop.download,
     print: prop.print,
-    uploadImg: prop.uploadImg
+    uploadImg: prop.uploadImg,
+    uploadFile: prop.uploadFile
   }
 })
 
@@ -282,14 +288,14 @@ function upload(form){
 
 //点击子组件的删除按钮
 function del(row){
-  console.log(JSON.stringify(row))
+  let deleteDataBody = {}
   if(typeof prop.keyData === "string") {
-    prop.deleteDataBody[prop.keyData] = row[prop.keyData]
+    deleteDataBody[prop.keyData] = row[prop.keyData]
   }
   else{
-    prop.deleteDataBody = editObjKeyData(prop.deleteDataBody, getObjKeyData(row, prop.keyData), prop.keyData)
+    deleteDataBody = editObjKeyData(deleteDataBody, getObjKeyData(row, prop.keyData), prop.keyData)
   }
-  deleteData(prop.deleteDataBody)
+  deleteData(deleteDataBody)
 }
 
 //上传图片

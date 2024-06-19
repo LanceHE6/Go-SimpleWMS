@@ -5,9 +5,9 @@
       :table-col-list="tableColList"
       :add-form="addForm"
       :edit-form="editForm"
-      :delete-data-body="deleteDataBody"
       :urls="urls"
       large
+      delete
       download
       print
       upload-img
@@ -25,20 +25,21 @@ import { pNumValidatorNRequire } from "@/utils/validator.js"
 const tableColList = [
   {property: "name", label: "货品名称", sortable: false},
   {property: "images", label: "图片", sortable: false, isImage: true, width: 120},
-  {property: "goods_code", label: "货品编码", sortable: false},
-  {property: "model", label: "规格型号", sortable: false},
-  {property: "goods_type", label: "货品类型", sortable: false, isFK: true, FKData:{
+  {property: "goods_code", label: "货品编码", width: 120, sortable: false},
+  {property: "model", label: "规格型号", width: 120, sortable: false},
+  {property: "goods_type", label: "货品类型", width: 120, sortable: false, isFK: true, FKData:{
       url: "/gt/list",
       property: "gtid",
       label: "name"
     }},
-  {property: "unit", label: "计量单位", sortable: false, isFK: true, FKData:{
+  {property: "unit", label: "计量单位", width: 100, sortable: false, isFK: true, FKData:{
       url: "/unit/list",
       property: "unid",
       label: "name"
     }},
-  {property: "unit_price", label: "单价", sortable: true},
-  {property: "manufacturer", label: "生产厂商", sortable: false, width: 150},
+  {property: "unit_price", label: "单价", width: 80, sortable: true},
+  {property: "manufacturer", label: "生产厂商", width: 150, sortable: false},
+  {property: "files", label: "附件", sortable: false, isFile: true, width: 120},
 ]
 
 /**
@@ -154,13 +155,6 @@ const addForm = reactive({
 })
 
 /**
- * 删除请求体
- * */
-const deleteDataBody = {
-  gid: ""
-}
-
-/**
  * 网络请求url
  * */
 const urls = {
@@ -168,7 +162,8 @@ const urls = {
   deleteData: "/goods/delete",
   addData: "/goods/add",
   updateData: "/goods/update",
-  uploadImage: "/upload/goods_img"
+  uploadImage: "/upload/goods_img",
+  uploadFile: "/upload/goods_file"
 }
 </script>
 
