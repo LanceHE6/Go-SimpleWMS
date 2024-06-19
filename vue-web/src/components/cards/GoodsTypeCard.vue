@@ -21,9 +21,15 @@
     </div>
   </template>
   <v-chart
+      v-if="optionAmountData.length > 0"
       :option="option_column"
       class="my-chart"
       autoresize
+  />
+  <el-empty
+      v-else
+      description="暂无数据"
+      style="width: 100%"
   />
 
 </el-card>
