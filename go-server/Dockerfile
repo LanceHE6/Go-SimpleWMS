@@ -21,6 +21,12 @@ COPY . .
 # Build the Go app
 RUN go build -o main .
 
+# build后删除除main以外的所有文件
+RUN find . -maxdepth 1 ! -name "main" -exec rm -rf {} +
+
+# 修改权限
+RUN chmod +x main
+
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
