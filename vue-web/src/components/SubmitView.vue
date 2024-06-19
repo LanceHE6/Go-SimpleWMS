@@ -90,67 +90,14 @@
         删除
       </el-button>
     </div>
-    <el-table
-      :data="tableData"
-      :border="true"
-      :stripe="true"
+    <table-body
+      :default-data="tableData"
+      :table-col-list="mainTableColList"
+      :show-f-k-map="mainFKMap"
+      :operations="operations"
       height="50vh"
       @selection-change="handleSelectionChange"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column type="index" label="序号" align="center" header-align="center" width="55" />
-
-      <el-table-column
-          v-for="item in mainTableColList"
-          align="center"
-          header-align="center"
-          style="background-color: #67c23a"
-          :property="item.property"
-          :label="item.label"
-          :width="item.width"
-          :sortable="item.sortable"
-          :formatter="mapping(item.property, item)">
-        <template #default="scope" v-if="item.isImage">
-          <div style="display: flex; align-items: center">
-            <el-image
-                class="table-col-img"
-                v-if="isArrNotEmpty(scope.row, item)"
-                :src="`${axios.defaults.baseURL}/${getArrData(scope.row, item)[0].path}`"
-                fit="cover"
-                :preview-src-list="getArrData(scope.row, item).map(imgObj => axios.defaults.baseURL + '/' + imgObj.path)"
-                preview-teleported
-            >
-              <template #error>
-                <div class="error-image-slot">
-                  <el-icon><Picture /></el-icon>
-                </div>
-              </template>
-            </el-image>
-
-            <div class="error-image-slot" v-else>
-              <el-icon><Picture /></el-icon>
-            </div>
-
-          </div>
-        </template>
-
-        <template #default="scope" v-if="item.isInput">
-          <div style="display: flex; align-items: center">
-            <el-input
-              v-if="item.type !== 'number'"
-              v-model="scope.row[item.property]"
-              :type="item.type"
-            />
-            <el-input
-                v-if="item.type === 'number'"
-                v-model.number="scope.row[item.property]"
-                :type="item.type"
-            />
-          </div>
-        </template>
-
-      </el-table-column>
-    </el-table>
+    />
   </el-main>
 
   <el-divider class="my-divider"/>
@@ -218,6 +165,7 @@ import {Delete, Picture} from "@element-plus/icons-vue";
 import DataShowView from "@/components/DataShowView.vue";
 import {getObjectArrayDifference, getObjectArrayUnionByKey} from "@/utils/arrayUtil"
 import {axiosGet, axiosPost} from "@/utils/axiosUtil.js";
+import TableBody from "@/components/TableBody.vue";
 
 const hasFKData = computed(() => (key) => FKMap.value.has(key));
 const tableData = ref([])  //表格数据
@@ -227,6 +175,16 @@ let multipleSelection = []  //用户选择的主窗口元素
 
 //对外事件列表
 const emit = defineEmits(["addTab", "removeTab"]);
+
+const operations = {
+  add: false,
+  del: false,
+  edit: false,
+  upload: false,
+  download: false,
+  print: false,
+  uploadImg: false,
+}
 
 const state =  reactive({
   isLoading: true,  //数据是否正在加载
@@ -392,84 +350,6 @@ const addData=async (data) => {
     ElMessage.success("数据添加成功！")
   }
   state.isLoading = false
-}
-
-// 数据显示转换(映射)
-function mapping(property, item){
-  return (row) => {
-    let currentRow = row
-    let currentItem = item
-    let currentProp = property
-    //多层对象, 一层层解开
-    while(currentItem.isParent){
-      currentRow = currentRow[currentItem.property]
-      currentItem = currentItem['child']
-      currentProp = currentItem.property
-    }
-    //外键映射
-    if(currentItem.isFK){
-      //从外键map中获取对应的外键表
-      const fkList = mainFKMap.value.get(currentItem.FKData.property)
-      for(const item2 of fkList){
-        // 映射
-        if(currentRow[currentProp] === item2[currentItem.FKData.property]){
-          return item2[currentItem.FKData.label]
-        }
-      }
-    }
-    //普通映射
-    if(currentItem.isMapping){
-      //从映射表获取映射对象
-      for(const j of currentItem.mappingList){
-        const item2 = j
-        // 映射
-        if(currentRow[currentProp] === item2.value){
-          return item2.label
-        }
-      }
-    }
-    //日期转换
-    if(currentItem.isDateFormat){
-      currentRow[currentProp] = new Date(currentRow[currentProp]).toLocaleString()
-    }
-    //不需要映射或者没有匹配的映射则返回原值
-    return currentRow[currentItem.property]
-  }
-}
-
-//判断数据数组内是否有数据
-const isArrNotEmpty = (row, item) =>{
-  if (row === null || typeof row !== 'object' || Object.keys(row).length === 0) {
-    return false;
-  }
-
-  //嵌套对象则逐层解开
-  while (item && ('isParent' in item) && item.isParent){
-    if(!(item.property in row)){
-      return false
-    }
-    row = row[item.property]
-    item = item.child
-  }
-
-  return Array.isArray(row[item.property]) && row[item.property].length > 0
-}
-
-const getArrData = (row, item) =>{
-  if (row === null || typeof row !== 'object' || Object.keys(row).length === 0) {
-    return [];
-  }
-
-  //嵌套对象则逐层解开
-  while (item && ('isParent' in item) && item.isParent){
-    if(!(item.property in row)){
-      return false
-    }
-    row = row[item.property]
-    item = item.child
-  }
-
-  return row[item.property]
 }
 
 const submitAddForm = () => {
@@ -661,21 +541,5 @@ const cancel = () => {
   text-align: justify;
   width: 420px;
   padding-right: 30px;
-}
-.table-col-img{
-  height: 30px;
-  width: 30px;
-
-}
-
-.error-image-slot{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
-  font-size: 15px;
 }
 </style>
