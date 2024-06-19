@@ -19,13 +19,13 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o main .
+RUN go build -o server .
 
-# build后删除除main以外的所有文件
-RUN find . -maxdepth 1 ! -name "main" -exec rm -rf {} +
+# build后删除除server以外的所有文件
+RUN rm -rf `ls | grep -v "server"`
 
 # 修改权限
-RUN chmod +x main
+RUN chmod +x server
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
@@ -45,4 +45,4 @@ ENV SMTP_PASSWORD=your-email-password
 VOLUME [ "/static" ]
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["./server"]
