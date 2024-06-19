@@ -314,8 +314,6 @@ function edit(form){
   updateData(form)
 }
 
-const token="bearer "+localStorage.getItem("token");
-
 /**
  * getData()
  * 获取数据的请求
