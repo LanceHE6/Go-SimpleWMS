@@ -7,7 +7,7 @@ import (
 )
 
 type uploadUsersRequest struct {
-	UserList []registerRequest `json:"list" form:"list" binding:"required"`
+	List []registerRequest `json:"list" form:"list" binding:"required"`
 }
 
 func UploadUsers(context *gin.Context) {
@@ -17,10 +17,8 @@ func UploadUsers(context *gin.Context) {
 		return
 	}
 
-	userList := data.UserList
-	//fmt.Println(userList)
+	userList := data.List
 	num := len(userList)
-	count := 0
 	var errs []gin.H
 	for _, userInfo := range userList {
 		// 循环注册用户
@@ -29,7 +27,6 @@ func UploadUsers(context *gin.Context) {
 			errs = append(errs, returnInfo)
 			continue
 		}
-		count++
 	}
 	if len(errs) > 0 {
 		if len(errs) == num {
