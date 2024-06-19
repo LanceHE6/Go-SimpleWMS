@@ -24,6 +24,7 @@
       @search="startSearch"
       @refresh="initialize"
       @upload-img="uploadImg"
+      @upload-file="uploadFile"
   >
   </my-table>
 </template>
@@ -311,8 +312,25 @@ async function uploadImg(id, fileList) {
   });
 
 
-  // 调用uploadImage函数并传入formData
-  await uploadImage(formData);
+  // 调用uploadFiles函数并传入formData
+  await uploadFiles(prop.urls['uploadImg'], formData);
+}
+
+//上传附件
+async function uploadFile(id, fileList) {
+
+  // 创建一个新的FormData对象
+  const formData = new FormData();
+  formData.append('goods', id);
+
+  // 遍历文件列表并添加到FormData中
+  fileList.forEach((file, _) => {
+    formData.append('file', file);
+  });
+
+
+  // 调用uploadFiles函数并传入formData
+  await uploadFiles(prop.urls['uploadFile'],formData);
 }
 
 //点击子组件的编辑按钮, 子组件处理完返回的可提交表单
@@ -420,17 +438,17 @@ const uploadData=async (list) => {
 }
 
 /**
- * uploadImage()
- * 上传图片
+ * uploadFiles()
+ * 上传文件
  * */
-const uploadImage=async (data) => {
+const uploadFiles=async (url, data) => {
   state.isLoading = true
   const headers = {
     'Content-Type': 'multipart/form-data'
   }
-  const result = axiosPost({url: prop.urls['uploadImage'], data: data, headers: headers, name: 'uploadImage'})
+  const result = axiosPost({url: url, data: data, headers: headers, name: 'uploadFiles'})
   if(result){
-    ElMessage.success("图片上传成功！")
+    ElMessage.success("文件上传成功！")
     state.allDataArray = await getData(prop.urls['getData'])
     await update(state.currentPage)
   }
