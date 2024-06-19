@@ -8,15 +8,17 @@
       @selection-change="handleSelectionChange"
       style="width: 100%"
   >
-    <el-table-column type="selection" width="55" />
-    <el-table-column type="index" label="序号" align="center" header-align="center" width="55" />
+    <el-table-column type="selection" width="55" fixed />
+    <el-table-column type="index" label="序号" align="center" header-align="center" width="55" fixed/>
 
     <el-table-column
         v-if="operations.edit || operations.del"
         align="center"
         header-align="center"
         width="135"
-        label="操作">
+        label="操作"
+        fixed
+    >
       <template #default="scope">
         <el-button
             v-if="operations.edit"
@@ -44,7 +46,14 @@
         :label="item.label"
         :width="item.width"
         :sortable="item.sortable"
-        :formatter="mapping(item.property, item)">
+        :formatter="(row) => itemMapping(row, item.property, item)"
+        :fixed="item.isFixed"
+    >
+      <template #default="scope" v-if="item.operable">
+          <span class="blue-font-color" @click="item.operationEvent(scope.row[keyData], scope.row[item.property])">
+            {{ itemMapping(scope.row, item.property, item) }}
+          </span>
+      </template>
       <template #default="scope" v-if="item.isImage">
         <div style="display: flex; align-items: center; justify-content: center">
           <el-image
@@ -68,7 +77,8 @@
               v-else
               :class="['error-image-slot', operations.uploadImg ? 'is_upload_img' : '']"
               @click="uploadImg(getObjKeyData(scope.row, keyData))">
-            <el-icon><Plus /></el-icon>
+            <el-icon v-if="operations.uploadImg"><Plus /></el-icon>
+            <el-icon v-else><Picture /></el-icon>
           </div>
 
           <el-button
@@ -82,6 +92,22 @@
           />
         </div>
       </template>
+
+      <template #default="scope" v-if="item.isInput">
+        <div style="display: flex; align-items: center">
+          <el-input
+              v-if="item.type === 'number'"
+              v-model.number="scope.row[item.property]"
+              :type="item.type"
+          />
+          <el-input
+              v-else
+              v-model="scope.row[item.property]"
+              :type="item.type"
+          />
+        </div>
+      </template>
+
       <template #default="scope" v-if="item.isExpand">
         <div class="child_table_div">
           <el-table
@@ -97,7 +123,9 @@
                 :prop="child_item.property"
                 :width="child_item.width"
                 :sortable="child_item.sortable"
-                :formatter="mapping(child_item.property, child_item)">
+                :formatter="(row) => itemMapping(row, child_item.property, child_item)"
+                :fixed="child_item.isFixed"
+            >
               <template #default="prop" v-if="child_item.isImage">
                 <div style="display: flex; align-items: center; justify-content: center">
                   <el-image
@@ -135,7 +163,7 @@
 <script setup>
 
 import axios from "axios";
-import {Plus} from "@element-plus/icons-vue";
+import {Plus, Picture} from "@element-plus/icons-vue";
 import {getObjKeyData} from "@/utils/objectUtil.js";
 import {computed, ref, watch} from "vue";
 
@@ -191,7 +219,7 @@ const prop = defineProps({
 
 //对外事件列表
 const emit = defineEmits([
-  "edit", "delete", "uploadImg", "selectionChange"
+  "edit", "delete", "uploadImg", "selectionChange", "operation"
 ]);
 
 //表格
@@ -213,55 +241,63 @@ watch(() => prop.defaultData, (newValue) => {
 
 
 //筛选函数, 根据搜索框来做筛选(仅对前端分页生效)
-const filterTableData = computed(() =>
-    tableData.value.filter(
-        (data) =>
-            !prop.search || prop.large ||
-            data[prop.searchData].toLowerCase().includes(prop.search.toLowerCase())
-    )
-)
+const filterTableData = computed(() => {
+  // 如果prop.searchData为空字符串，则不进行筛选，直接返回所有数据
+  if (prop.searchData === "") {
+    return tableData.value
+  }
+
+  // 否则，进行筛选
+  return tableData.value.filter((data) => {
+    // 如果prop.search为空或者prop.large为真，则包含该数据
+    if (!prop.search || prop.large) {
+      return true
+    }
+
+    // 进行正常的搜索比较
+    return data[prop.searchData] && data[prop.searchData].toLowerCase().includes(prop.search.toLowerCase());
+  })
+})
 
 // 数据显示转换(映射)
-function mapping(property, item){
-  return (row) => {
-    let currentRow = row
-    let currentItem = item
-    let currentProp = property
-    //多层对象, 一层层解开
-    while(currentItem.isParent){
-      currentRow = currentRow[currentItem.property]
-      currentItem = currentItem['child']
-      currentProp = currentItem.property
-    }
-    //外键映射
-    if(currentItem.isFK){
-      //从外键map中获取对应的外键表
-      const fkList = prop.showFKMap.get(currentItem.FKData.property)
-      for(const item2 of fkList){
-        // 映射
-        if(currentRow[currentProp] === item2[currentItem.FKData.property]){
-          return item2[currentItem.FKData.label]
-        }
-      }
-    }
-    //普通映射
-    if(currentItem.isMapping){
-      //从映射表获取映射对象
-      for(const j of currentItem.mappingList){
-        const item2 = j
-        // 映射
-        if(currentRow[currentProp] === item2.value){
-          return item2.label
-        }
-      }
-    }
-    //日期转换
-    if(currentItem.isDateFormat){
-      currentRow[currentProp] = new Date(currentRow[currentProp]).toLocaleString()
-    }
-    //不需要映射或者没有匹配的映射则返回原值
-    return currentRow[currentItem.property]
+function itemMapping(row, property, item){
+  let currentRow = row
+  let currentItem = item
+  let currentProp = property
+  //多层对象, 一层层解开
+  while(currentItem.isParent){
+    currentRow = currentRow[currentItem.property]
+    currentItem = currentItem['child']
+    currentProp = currentItem.property
   }
+  //外键映射
+  if(currentItem.isFK){
+    //从外键map中获取对应的外键表
+    const fkList = prop.showFKMap.get(currentItem.FKData.property)
+    for(const item2 of fkList){
+      // 映射
+      if(currentRow[currentProp] === item2[currentItem.FKData.property]){
+        return item2[currentItem.FKData.label]
+      }
+    }
+  }
+  //普通映射
+  if(currentItem.isMapping){
+    //从映射表获取映射对象
+    for(const j of currentItem.mappingList){
+      const item2 = j
+      // 映射
+      if(currentRow[currentProp] === item2.value){
+        return item2.label
+      }
+    }
+  }
+  //日期转换
+  if(currentItem.isDateFormat){
+    currentRow[currentProp] = new Date(currentRow[currentProp]).toLocaleString()
+  }
+  //不需要映射或者没有匹配的映射则返回原值
+  return currentRow[currentItem.property]
 }
 
 //判断数据数组内是否有数据
@@ -331,6 +367,11 @@ const uploadImg = (id) =>{
   background: var(--el-fill-color-light);
   color: var(--el-text-color-secondary);
   font-size: 15px;
+}
+.blue-font-color {
+  color: #409eff;
+  border-bottom: 1px solid #409eff;
+  cursor: pointer;
 }
 .is_upload_img{
   cursor: pointer;
