@@ -166,6 +166,7 @@ import DataShowView from "@/components/DataShowView.vue";
 import {getObjectArrayDifference, getObjectArrayUnionByKey} from "@/utils/arrayUtil"
 import {axiosGet, axiosPost} from "@/utils/axiosUtil.js";
 import TableBody from "@/components/TableBody.vue";
+import EventBus from "@/utils/eventBus.js";
 
 const hasFKData = computed(() => (key) => FKMap.value.has(key));
 const tableData = ref([])  //表格数据
@@ -484,6 +485,9 @@ const save = async () => {
   }
   console.log("data", prop.submitForm.data)
   await addData(prop.submitForm.data)
+  setTimeout(() => {
+    EventBus.emit("refresh", 1)
+  }, 500);
   emit("removeTab")
 }
 

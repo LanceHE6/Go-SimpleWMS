@@ -31,10 +31,11 @@
 
 <script setup>
 import {ElMessage, ElNotification} from "element-plus";
-import {onMounted, reactive, ref} from "vue";
+import {onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref} from "vue";
 import MyTable from "@/components/MyTable.vue";
 import {axiosDelete, axiosGet, axiosPost, axiosPut} from "@/utils/axiosUtil.js";
 import {editObjKeyData, getObjKeyData} from "@/utils/objectUtil.js";
+import EventBus from "@/utils/eventBus.js";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
@@ -118,6 +119,11 @@ const prop = defineProps({
     type: Boolean,
     default: () => false,
     description: '是否需要提交表单的页面, 如果为false则使用简单的窗口来提交表单'
+  },
+  hasRefreshEventBus:{
+    type: Boolean,
+    default: () => false,
+    description: '是否需要控制页面刷新的eventBus'
   }
 });
 
@@ -170,8 +176,27 @@ async function initialize(){
   await update(state.currentPage)
   state.isLoading = false
 }
-onMounted(initialize)
+onMounted(() =>{
+  initialize()
+})
 
+onActivated(()=>{
+  //全局监听
+  if(prop.hasRefreshEventBus){
+    EventBus.on("refresh", (page) => {
+      update(page)
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  //销毁全局监听, 避免内存泄漏
+  EventBus.off("refresh")
+})
+onDeactivated(()=>{
+  //销毁全局监听, 避免内存泄漏
+  EventBus.off("refresh")
+})
 
 async function getDataAndSet(url, propName, stateMap, FKDataMap) {
   if (!FKDataMap.has(propName)) {

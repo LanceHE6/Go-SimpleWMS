@@ -5,6 +5,7 @@
       :urls="urls"
       :extra-params="extraParams"
       @addTab="addTab"
+      has-refresh-event-bus
       has-submit-page
       large
       download
