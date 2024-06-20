@@ -292,7 +292,9 @@
   >
     <el-upload
         ref="myUploadFileForm"
-        accept=""
+        accept="text/plain, text/markdown, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/pdf,
+        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation,
+        application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         :auto-upload="false"
         :limit="5"
         :on-change="handleFileChange"
@@ -782,7 +784,7 @@ const handleImgChange = (uploadFile) => {
 }
 
 const handleFileChange = (uploadFile) => {
-  if (!/\.(txt|doc|docx|xls|xlsx|ppt|pptx|pdf|md)$/.test(uploadFile.name.toLowerCase())) {
+  if (!/\.(txt|doc|dot|docx|xls|xlsx|ppt|pptx|pdf|md)$/.test(uploadFile.name.toLowerCase())) {
     // 格式根据自己需求定义
     ElMessage.error('上传格式不正确，请上传支持的文件格式')
     myUploadFileForm.value.handleRemove(uploadFile)
