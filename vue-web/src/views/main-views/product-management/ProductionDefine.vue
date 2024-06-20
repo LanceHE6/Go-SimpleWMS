@@ -25,7 +25,7 @@ import { pNumValidatorNRequire } from "@/utils/validator.js"
  * 表头属性列表
  * */
 const tableColList = [
-  {property: "name", label: "货品名称", sortable: false},
+  {property: "name", label: "货品名称", width: 180, sortable: false},
   {property: "images", label: "图片", sortable: false, isImage: true, width: 120},
   {property: "goods_code", label: "货品编码", width: 120, sortable: false},
   {property: "model", label: "规格型号", width: 120, sortable: false},
