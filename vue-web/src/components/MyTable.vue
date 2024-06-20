@@ -336,6 +336,7 @@ import TableHeader from "@/components/TableHeader.vue";
 import {editObjKeyData, getObjKeyData} from "@/utils/objectUtil.js";
 import TableBody from "@/components/TableBody.vue";
 import axios from "axios";
+import EventBus from "@/utils/eventBus.js";
 
 const prop = defineProps({
   large:{
@@ -632,7 +633,11 @@ function submitUploadFileData(){
   console.log("2333")
   myUploadFileForm.value.clearFiles()
   emit("uploadFile",uploadFileId.value ,fileList.value)
+  viewFileVisible.value = false
   uploadFileVisible.value = false
+  setTimeout(() => {
+    EventBus.emit("refresh", 1)
+  }, 500);
 }
 //提交编辑表单
 async function submitEditForm(form){
