@@ -144,7 +144,7 @@ function help(){
 async function about(){
   let go_simpleWMS_version = 'v0.0.0_Alpha'
   let go_server_version = 'unknown'
-  let vue_web_version = 'v0.5.0.20240619_Alpha'
+  let vue_web_version = 'v0.5.1.20240620_Alpha'
   const result = await axiosGet({url: '/ping'})
   if(result){
     go_server_version = result.data.version
