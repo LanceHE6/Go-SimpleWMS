@@ -6,6 +6,7 @@
       :add-form="addForm"
       :edit-form="editForm"
       :urls="urls"
+      has-refresh-event-bus
       large
       delete
       download
