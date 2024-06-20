@@ -4,6 +4,7 @@
       :table-col-list="tableColList"
       :urls="urls"
       @addTab="addTab"
+      has-refresh-event-bus
       has-submit-page
       large
       download
@@ -16,6 +17,7 @@ import DataShowView from "@/components/DataShowView.vue";
 import {ElInput, ElMessage, ElMessageBox, ElSwitch} from "element-plus";
 import {axiosPut} from "@/utils/axiosUtil.js";
 import {h, ref} from "vue";
+import EventBus from "@/utils/eventBus.js";
 
 //对外事件列表
 const emit = defineEmits(["addTab"]);
@@ -61,6 +63,7 @@ const audit = (tid, isAudit) =>{
       })
       if(result){
         ElMessage.success("审核成功")
+        EventBus.emit("refresh", 1)
       }
     })
   }
@@ -84,6 +87,7 @@ const audit = (tid, isAudit) =>{
       })
       if(result){
         ElMessage.success("审核已撤销")
+        EventBus.emit("refresh", 1)
       }
     })
   }
