@@ -82,7 +82,7 @@
         <div class="head-container-right"/>
 
         <el-button
-            style="margin-top: 18px; margin-left: 15px"
+            style="margin-top: 18px; margin-left: 15px; cursor: default"
             size="small"
             :disabled="true"
             round
@@ -98,6 +98,7 @@
             </el-icon>
             {{state.user?.nickname || '用户'}}
           </template>
+          <el-menu-item index="/home/userCenter" >用户中心</el-menu-item>
           <el-menu-item @click="help">帮助中心</el-menu-item>
           <el-menu-item @click="about">关于</el-menu-item>
           <el-menu-item @click="logout">退出登录</el-menu-item>
@@ -237,7 +238,7 @@ async function initialize(){
   max-width: 100%;
 }
 .head-menu {
-  width: 100vw;
+  width: 100%;
   border: 0 !important;
 }
 .main-logo {
