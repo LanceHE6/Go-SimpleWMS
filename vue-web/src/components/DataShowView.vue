@@ -171,7 +171,7 @@ async function initialize(){
   state.isLoading = true
   await getAllFKList()
   if(!prop.large) {
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'init-getData')
   }
   await update(state.currentPage)
   state.isLoading = false
@@ -200,7 +200,7 @@ onDeactivated(()=>{
 
 async function getDataAndSet(url, propName, stateMap, FKDataMap) {
   if (!FKDataMap.has(propName)) {
-    const data = await getData(url);
+    const data = await getData(url, undefined, `getFK-${propName}`);
     stateMap.set(propName, data);
     FKDataMap.set(propName, data);
   } else {
@@ -273,7 +273,7 @@ async function update(currentPage) {
       page_size: PAGE_SIZE,
       keyword: state.searchWord
     }
-    state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams})
+    state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams}, `getData-page${currentPage}`)
     //判断数据更新后当前页数是否大于总页数
     if (currentPage > state.pageCount) {
       currentPage = state.pageCount
@@ -293,7 +293,7 @@ async function startSearch(s) {
     page_size: PAGE_SIZE,
     keyword: state.searchWord
   }
-  state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams})
+  state.currentDataArray = await getData(prop.urls['getData'], {...defaultParams, ...prop.extraParams}, 'search-getData')
   state.isLoading = false
 }
 
@@ -368,8 +368,8 @@ function edit(form){
  * 获取数据的请求
  * */
 
-const getData = async (url, params = {}) => {
-  const result = await axiosGet({url: url, params: params, name: 'getData'})
+const getData = async (url, params = {}, name = 'getData') => {
+  const result = await axiosGet({url: url, params: params, name: name})
   if (result && result.data && result.data.rows) {
     if(prop.large){
       state.pageCount = Math.max(result.data['total_pages'], 1)
@@ -390,7 +390,7 @@ const deleteData=async (data) => {
   const result = await axiosDelete({url: prop.urls['deleteData'], data: data, name: 'deleteData'})
   if(result){
     ElMessage.success("数据已被删除！")
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'del-getData')
     await update(state.currentPage)
   }
   state.isLoading = false
@@ -405,7 +405,7 @@ const addData=async (data) => {
   const result = await axiosPost({url: prop.urls['addData'], data: data, name: 'addData'})
   if(result){
     ElMessage.success("数据添加成功！")
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'add-getData')
     await update(state.currentPage)
   }
   state.isLoading = false
@@ -420,7 +420,7 @@ const updateData=async (data) => {
   const result = await axiosPut({url: prop.urls['updateData'], data: data, name: 'updateData'})
   if(result){
     ElMessage.success("数据修改成功！")
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'update-getData')
     await update(state.currentPage)
   }
   state.isLoading = false
@@ -456,7 +456,7 @@ const uploadData=async (list) => {
         }
       }
     }
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'upload-getData')
     await update(state.currentPage)
   }
   state.isLoading = false
@@ -474,7 +474,7 @@ const uploadFiles=async (url, data) => {
   const result = axiosPost({url: url, data: data, headers: headers, name: 'uploadFiles'})
   if(result){
     ElMessage.success("文件上传成功！")
-    state.allDataArray = await getData(prop.urls['getData'])
+    state.allDataArray = await getData(prop.urls['getData'], undefined, 'uploadFile-getData')
     await update(state.currentPage)
   }
   state.isLoading = false

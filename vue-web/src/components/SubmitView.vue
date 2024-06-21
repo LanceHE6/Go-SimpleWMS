@@ -279,7 +279,7 @@ onMounted(async () => {
 
 async function getDataAndSet(url, propName, stateMap, FKDataMap) {
   if (!FKDataMap.has(propName)) {
-    const data = await getData(url);
+    const data = await getData(url, undefined, `getFK-${propName}`);
     stateMap.set(propName, data);
     FKDataMap.set(propName, data);
   } else {
@@ -327,8 +327,8 @@ async function getAllFKList() {
  * 结果：dataArray中包含一到多个data对象
  * */
 
-const getData = async (url, params = {}) => {
-  const result = await axiosGet({url: url, params: params, name: 'getData'})
+const getData = async (url, params = {}, name = 'getData') => {
+  const result = await axiosGet({url: url, params: params, name: name})
   if(result){
     if (result && result.data && result.data.rows) {
       return result.data.rows;
