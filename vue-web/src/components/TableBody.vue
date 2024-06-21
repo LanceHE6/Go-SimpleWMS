@@ -97,13 +97,14 @@
 
       <template #default="scope" v-if="item.isFile">
         <div style="display: flex; align-items: center; justify-content: center">
-          <el-icon
-              class="table-col-file"
-              v-if="isArrNotEmpty(scope.row, item)"
-              @click="viewFiles(getArrData(scope.row, item), getObjKeyData(scope.row, keyData))"
-          >
-            <Document />
-          </el-icon>
+          <el-button
+            v-if="isArrNotEmpty(scope.row, item)"
+            class="table-col-file"
+            type="primary"
+            icon="Document"
+            @click="viewFiles(getArrData(scope.row, item), getObjKeyData(scope.row, keyData))"
+            text
+          />
 
           <div
               v-else
@@ -411,8 +412,6 @@ const viewFiles = (data, id) =>{
   align-items: center;
   width: 50px;
   height: 50px;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
   font-size: 25px;
 }
 
