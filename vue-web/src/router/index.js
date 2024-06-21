@@ -3,6 +3,7 @@ import Login from '@/views/Login.vue';
 
 import Main from  '@/views/Main.vue'
 import HomePage from  '@/views/main-views/HomePage.vue'
+import UserCenter from "@/views/main-views/UserCenter.vue";
 
 import ProductManagement from  '@/views/main-views/ProductManagement.vue'
 import ProductionDefine from "@/views/main-views/product-management/ProductionDefine.vue";
@@ -31,6 +32,7 @@ const routes = [
     { path: '/', component: Login , name: 'login'},
     { path: '/home', component: Main , name: 'home', meta: { requiresAuth: true },
         children: [
+            { path: 'userCenter', component: UserCenter , name: 'userCenter'},
             { path: 'homePage', component: HomePage , name: 'homePage'},
             { path: 'productManagement', component: ProductManagement , name: 'productManagement',
                 children: [
