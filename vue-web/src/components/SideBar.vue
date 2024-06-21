@@ -1,7 +1,7 @@
 <template>
   <el-menu
       :collapse="state.isCollapse"
-      active-text-color="#ffd04b"
+      active-text-color="#ffffff"
       background-color="#545c64"
       class="side-menu"
       text-color="#fff"
@@ -17,13 +17,25 @@
     </el-menu-item>
 
     <!--其他选项动态设置-->
-    <el-menu-item
-        v-for="item in menuList"
-        :index="item.path"
+    <el-popover
+      v-for="item in menuList"
+      trigger="hover"
+      placement="right-start"
+      :disabled="!state.isCollapse"
+      :content="item.label"
+      popper-style="width: auto; min-width: 25px"
     >
-      <component :is="item.icon" style="margin-right: 5px; height: 20px; width: 20px"></component>
-      <span>{{item.label}}</span>
-    </el-menu-item>
+
+      <template #reference>
+        <el-menu-item
+            :index="item.path"
+            class="my-menu-item"
+        >
+          <component :is="item.icon" style="margin-right: 5px; height: 20px; width: 20px"></component>
+          <span>{{item.label}}</span>
+        </el-menu-item>
+      </template>
+    </el-popover>
 
   </el-menu>
 </template>
@@ -73,5 +85,9 @@ const handleSideMenu = (path) => {
 <style scoped>
 .side-menu{
   height: 100%;
+}
+.my-menu-item{
+  display: grid;
+  grid-template-columns: repeat(2, auto); /* 创建两个相等宽度的列 */
 }
 </style>
