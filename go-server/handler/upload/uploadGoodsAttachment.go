@@ -12,6 +12,8 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type ContentType int
@@ -54,26 +56,11 @@ type uploadGoodsImageRequest struct {
 // GoodsAttachmentUpload 上传货品相关附件
 func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 	var data uploadGoodsImageRequest
-	fileDir := ""
-	if contentType == IMAGE {
-		fileDir = "static/res/goodsImage"
-	}
-	if contentType == FILE {
-		fileDir = "static/res/goodsFile"
-	}
-	if err := context.ShouldBind(&data); err != nil {
-		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
-		return
-	}
-	// 判断本地静态文件夹是否存在
-	_, err := os.Stat(fileDir)
+
+	form, err := context.MultipartForm()
 	if err != nil {
-		// 创建文件夹
-		err = os.MkdirAll(fileDir, os.ModePerm)
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to create directory", err.Error()))
-			return
-		}
+		context.JSON(http.StatusBadRequest, response.Response(402, "Failed to get multipart form", nil))
+		return
 	}
 	requestKey := ""
 	if contentType == IMAGE {
@@ -82,13 +69,31 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 	if contentType == FILE {
 		requestKey = "file"
 	}
-	form, err := context.MultipartForm()
-	if err != nil {
-		context.JSON(http.StatusBadRequest, response.Response(402, "Failed to get multipart form", nil))
+	if err := context.ShouldBind(&data); err != nil {
+		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
 	fileHeaders := form.File[requestKey]
 	gid := data.Goods
+
+	fileDir := ""
+	if contentType == IMAGE {
+		fileDir = "static/res/goodsImage/" + gid
+	}
+	if contentType == FILE {
+		fileDir = "static/res/goodsFile/" + gid
+	}
+
+	// 判断本地静态文件夹是否存在
+	_, err = os.Stat(fileDir)
+	if err != nil {
+		// 创建文件夹
+		err = os.MkdirAll(fileDir, os.ModePerm)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Failed to create directory", err.Error()))
+			return
+		}
+	}
 
 	// 获取数据库连接
 	db := myDb.GetMyDbConnection()
@@ -129,15 +134,22 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 		if contentType == FILE {
 			ext = fileExt
 		}
-
+		// 判断文件类型是否合法
 		if !ext[extString] {
 			context.JSON(http.StatusBadRequest, response.Response(404, "Invalid file type", nil))
 			return
 		}
-		// 构造文件名
-		fileName = "goods_" + gid + "_" + strconv.Itoa(count) + extString
+		// 判断目录下是否已有同名文件
+		_, err = os.Stat(fileDir + "/" + fileName)
+		if err == nil {
+			// 文件已存在，在原文件名后面添加时间戳来去重
+			timestamp := strconv.FormatInt(time.Now().UnixNano(), 10)
+			fileName = strings.TrimSuffix(fileName, extString) + "_" + timestamp + extString
+		}
+
 		var filePath model.File
 		filePath.Path = fileDir + "/" + fileName
+		filePath.Name = fileName
 
 		out, err := os.Create(filePath.Path)
 		if err != nil {
@@ -166,19 +178,15 @@ func GoodsAttachmentUpload(context *gin.Context, contentType ContentType) {
 	}
 
 	// 更新数据库
+	var g model.Goods
+	db.Model(model.Goods{}).Where("gid = ?", gid).First(&g)
 	if contentType == IMAGE {
-		var goods model.Goods
-		db.Model(model.Goods{}).Where("gid = ?", gid).First(&goods)
-		goods.Images = filePaths
-		db.Model(model.Goods{}).Where("gid = ?", gid).Updates(&goods)
+		g.Images = append(g.Images, filePaths...)
 	}
 	if contentType == FILE {
-		var goods model.Goods
-		db.Model(model.Goods{}).Where("gid = ?", gid).First(&goods)
-		goods.Files = filePaths
-		db.Model(model.Goods{}).Where("gid = ?", gid).Updates(&goods)
+		g.Files = append(g.Files, filePaths...)
 	}
-
+	db.Model(model.Goods{}).Where("gid = ?", gid).Updates(&g)
 	context.JSON(http.StatusOK, response.Response(200, "Upload successful", gin.H{
 		"data": res,
 	}))
