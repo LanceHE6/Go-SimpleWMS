@@ -2,7 +2,7 @@ package user
 
 import (
 	"Go_simpleWMS/database/model"
-	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"errors"
@@ -40,7 +40,7 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	nickName := userData.NickName
 	phone := userData.Phone
 
-	db := myDb.GetMyDbConnection()
+	db := my_db.GetMyDbConnection()
 
 	// 判断该账户是否已被注册
 	var user model.User

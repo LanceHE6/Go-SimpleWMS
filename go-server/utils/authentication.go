@@ -3,7 +3,7 @@ package utils
 import (
 	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/model"
-	db2 "Go_simpleWMS/database/myDb"
+	db2 "Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils/response"
 	"errors"
 	"net/http"

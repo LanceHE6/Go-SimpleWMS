@@ -2,7 +2,7 @@ package auth
 
 import (
 	"Go_simpleWMS/database/model"
-	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
@@ -17,7 +17,7 @@ func Auth(context *gin.Context) {
 		return
 	}
 	// 判断是否在数据库中
-	db := myDb.GetMyDbConnection()
+	db := my_db.GetMyDbConnection()
 	var user model.User
 	err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
 

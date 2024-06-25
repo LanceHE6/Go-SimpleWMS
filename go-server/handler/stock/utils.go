@@ -2,7 +2,7 @@ package stock
 
 import (
 	"Go_simpleWMS/database/model"
-	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -10,7 +10,7 @@ import (
 )
 
 func GetStock(warehouse string, goods string) float64 {
-	db := myDb.GetMyDbConnection()
+	db := my_db.GetMyDbConnection()
 	var stock model.Stock
 	notExist := db.Model(model.Stock{}).Where("warehouse = ? and goods = ?", warehouse, goods).First(&stock).RecordNotFound()
 	if notExist {
