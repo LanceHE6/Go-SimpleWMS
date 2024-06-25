@@ -29,4 +29,16 @@ func GoodsGroup(ginApi *gin.RouterGroup) {
 	goodsGroup.GET("/search", func(c *gin.Context) {
 		goods.SearchGoods(c)
 	})
+	goodsGroup.DELETE("/delete/image",
+		utils.IsAdminMiddleware(),
+		utils.OPLoggerMiddleware("货品", "删除货品图片"),
+		func(c *gin.Context) {
+			goods.DeleteGoodsAttachment(c, goods.IMAGE)
+		})
+	goodsGroup.DELETE("/delete/file",
+		utils.IsAdminMiddleware(),
+		utils.OPLoggerMiddleware("货品", "删除货品附件"),
+		func(c *gin.Context) {
+			goods.DeleteGoodsAttachment(c, goods.FILE)
+		})
 }
