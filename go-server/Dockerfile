@@ -19,10 +19,30 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o main .
+RUN go build -o server .
+
+# build后删除除server以外的所有文件
+RUN rm -rf `ls | grep -v "server"`
+
+# 修改权限
+RUN chmod +x server
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
+# Set the environment variable for the app
+ENV MYSQL_ACCOUNT=root
+ENV MYSQL_PASSWORD=root
+ENV MYSQL_HOST=127.0.0.1
+ENV MYSQL_PORT=3306
+ENV MYSQL_DBNAME=simple_wms
+
+ENV SMTP_HOST=smtp.qq.com
+ENV SMTP_PORT=465
+ENV SMTP_USERNAME=your-email@qq.com
+ENV SMTP_PASSWORD=your-email-password
+
+VOLUME [ "/static" ]
+
 # Command to run the executable
-CMD ["./main"]
+CMD ["./server"]

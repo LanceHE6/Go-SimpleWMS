@@ -8,19 +8,31 @@ import (
 
 func TransferGroup(ginApi *gin.RouterGroup) {
 	transferGroup := ginApi.Group("/trans", utils.AuthMiddleware())
-	transferGroup.POST("/add", utils.IsAdminMiddleware(), func(c *gin.Context) {
-		transfer.AddTrans(c)
-	})
+	transferGroup.POST("/add",
+		utils.IsAdminMiddleware(),
+		utils.OPLoggerMiddleware("调拨单", "增加"),
+		func(c *gin.Context) {
+			transfer.AddTrans(c)
+		})
 	transferGroup.GET("/search", func(c *gin.Context) {
 		transfer.SearchTrans(c)
 	})
-	transferGroup.DELETE("/delete", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		transfer.DeleteTrans(c)
-	})
-	transferGroup.PUT("/audit", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		transfer.AuditTrans(c)
-	})
-	transferGroup.PUT("/audit/revoke", utils.IsSuperAdminMiddleware(), func(c *gin.Context) {
-		transfer.RevokeAudit(c)
-	})
+	transferGroup.DELETE("/delete",
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("调拨单", "删除"),
+		func(c *gin.Context) {
+			transfer.DeleteTrans(c)
+		})
+	transferGroup.PUT("/audit",
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("调拨单", "审核"),
+		func(c *gin.Context) {
+			transfer.AuditTrans(c)
+		})
+	transferGroup.PUT("/audit/revoke",
+		utils.IsSuperAdminMiddleware(),
+		utils.OPLoggerMiddleware("调拨单", "撤销审核"),
+		func(c *gin.Context) {
+			transfer.RevokeAudit(c)
+		})
 }

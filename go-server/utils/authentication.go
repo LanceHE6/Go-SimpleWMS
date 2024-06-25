@@ -3,7 +3,7 @@ package utils
 import (
 	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/model"
-	db2 "Go_simpleWMS/database/myDb"
+	db2 "Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils/response"
 	"errors"
 	"net/http"
@@ -91,8 +91,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 判断是否在数据库中
 		var user model.User
 		db := db2.GetMyDbConnection()
-
-		err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
+		err = db.Where("uid=? and created_at=? and token=?", uid, createdAt, bearerToken[1]).First(&user).Error
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
