@@ -186,7 +186,7 @@ const submitForm = async (form) => {
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("../res/login-background.jpeg") no-repeat center;
+  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("@/res/login-background.jpeg") no-repeat center;
   background-size: cover;
 }
 .login-container {
