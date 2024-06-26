@@ -98,7 +98,7 @@
             </el-icon>
             {{state.user?.nickname || '用户'}}
           </template>
-          <el-menu-item index="/home/userCenter" >用户中心</el-menu-item>
+          <el-menu-item index="/home/userCenter/profile" >用户中心</el-menu-item>
           <el-menu-item @click="help">帮助中心</el-menu-item>
           <el-menu-item @click="about">关于</el-menu-item>
           <el-menu-item @click="logout">退出登录</el-menu-item>
@@ -111,7 +111,9 @@
       <el-main
         class="main-container"
       >
-        <router-view></router-view>
+        <router-view v-slot="{ Component }">
+            <component :is="Component" />
+        </router-view>
       </el-main>
 
   </el-container>
@@ -210,6 +212,7 @@ async function initialize(){
   }
   else{
     state.user = JSON.parse(userJson)
+    console.log("user", state.user)
   }
   const result = await axiosGet({url: '/auth', name: 'auth'})
   if(!result){
