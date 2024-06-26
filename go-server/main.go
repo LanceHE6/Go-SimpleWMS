@@ -2,7 +2,7 @@ package main
 
 import (
 	"Go_simpleWMS/config"
-	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/route"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
@@ -17,8 +17,8 @@ func main() {
 	ginServer.Use(utils.Cors())
 
 	// 连接数据库
-	myDb.Init()
-	defer myDb.CloseMyDb()
+	my_db.Init()
+	defer my_db.CloseMyDb()
 
 	// 设置日志等级
 	if config.ServerConfig.SERVER.MODE == "release" {

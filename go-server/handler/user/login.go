@@ -2,7 +2,7 @@ package user
 
 import (
 	"Go_simpleWMS/database/model"
-	"Go_simpleWMS/database/myDb"
+	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,7 @@ func Login(context *gin.Context) {
 	account := data.Account
 	password := data.Password
 
-	db := myDb.GetMyDbConnection()
+	db := my_db.GetMyDbConnection()
 	var user model.User
 
 	err := db.Where("(account=? and password=?) OR (email=? and password=?)", account, password, account, password).First(&user).Error
