@@ -338,7 +338,7 @@ async function uploadImg(id, fileList) {
 
 
   // 调用uploadFiles函数并传入formData
-  await uploadFiles(prop.urls['uploadImg'], formData);
+  await uploadFiles(prop.urls['uploadImage'], formData);
 }
 
 //上传附件
@@ -471,7 +471,7 @@ const uploadFiles=async (url, data) => {
   const headers = {
     'Content-Type': 'multipart/form-data'
   }
-  const result = axiosPost({url: url, data: data, headers: headers, name: 'uploadFiles'})
+  const result = await axiosPost({url: url, data: data, headers: headers, name: 'uploadFiles'})
   if(result){
     ElMessage.success("文件上传成功！")
     state.allDataArray = await getData(prop.urls['getData'], undefined, 'uploadFile-getData')
