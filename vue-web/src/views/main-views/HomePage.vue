@@ -138,7 +138,7 @@ function getInvParams(wid = '', type = -1, date = 0){
     ...w,
     ...t,
     page: -1,
-    created_at: getDate(date)
+    date: getDate(date)
   }
 }
 
