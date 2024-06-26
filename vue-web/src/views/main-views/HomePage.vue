@@ -138,21 +138,21 @@ function getInvParams(wid = '', type = -1, date = 0){
     ...w,
     ...t,
     page: -1,
-    created_at: getDate(date)
+    date: getDate(date)
   }
 }
 
 //获取仓库卡片信息
 async function getWarehouseCardData(){
-  const warehouseList = (await getData("/warehouse/list")).rows
+  const warehouseList = (await getData("/warehouse/list", undefined, 'getWarehouseList')).rows
   const warehouseCardDataList = []  //仓库信息卡片数据列表缓存
 
   // 并发执行多个请求
-  const typeQuantityPromise = getData("/stock/get");
-  const entryPromise = getData("/inv/search", getInvParams(undefined,1,undefined));
-  const outPromise = getData("/inv/search", getInvParams(undefined,2,undefined));
-  const yEntryPromise = getData("/inv/search", getInvParams(undefined,1,-1));
-  const yOutPromise = getData("/inv/search", getInvParams(undefined,2,-1));
+  const typeQuantityPromise = getData("/stock/get", undefined, 'getAllQuantity');
+  const entryPromise = getData("/inv/search", getInvParams(undefined,1,undefined), 'getAllEntry');
+  const outPromise = getData("/inv/search", getInvParams(undefined,2,undefined), 'getAllOut');
+  const yEntryPromise = getData("/inv/search", getInvParams(undefined,1,-1), 'getYAllEntry');
+  const yOutPromise = getData("/inv/search", getInvParams(undefined,2,-1), 'getYAllOut');
 
   const [typeQuantity, entry, out, yEntry, yOut] = await Promise.all([
     typeQuantityPromise,
@@ -221,11 +221,11 @@ async function getWarehouseCardData(){
     const wid = item['wid']
     const itemTypeQuantityPromise = getData("/stock/get",{
       warehouse: wid
-    })
-    const itemEntryPromise = getData("/inv/search", getInvParams(wid,1,undefined))
-    const itemOutPromise = getData("/inv/search", getInvParams(wid,2,undefined))
-    const yItemEntryPromise = getData("/inv/search", getInvParams(wid,1,-1))
-    const yItemOutPromise = getData("/inv/search", getInvParams(wid,2,-1))
+    }, 'getItemQuatity')
+    const itemEntryPromise = getData("/inv/search", getInvParams(wid,1,undefined), 'getItemEntry')
+    const itemOutPromise = getData("/inv/search", getInvParams(wid,2,undefined), 'getItemOut')
+    const yItemEntryPromise = getData("/inv/search", getInvParams(wid,1,-1), 'getYItemEntry')
+    const yItemOutPromise = getData("/inv/search", getInvParams(wid,2,-1), 'getYItemOut')
 
     const [itemTypeQuantity, itemEntry, itemOut, yItemEntry, yItemOut] = await Promise.all([
       itemTypeQuantityPromise,
@@ -291,7 +291,7 @@ async function getGoodsTypeCardData(){
   const params = state.selectWid === '0' ? {} : {
     warehouse: state.selectWid
   }
-  const stockDataRow = (await getData('/stock/get',params)).rows
+  const stockDataRow = (await getData('/stock/get', params, 'getGoodsTypeCardData')).rows
   const amountObjList = []
   const priceObjList = []
   for(const item of stockDataRow || []){
@@ -365,9 +365,9 @@ const option = computed(() => {
  * getData()
  * 获取数据的请求
  * */
-const getData = async (url, params = {}) => {
+const getData = async (url, params = {}, name = 'getData') => {
   let resultObj = {}
-  const result = await axiosGet({url: url, params: params, name: 'home_getData'})
+  const result = await axiosGet({url: url, params: params, name: name})
   if(result){
     resultObj = result.data
   }

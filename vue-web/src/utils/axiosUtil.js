@@ -154,17 +154,15 @@ const catchError = async (err) => {
     if (err && err.response && err.response.status) {
         status = err.response.status
     }
-    if (status) {
-        switch (status) {
-            case 401: {
-                showErrMessage("用户信息已过期，请重新登录！")
-                await router.push('/')
-                break
-            }
-            default: {
-                showErrMessage("网络请求出错了！")
-                break
-            }
+    switch (status) {
+        case 401: {
+            showErrMessage("用户信息已过期，请重新登录！")
+            await router.push('/')
+            break
+        }
+        default: {
+            showErrMessage("网络请求出错了！")
+            break
         }
     }
 }
