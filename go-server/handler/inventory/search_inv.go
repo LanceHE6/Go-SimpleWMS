@@ -59,7 +59,7 @@ func SearchInv(context *gin.Context) {
 		query = query.Where("inventories.comment = ? OR JSON_CONTAINS(inventories.goods_list, JSON_OBJECT('Comment', ?))", comment, comment)
 	}
 	if date != "" {
-		// 将 created_at 转换为日期格式，并过滤出当天的记录
+		// 将 date 转换为日期格式，并过滤出当天的记录
 		parsedDate, err := time.Parse("2006-01-02", date)
 		fmt.Println(parsedDate)
 		if err == nil {
