@@ -21,7 +21,6 @@ const tableColList = [
   {property: "name", label: "货品类型名", sortable: false, width: 180},
   {property: "type_code", label: "货品类型编号", sortable: true, width: 180},
   {property: "created_at", label: "创建时间", isDateFormat: true, sortable: true, width: 240},
-  {property: "gtid", label: "货品类型ID", sortable: true, width: 130},
 ]
 
 /**

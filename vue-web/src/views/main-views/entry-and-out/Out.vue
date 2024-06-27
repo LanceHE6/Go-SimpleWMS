@@ -92,7 +92,7 @@ const tableColList = [
       label: "name"
     }},
   {property: "manufacturer", label: "制造商", sortable: false, width: 150},
-  {property: "comment", label: "备注", sortable: false},
+  {property: "comment", label: "备注", width: 240, sortable: false},
 ]
 
 /**

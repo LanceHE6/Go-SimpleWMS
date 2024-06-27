@@ -26,7 +26,6 @@ const tableColList = [
       label: "name"
     }},
   {property: "created_at", label: "注册时间", isDateFormat: true, sortable: true, width: 240},
-  {property: "sid", label: "员工ID", sortable: true, width: 120},
 ]
 
 /**
