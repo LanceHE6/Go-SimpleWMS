@@ -16,6 +16,7 @@
       :large="large"
       :has-submit-page="hasSubmitPage"
       :height="tableHeight"
+      :permission="permission"
       @add="add"
       @upload="upload"
       @del="del"
@@ -36,6 +37,7 @@ import MyTable from "@/components/MyTable.vue";
 import {axiosDelete, axiosGet, axiosPost, axiosPut} from "@/utils/axiosUtil.js";
 import {editObjKeyData, getObjKeyData} from "@/utils/objectUtil.js";
 import EventBus from "@/utils/eventBus.js";
+import {getUserPermission} from "@/utils/appManager.js";
 
 const PAGE_SIZE = 10 //每页展示多少个数据
 
@@ -129,6 +131,8 @@ const prop = defineProps({
 
 //表格对象
 const myTable = ref(null)
+//当前用户权限
+const permission = ref(getUserPermission())
 
 const state =  reactive({
   pageCount: 1, //数据总页数
@@ -141,14 +145,14 @@ const state =  reactive({
   editFKMap: new Map(),  //编辑窗口外键
   showFKMap: new Map(),  //显示映射外键
   operations: {
-    add: prop.addForm !== null,
-    edit: prop.editForm !== null,
-    del: prop.delete,
-    upload: prop.upload,
+    add: prop.addForm !== null && permission.value >= 2,
+    edit: prop.editForm !== null && permission.value >= 2,
+    del: prop.delete && permission.value >= 2,
+    upload: prop.upload && permission.value >= 2,
+    uploadImg: prop.uploadImg && permission.value >= 2,
+    uploadFile: prop.uploadFile && permission.value >= 2,
     download: prop.download,
     print: prop.print,
-    uploadImg: prop.uploadImg,
-    uploadFile: prop.uploadFile
   }
 })
 
@@ -247,6 +251,7 @@ async function getAllFKList() {
 
 //页数更新时更新数据
 async function update(currentPage) {
+  permission.value = getUserPermission()
   if (!prop.large) {  //前端分页
     //获取数据总数
     const dataSize = state.allDataArray.length
