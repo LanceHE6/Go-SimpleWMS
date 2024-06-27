@@ -1,3 +1,38 @@
+//内容相同约束
+export const isSame = (rule, value, callback, objValue, message='两次输入的内容不相同') => {
+    if(value === ''){
+        callback()
+    }
+    if(value !== objValue){
+        callback(new Error(message))
+    }
+    else{
+        callback()
+    }
+}
+
+//内容不相同约束
+export const isNotSame = (rule, value, callback, objValue, message='两次输入的内容不能相同') => {
+    if(value === ''){
+        callback()
+    }
+    if(value === objValue){
+        callback(new Error(message))
+    }
+    else{
+        callback()
+    }
+}
+
+//密码合法约束
+export const isPasswordValid = (rule, value, callback) => {
+    if(value === '' || (/[a-zA-Z]/.test(value) && /[0-9]/.test(value))){
+        callback()
+    }
+    else{
+        callback(new Error('密码必须由数字和字母组成'))
+    }
+}
 
 //正整数必填项约束
 export const pIntValidatorRequire = (rule, value, callback) => {
