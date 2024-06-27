@@ -14,7 +14,7 @@
       </div>
     </template>
     <div class="card-main">
-      <div class="main-title">
+      <div class="card-title">
         <el-text>
           <el-icon style="vertical-align: middle">
             <Sunny />
@@ -22,8 +22,8 @@
           今日概况
         </el-text>
       </div>
-      <div class="main-body">
-        <div class="main-content">
+      <div class="card-body">
+        <div class="card-content">
           <el-tag size="small" :type="isSelected ? 'primary' : 'success'" style="width: 40px">入库</el-tag>
           <div class="number-body">
             <el-statistic class="number" :value="eqv" />
@@ -32,7 +32,7 @@
           <el-text class="item-text">金额 {{entryPriceQuantity}}</el-text>
         </div>
         <el-divider direction="vertical" style="height: 60px"/>
-        <div class="main-content">
+        <div class="card-content">
           <el-tag size="small" :type="isSelected ? 'primary' : 'warning'" style="width: 40px">出库</el-tag>
           <div class="number-body">
             <el-statistic class="number" :value="oqv" />
@@ -42,7 +42,7 @@
         </div>
       </div>
       <el-divider style="margin:5px"/>
-      <div class="main-title">
+      <div class="card-title">
         <el-text>
           <el-icon style="vertical-align: middle">
             <Moon />
@@ -50,8 +50,8 @@
           昨日概况
         </el-text>
       </div>
-      <div class="main-body">
-        <div class="main-content">
+      <div class="card-body">
+        <div class="card-content">
           <el-tag size="small" :type="isSelected ? 'primary' : 'success'" style="width: 40px">入库</el-tag>
           <div class="number-body">
             <el-statistic class="number" :value="y_eqv" />
@@ -60,7 +60,7 @@
           <el-text class="item-text">金额 {{yEntryPriceQuantity}}</el-text>
         </div>
         <el-divider direction="vertical" style="height: 60px"/>
-        <div class="main-content">
+        <div class="card-content">
           <el-tag size="small" :type="isSelected ? 'primary' : 'warning'" style="width: 40px">出库</el-tag>
           <div class="number-body">
             <el-statistic class="number" :value="y_oqv" />
@@ -203,15 +203,15 @@ y_oq.value = prop.yOutQuantity
   flex-direction: column;
   justify-content: flex-start; /* 子元素在父容器中垂直分布 */
 }
-.main-title{
+.card-title{
   margin-bottom: 5px;
 }
-.main-body{
+.card-body{
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.main-content{
+.card-content{
   width: 50%;
   display: flex;
   flex-direction: column;
