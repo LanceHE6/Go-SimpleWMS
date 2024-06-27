@@ -96,7 +96,7 @@
             <el-icon>
               <user />
             </el-icon>
-            {{state.user?.nickname || '用户'}}
+            {{CURRENT_USER?.nickname || '用户'}}
           </template>
           <el-menu-item index="/home/userCenter/profile" >用户中心</el-menu-item>
           <el-menu-item @click="help">帮助中心</el-menu-item>
@@ -130,6 +130,7 @@ import {router} from "@/router/index.js";
 import {HomeFilled, User} from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {axiosGet} from "@/utils/axiosUtil.js";
+import {CURRENT_USER, refreshUser} from "@/utils/appManager.js";
 
 onMounted(initialize)
 
@@ -137,7 +138,7 @@ const state = reactive({
   nowMenuActive: '',  //当前首部栏界面
   defaultPage: '',  //当前路由界面
   headMenuOffset: 0,  //首部菜单锚点偏移量
-  user: null,  //用户
+  user: CURRENT_USER.value,  //用户
 })
 
 function help(){
@@ -205,14 +206,10 @@ const pageChange = (key = '') => {
 //初始化
 async function initialize(){
   pageChange()
-  const userJson = localStorage.getItem("user") || '';
-  if(!userJson){
+  refreshUser()
+  if(!state.user){
     ElMessage.error("用户信息获取失败，请重新登录！")
     await router.push('/')
-  }
-  else{
-    state.user = JSON.parse(userJson)
-    console.log("user", state.user)
   }
   const result = await axiosGet({url: '/auth', name: 'auth'})
   if(!result){
