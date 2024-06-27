@@ -42,14 +42,15 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
 		return
 	}
-
+	// 获取当前操作人的信息
+	myUid, myPermission, _, _ := utils.GetUserInfoByContext(context)
 	var updateData = make(map[string]interface{})
 	if nickname != "" {
 		updateData["nickname"] = nickname
 	}
 	if permission != 0 {
 		// 权限只有超管能改
-		if oldUser.Permission != 3 {
+		if myPermission != 3 {
 			context.JSON(http.StatusOK, response.Response(300, "Permission denied", nil))
 			return
 		}
@@ -58,7 +59,7 @@ func UpdateUser(context *gin.Context) {
 	if phone != "" {
 		updateData["phone"] = phone
 	}
-	myUid, myPermission, _, _ := utils.GetUserInfoByContext(context)
+
 	// 如果要改密码:密码不为空
 	if newPassword != "" {
 		// 如果权限为管理员以上且改密码的用户不是自己
