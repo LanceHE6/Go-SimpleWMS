@@ -3,6 +3,7 @@ package user
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
+	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -11,11 +12,12 @@ import (
 )
 
 type updateRequest struct {
-	Uid        string `json:"uid" form:"uid" binding:"required"`
-	Password   string `json:"password" form:"password"`
-	Nickname   string `json:"nickname" form:"nickname"`
-	Permission int    `json:"permission" form:"permission"`
-	Phone      string `json:"phone" form:"phone"`
+	Uid         string `json:"uid" form:"uid" binding:"required"`
+	OldPassword string `json:"old_password" form:"old_password"`
+	NewPassword string `json:"new_password" form:"new_password"`
+	Nickname    string `json:"nickname" form:"nickname"`
+	Permission  int    `json:"permission" form:"permission"`
+	Phone       string `json:"phone" form:"phone"`
 }
 
 func UpdateUser(context *gin.Context) {
@@ -24,38 +26,75 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
-	uid := data.Uid
-	password := data.Password
+	targetUid := data.Uid
+	oldPassword := data.OldPassword
+	newPassword := data.NewPassword
 	nickname := data.Nickname
 	permission := data.Permission
 	phone := data.Phone
 
-	//if password == "" && nickname == "" && permission == 0 && phone == "" {
-	//	context.JSON(http.StatusBadRequest, gin.H{
-	//		"message": "One of password, nickname, permission and phone is required",
-	//		"code":    402,
-	//	})
-	//	return
-	//}
-
 	db := my_db.GetMyDbConnection()
 
+	var oldUser model.User
 	// 判断该用户是否已存在
-	err := db.Model(&model.User{}).Where("uid=?", uid).Error
+	err := db.Model(&model.User{}).Where("uid=?", targetUid).First(&oldUser).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
 		return
 	}
-	var updateData = map[string]interface{}{
-		"nickname":   nickname,
-		"permission": permission,
-		"phone":      phone,
+
+	var updateData = make(map[string]interface{})
+	if nickname != "" {
+		updateData["nickname"] = nickname
 	}
-	if password != "" {
-		updateData["password"] = password
+	if permission != 0 {
+		// 权限只有超管能改
+		if oldUser.Permission != 3 {
+			context.JSON(http.StatusOK, response.Response(300, "Permission denied", nil))
+			return
+		}
+		updateData["permission"] = permission
+	}
+	if phone != "" {
+		updateData["phone"] = phone
+	}
+	myUid, myPermission, _, _ := utils.GetUserInfoByContext(context)
+	// 如果要改密码:密码不为空
+	if newPassword != "" {
+		// 如果权限为管理员以上且改密码的用户不是自己
+		if myPermission >= 2 {
+			if targetUid != myUid {
+				updateData["password"] = newPassword
+			} else {
+				// 改自己密码
+				if oldUser.Password == oldPassword {
+					updateData["password"] = newPassword
+				} else {
+					// 旧密码不正确
+					context.JSON(http.StatusOK, response.Response(403, "Old password is incorrect", nil))
+					return
+				}
+			}
+		} else {
+			// 权限为普通用户 只能更改自己的密码
+			if targetUid == myUid {
+				if oldUser.Password == oldPassword {
+					updateData["password"] = newPassword
+				} else {
+					// 旧密码不正确
+					context.JSON(http.StatusOK, response.Response(403, "Old password is incorrect", nil))
+					return
+				}
+			} else {
+				// 权限不足
+				context.JSON(http.StatusOK, response.Response(300, "Permission denied", nil))
+				return
+			}
+		}
+
 	}
 
-	err = db.Model(&model.User{}).Where("uid = ?", uid).Updates(updateData).Error
+	err = db.Model(&model.User{}).Where("uid = ?", targetUid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Update user failed", err.Error()))
 		return

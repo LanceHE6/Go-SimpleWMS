@@ -36,7 +36,7 @@ func UserGroup(ginApi *gin.RouterGroup) {
 		})
 	userGroup.PUT("/update",
 		utils.AuthMiddleware(),
-		utils.IsSuperAdminMiddleware(),
+		//utils.IsSuperAdminMiddleware(),
 		utils.OPLoggerMiddleware("用户", "更新"),
 		func(c *gin.Context) {
 			user.UpdateUser(c)
