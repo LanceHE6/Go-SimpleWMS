@@ -14,6 +14,7 @@
 
 <script setup>
 import DataShowView from "@/components/DataShowView.vue";
+import {isPasswordValid} from "@/utils/validator.js";
 
 /**
  * 表头属性列表
@@ -28,7 +29,6 @@ const tableColList = [
     ]},
   {property: "phone", label: "手机号码", sortable: false, width: 120},
   {property: "created_at", label: "注册时间", sortable: true, isDateFormat: true, width: 240},
-  {property: "uid", label: "用户ID", sortable: true, width: 120},
 ]
 
 /**
@@ -37,22 +37,23 @@ const tableColList = [
 const editForm = {
   data :{
     uid:'',
-    password:'',
+    new_password:'',
     permission:0,
     nickname:'',
     phone:''
   },
   dataType:{
     uid:'String',
-    password:'String',
+    new_password:'String',
     permission:'Int',
     nickname:'String',
     phone:'String'
   },
   dataNum: 5,
   rules: {
-    password: [
+    new_password: [
       { min: 6, max: 16, message: '密码长度需要在6-16之间', trigger: 'blur' },
+      { validator: isPasswordValid, trigger: 'blur' },
     ],
     permission:[
       { required: 'true', message: '请选择用户权限', trigger: 'blur' }
@@ -71,7 +72,7 @@ const editForm = {
         {label: '超级管理员', value: 3},
       ]},
     {label: '电话', prop: 'phone', dataName: 'phone', isInput: true, type: 'number'},
-    {label: '新密码', prop: 'password', dataName: 'password', isInput: true, type: 'password'},
+    {label: '新密码', prop: 'new_password', dataName: 'new_password', isInput: true, type: 'password'},
   ],
 }
 
@@ -102,6 +103,7 @@ const addForm = {
     password: [
       { required: 'true', message: '密码不能为空', trigger: 'blur' },
       { min: 6, max: 16, message: '密码长度需要在6-16之间', trigger: 'blur' },
+      { validator: isPasswordValid, trigger: 'blur' },
     ],
     permission:[
       { required: 'true', message: '请选择用户权限', trigger: 'blur' }
