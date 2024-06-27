@@ -4,7 +4,6 @@ import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
 	"Go_simpleWMS/utils/response"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"math"
 	"net/http"
@@ -61,7 +60,6 @@ func SearchInv(context *gin.Context) {
 	if date != "" {
 		// 将 date 转换为日期格式，并过滤出当天的记录
 		parsedDate, err := time.Parse("2006-01-02", date)
-		fmt.Println(parsedDate)
 		if err == nil {
 			startOfDay := parsedDate.Format("2006-01-02 00:00:00")
 			endOfDay := parsedDate.Add(24 * time.Hour).Format("2006-01-02 15:04:05")
