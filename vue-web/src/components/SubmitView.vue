@@ -3,7 +3,7 @@
   v-loading="state.isLoading"
 >
   <el-header
-      class="main-header"
+      class="submit-header"
   >
     <el-form
       ref="myForm"
@@ -68,7 +68,7 @@
   <el-divider class="my-divider"/>
 
   <el-main
-    class="main-body"
+    class="submit-body"
   >
     <div
       class="my-table-header"
@@ -103,7 +103,7 @@
   <el-divider class="my-divider"/>
 
   <el-footer
-    class="main-footer"
+    class="submit-footer"
   >
     <el-button
       type="primary"
@@ -510,7 +510,7 @@ const cancel = () => {
 </script>
 
 <style scoped>
-.main-header{
+.submit-header{
   width: 100%;
   height: auto;
 }
@@ -519,7 +519,7 @@ const cancel = () => {
   flex-wrap: wrap; /* 允许容器内子元素换行 */
   justify-content: flex-start; /* 水平分布，两端对齐 */
 }
-.main-body{
+.submit-body{
   padding: 5px
 }
 .my-table-header{
@@ -529,11 +529,11 @@ const cancel = () => {
   margin-top: 10px;
   margin-bottom: 5px;
 }
-.main-footer{
+.submit-footer{
   display: flex;
   justify-content: center; /* 水平分布，两端对齐 */
 }
-.main-footer .el-button{
+.submit-footer .el-button{
   margin-top: 10px;
 }
 .form-item {
