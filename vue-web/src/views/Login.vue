@@ -90,6 +90,7 @@ const axios = inject("axios")
 const loginForm = ref(null)
 import {Lock, User} from "@element-plus/icons-vue";
 import {axiosPost} from "@/utils/axiosUtil.js";
+import {isPasswordValid} from "@/utils/validator.js";
 
 onMounted(initialize)
 const state = reactive({
@@ -108,7 +109,8 @@ const state = reactive({
       { required: 'true', message: '账户不能为空', trigger: 'blur' }
     ],
     password: [
-      { required: 'true', message: '密码不能为空', trigger: 'blur' }
+      { required: 'true', message: '密码不能为空', trigger: 'blur' },
+      { validator: isPasswordValid, trigger: 'blur' }
     ],
     url: [
       { required: 'true', message: 'url不能为空', trigger: 'blur' }
@@ -186,7 +188,7 @@ const submitForm = async (form) => {
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url("@/res/login-background.jpeg") no-repeat center;
+  background: url("@/res/login-background.png") no-repeat center;
   background-size: cover;
 }
 .login-container {
