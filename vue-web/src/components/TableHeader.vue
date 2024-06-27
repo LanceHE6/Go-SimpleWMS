@@ -1,6 +1,6 @@
 <template>
   <div class="my-table-header">
-    <el-button v-if="operations.add || hasSubmitPage" type="primary" icon="Plus" @click="add">
+    <el-button v-if="(operations.add || hasSubmitPage) && permission >= 2" type="primary" icon="Plus" @click="add">
       添加
     </el-button>
 
@@ -65,6 +65,11 @@ const prop = defineProps({
     default: () => false,
     description: '是否为后端分页(由父组件传入, 无需手动配置)'
   },
+  permission:{
+    type: Number,
+    default: () => 0,
+    description: '用户权限等级'
+  }
 })
 
 const emit = defineEmits(["add", "download", "upload", "search", "print", "refresh"]);
