@@ -54,6 +54,11 @@ func UpdateUser(context *gin.Context) {
 			context.JSON(http.StatusOK, response.Response(300, "Permission denied", nil))
 			return
 		}
+		// 不能修改自己的权限
+		if targetUid == myUid {
+			context.JSON(http.StatusOK, response.Response(405, "Cannot modify one's own permissions", nil))
+			return
+		}
 		updateData["permission"] = permission
 	}
 	if phone != "" {
