@@ -66,12 +66,10 @@ func UserGroup(ginApi *gin.RouterGroup) {
 	pswGroup := userGroup.Group("/psw")
 
 	pswGroup.POST("/reset",
-		utils.OPLoggerMiddleware("用户", "重置密码"),
 		func(c *gin.Context) {
 			user.ResetPassword(c)
 		})
 	pswGroup.POST("/verify",
-		utils.OPLoggerMiddleware("用户", "重置密码验证"),
 		func(c *gin.Context) {
 			user.VerifyResetPasswordEmail(c)
 		})
