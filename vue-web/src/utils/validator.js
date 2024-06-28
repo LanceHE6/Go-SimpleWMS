@@ -1,3 +1,63 @@
+//内容相同约束
+export const isSame = (rule, value, callback, objValue, message='两次输入的内容不相同') => {
+    if(value === ''){
+        callback()
+    }
+    if(value !== objValue){
+        callback(new Error(message))
+    }
+    else{
+        callback()
+    }
+}
+
+//内容不相同约束
+export const isNotSame = (rule, value, callback, objValue, message='两次输入的内容不能相同') => {
+    if(value === ''){
+        callback()
+    }
+    if(value === objValue){
+        callback(new Error(message))
+    }
+    else{
+        callback()
+    }
+}
+
+//条件内容不为空约束
+export const isNotEmptyCondition = (rule, value, callback, objValue, message='内容不能为空') => {
+    if(objValue === ''){
+        callback()
+    }
+    if(value === '' && objValue !== ''){
+        callback(new Error(message))
+    }
+    else{
+        callback()
+    }
+}
+export const isEmail = (rule, value, callback, message='邮箱格式不正确') => {
+    if(value === ''){
+        callback()
+    }
+    const reg = /^([a-zA-Z]|[0-9])(\w|-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+    if(reg.test(value)){
+        callback()
+    }
+    else{
+        callback(new Error(message))
+    }
+}
+
+//密码合法约束
+export const isPasswordValid = (rule, value, callback) => {
+    if(value === '' || (/[a-zA-Z]/.test(value) && /[0-9]/.test(value))){
+        callback()
+    }
+    else{
+        callback(new Error('密码必须由数字和字母组成'))
+    }
+}
 
 //正整数必填项约束
 export const pIntValidatorRequire = (rule, value, callback) => {

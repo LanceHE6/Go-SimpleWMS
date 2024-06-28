@@ -2,28 +2,6 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 import {router} from "@/router/index.js";
 
-// 错误映射和定时器存储
-const errorMap = new Map();
-
-// 网络请求失败的回调函数
-const showErrMessage = (errStr) => {
-    const currentTime = Date.now();
-
-    // 检查是否已经在短时间内报告过相同的错误
-    if (!errorMap.has(errStr) || currentTime - errorMap.get(errStr) > 5000) {
-        // 如果没有，显示提示框并将错误添加到映射中
-        ElMessage.error(errStr);
-        errorMap.set(errStr, currentTime);
-
-        // 设置一个定时器，在3秒后从映射中删除该错误
-        setTimeout(() => {
-            if (errorMap.get(errStr) === currentTime) {
-                errorMap.delete(errStr);
-            }
-        }, 3000);
-    }
-}
-
 /**
  * @description 请求头中需要附带的鉴权token
  * */
@@ -84,7 +62,9 @@ export const axiosDelete = async ({url, data, headers = {}, name = 'axiosDelete'
     })
     .then( message => {
         console.log(`${name}:`, message)
-        result = message
+        if(catchSuccess(message)){
+            result = message
+        }
     })
     .catch( error => {
         catchError(error)
@@ -112,7 +92,9 @@ export const axiosPost = async ({url, data, headers = {}, name = 'axiosPost'}) =
     })
     .then( message => {
         console.log(`${name}:`, message)
-        result = message
+        if(catchSuccess(message)){
+            result = message
+        }
     })
     .catch( error => {
         catchError(error)
@@ -140,7 +122,9 @@ export const axiosPut = async ({url, data, headers = {}, name = 'axiosPut'}) => 
     })
     .then( message => {
         console.log(`${name}:`, message)
-        result = message
+        if(catchSuccess(message)){
+            result = message
+        }
     })
     .catch( error => {
         catchError(error)
@@ -149,6 +133,7 @@ export const axiosPut = async ({url, data, headers = {}, name = 'axiosPut'}) => 
     return result
 }
 
+//处理错误请求
 const catchError = async (err) => {
     let status = 0
     if (err && err.response && err.response.status) {
@@ -156,13 +141,54 @@ const catchError = async (err) => {
     }
     switch (status) {
         case 401: {
-            showErrMessage("用户信息已过期，请重新登录！")
+            showErrMessage("用户信息已过期，请重新登录")
             await router.push('/')
             break
         }
         default: {
-            showErrMessage("网络请求出错了！")
+            showErrMessage(`网络请求出错了：`)
             break
         }
+    }
+}
+
+//处理收到请求但处理失败的事件
+const catchSuccess = (message) => {
+    if(!(message.data && message.data.code)){
+        return true
+    }
+    else{
+        switch (message.data.code){
+            case 200:
+            case 201:{
+                return true
+            }
+            default:{
+                ElMessage.warning(`发送的请求有误：${message.data.msg}`)
+                return false
+            }
+        }
+    }
+}
+
+// 错误映射和定时器存储
+const errorMap = new Map();
+
+// 网络请求失败的回调函数
+const showErrMessage = (errStr) => {
+    const currentTime = Date.now();
+
+    // 检查是否已经在短时间内报告过相同的错误
+    if (!errorMap.has(errStr) || currentTime - errorMap.get(errStr) > 3000) {
+        // 如果没有，显示提示框并将错误添加到映射中
+        ElMessage.error(errStr);
+        errorMap.set(errStr, currentTime);
+
+        // 设置一个定时器，在3秒后从映射中删除该错误
+        setTimeout(() => {
+            if (errorMap.get(errStr) === currentTime) {
+                errorMap.delete(errStr);
+            }
+        }, 3000);
     }
 }

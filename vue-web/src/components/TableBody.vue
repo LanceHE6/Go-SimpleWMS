@@ -181,6 +181,14 @@
         </div>
       </template>
     </el-table-column>
+    <el-table-column
+        v-if="permission >= 3"
+        :property="keyData"
+        :label="keyData"
+        align="center"
+        header-align="center"
+        width="120"
+    ></el-table-column>
   </el-table>
 </template>
 
@@ -238,6 +246,11 @@ const prop = defineProps({
     type: String,
     default: () => '',
     description: '搜索框文字'
+  },
+  permission:{
+    type: Number,
+    default: () => 0,
+    description: '用户权限等级'
   }
 });
 

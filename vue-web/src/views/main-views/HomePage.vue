@@ -1,7 +1,7 @@
 <template>
   <el-container
       v-loading="state.isLoading"
-      class="main-body"
+      class="home-body"
   >
     <el-collapse
         v-model="activeNames"
@@ -394,7 +394,7 @@ const getDate = (extraDay = 0) => {
 </script>
 
 <style scoped>
-.main-body {
+.home-body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* 子元素在父容器中垂直分布 */

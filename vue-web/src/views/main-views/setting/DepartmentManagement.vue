@@ -20,7 +20,6 @@ import DataShowView from "@/components/DataShowView.vue";
 const tableColList = [
   {property: "name", label: "部门名", sortable: false, width: 120},
   {property: "created_at", label: "添加时间", isDateFormat: true, sortable: true, width: 240},
-  {property: "did", label: "部门ID", sortable: true, width: 120},
 ]
 
 /**

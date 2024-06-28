@@ -10,6 +10,7 @@
           :operations="operations"
           :has-submit-page="hasSubmitPage"
           :large="large"
+          :permission="permission"
           @add="add"
           @download="download"
           @upload="upload"
@@ -32,6 +33,7 @@
         :height="height"
         :large="large"
         :search="search"
+        :permission="permission"
         @edit="edit"
         @delete="confirmDel"
         @upload-img="uploadImg"
@@ -421,6 +423,11 @@ const prop = defineProps({
     type: String,
     default: () => '60vh',
     description: '表格高度'
+  },
+  permission:{
+    type: Number,
+    default: () => 0,
+    description: '用户权限等级'
   }
 });
 //对外事件列表
@@ -681,7 +688,9 @@ function edit(row){
   }
   for(const item in editForm.value.item){
     const i = editForm.value.item[item].dataName
-    editForm.value.data[i] = row[i]
+    if(row[i]){
+      editForm.value.data[i] = row[i]
+    }
   }
   editFormVisible.value = true
 }
