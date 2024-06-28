@@ -3,6 +3,7 @@ package warehouse
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
+	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -40,12 +41,7 @@ func UpdateWarehouse(context *gin.Context) {
 	}
 
 	// 使用map封装更新数据，能更新所有数据，包括零值字段
-	var updateData = map[string]interface{}{
-		"name":    warehouseName,
-		"comment": comment,
-		"manager": manager,
-		"status":  status,
-	}
+	var updateData = utils.CreateUpdateData("name", warehouseName, "comment", comment, "manager", manager, "status", status)
 
 	err = db.Model(&model.Warehouse{}).Where("wid=?", wid).Updates(updateData).Error
 

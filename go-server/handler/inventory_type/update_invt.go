@@ -3,6 +3,7 @@ package inventory_type
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
+	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -28,21 +29,9 @@ func UpdateInventoryType(context *gin.Context) {
 	typeCode := data.TypeCode
 	typeNum := data.Type
 
-	//if ITName == "" && typeCode == "" {
-	//	context.JSON(http.StatusBadRequest, gin.H{
-	//		"message": "Name or type_code is required",
-	//		"code":    402,
-	//	})
-	//	return
-	//}
-
 	db := my_db.GetMyDbConnection()
 
-	var updateData = map[string]interface{}{
-		"name":      ITName,
-		"type_code": typeCode,
-		"type":      typeNum,
-	}
+	var updateData = utils.CreateUpdateData("name", ITName, "type_code", typeCode, "type", typeNum)
 
 	// 判断该类型是否已存在
 	err := db.Model(&model.InventoryType{}).Where("itid=?", ITid).Error
