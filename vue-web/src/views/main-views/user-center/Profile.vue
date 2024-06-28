@@ -68,7 +68,7 @@
     center
 >
 
-  <el-form :model="editForm.data" :rules="editForm.rules" ref="myEditForm" label-position="top" status-icon>
+  <el-form :model="editForm.data" :rules="editForm.rules" class="multi-column" ref="myEditForm" label-position="top" status-icon>
 
     <el-form-item
         v-for="item in editForm.item"
@@ -465,5 +465,10 @@ const sendVerificationCode = async (form) => {
   width: 100%;
   display: flex;
   justify-content: flex-start;
+}
+.multi-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
 }
 </style>
