@@ -51,6 +51,7 @@
           type="primary"
           size="small"
           style="margin-left: 15px"
+          @click="openEmailForm"
           text
         >
           {{user[item.property] ? `换绑${item.label}` : `绑定${item.label}`}}
@@ -94,19 +95,81 @@
   </template>
 
 </el-dialog>
+<el-dialog
+    v-model="emailFormVisible"
+    title="邮箱绑定"
+    width="500"
+    center
+>
+
+  <el-form :model="emailForm.data" :rules="emailForm.rules" ref="myEmailForm" label-position="top" status-icon>
+
+    <el-form-item
+        v-for="item in emailForm.item"
+        :label="item.label"
+        :prop="item.prop"
+    >
+      <el-input
+          v-if="item.isInput"
+          v-model.trim="emailForm.data[item.dataName]"
+          :type="item.type"
+          :show-password="item.type === 'password'"
+          autocomplete="off"
+      />
+      <div
+        class="verification-input"
+        v-if="item.isVerification"
+      >
+        <el-input
+            v-model.trim="emailForm.data[item.dataName]"
+            :type="item.type"
+            :show-password="item.type === 'password'"
+            autocomplete="off"
+        />
+        <el-button
+          type="primary"
+          style="margin-left: 30px"
+          :loading="state.isVerificationBtnLoading"
+          :disabled="countDown > 0"
+          @click="sendVerificationCode(myEmailForm)"
+          plain
+        >
+          发送验证码
+          {{countDown > 0 ? countDown : ''}}
+        </el-button>
+      </div>
+    </el-form-item>
+  </el-form>
+
+  <template #footer>
+    <div class="dialog-footer">
+      <el-button @click="emailFormVisible = false">取消</el-button>
+      <el-button type="primary" @click="submitEmailForm(myEmailForm)">
+        确定
+      </el-button>
+    </div>
+  </template>
+
+</el-dialog>
 </template>
 
 <script setup>
 import {CURRENT_USER, setUser} from "@/utils/appManager.js";
 import {reactive, ref} from "vue";
-import {isSame, isPasswordValid, isNotSame} from "@/utils/validator.js";
-import {axiosGet, axiosPut} from "@/utils/axiosUtil.js";
+import {isSame, isPasswordValid, isNotSame, isNotEmptyCondition, isEmail} from "@/utils/validator.js";
+import {axiosGet, axiosPost, axiosPut} from "@/utils/axiosUtil.js";
 import {ElMessage} from "element-plus";
 
 const user = ref(CURRENT_USER.value)
 
 const myEditForm = ref(null)
 const editFormVisible = ref(false)
+
+const myEmailForm = ref(null)
+const emailFormVisible = ref(false)
+
+//发送验证码计时器
+const countDown = ref(0);
 
 //用户信息显示格式列表
 const dataCol = [
@@ -120,10 +183,11 @@ const dataCol = [
 
 //状态
 const state = reactive({
-  isLoading: false
+  isLoading: false,  //页面是否正在加载
+  isVerificationBtnLoading: false,  //发送验证码按钮是否正在加载
 })
 
-//用户信息编辑界面
+//用户信息编辑窗口数据
 const editForm = reactive({
   data :{
     uid:'',
@@ -148,6 +212,7 @@ const editForm = reactive({
     old_password: [
       { min: 6, max: 16, message: '密码长度需要在6-16之间', trigger: 'blur' },
       { validator: isPasswordValid, trigger: 'blur' },
+      { validator: (rule, value, callback) => isNotEmptyCondition(rule, value, callback, editForm.data.new_password, '旧密码不能为空'), trigger: 'blur' },
     ],
     new_password: [
       { min: 6, max: 16, message: '密码长度需要在6-16之间', trigger: 'blur' },
@@ -168,6 +233,34 @@ const editForm = reactive({
     {label: '旧密码', prop: 'old_password', dataName: 'old_password', isInput: true, type: 'password'},
     {label: '新密码', prop: 'new_password', dataName: 'new_password', isInput: true, type: 'password'},
     {label: '确认密码', prop: 'confirm', dataName: 'confirm', isInput: true, type: 'password'},
+  ],
+})
+
+//邮箱绑定窗口数据
+const emailForm = reactive({
+  data :{
+    uid:'',
+    email:'',
+    code:''
+  },
+  dataType:{
+    uid:'String',
+    email:'String',
+    code:'String'
+  },
+  dataNum: 3,
+  rules: {
+    email: [
+      { required: 'true', message: '邮箱不能为空', trigger: 'blur' },
+      { validator: (rule, value, callback) => isEmail(rule, value, callback), trigger: 'blur' },
+    ],
+    code: [
+      { required: 'true', message: '验证码不能为空', trigger: 'blur' },
+    ],
+  },
+  item:[
+    {label: '邮箱', prop: 'email', dataName: 'email', isInput: true,},
+    {label: '验证码', prop: 'code', dataName: 'code', isVerification: true},
   ],
 })
 
@@ -240,6 +333,34 @@ const submitEditForm = async (form) => {
   })
 }
 
+const openEmailForm = () => {
+  for(const i in emailForm.data){
+    if(user.value[i]){
+      emailForm.data[i] = user.value[i]
+    }
+  }
+  emailFormVisible.value = true
+}
+
+const submitEmailForm = async (form) => {
+  if (!form) return
+  await form.validate(async (valid) => {
+    if (valid) {
+      emailFormVisible.value = false
+      const result = await axiosPost({
+        url:'/user/email/verify',
+        data: emailForm.data,
+        name: 'userCenter-bind'
+      })
+      if(result){
+        ElMessage.success("邮箱绑定成功")
+        emailForm.data.code = ''
+        await refresh()
+      }
+    }
+  })
+}
+
 const refresh = async () => {
   state.isLoading = true
   const result = await axiosGet({
@@ -251,6 +372,33 @@ const refresh = async () => {
     setUser(result.data.user)
   }
   state.isLoading = false
+}
+
+const sendVerificationCode = async (form) => {
+  if (!form) return
+  await form.validateField(['email'], async (valid) => {
+    if (valid) {
+      state.isVerificationBtnLoading = true
+      const result = await axiosPost({
+        url: '/user/email/bind',
+        data: emailForm.data,
+        name: 'userCenter-sendVerification'
+      })
+      state.isVerificationBtnLoading = false
+      if(result){
+        ElMessage.success("验证码已发送")
+        countDown.value = 60
+        let intervalId = null
+        intervalId = setInterval(() => {
+          if (countDown.value > 0) {
+            countDown.value--
+          } else {
+            clearInterval(intervalId)
+          }
+        }, 1000);
+      }
+    }
+  })
 }
 </script>
 
@@ -312,5 +460,10 @@ const refresh = async () => {
   display: flex;
   align-items: center; /* 垂直居中 */
   color: #8c939d;
+}
+.verification-input{
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
