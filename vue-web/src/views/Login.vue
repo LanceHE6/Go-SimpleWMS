@@ -39,7 +39,13 @@
         <el-form-item>
           <br>
           <el-checkbox v-model="state.remember" @change="!state.remember">记住密码</el-checkbox>
-          <el-button type="primary" text style="margin-left: 140px" @click="state.settingFormVisible = true">url设置</el-button>
+          <el-button type="primary" text style="margin-left: 25px" @click="state.settingFormVisible = true">API设置</el-button>
+          <el-button type="primary" text style="margin-left: 20px" @click="
+            state.forgetForm.account = state.ruleForm.account;
+            state.forgetFormVisible = true"
+          >
+            找回密码
+          </el-button>
           <el-button style="width: 100%; margin-top: 20px" type="primary" @click="submitForm(loginForm)" :loading="state.loading" round>
             <el-text style="color: white">立即登录</el-text>
           </el-button>
@@ -50,7 +56,7 @@
   </div>
   <el-dialog
       v-model="state.settingFormVisible"
-      title="url设置"
+      title="API设置"
       width="500"
       center
   >
@@ -58,11 +64,11 @@
     <el-form :model="state.settingForm" :rules="state.rules" ref="mySettingForm" label-position="top" status-icon>
 
       <el-form-item
-          label="url"
-          prop="url"
+          label="API"
+          prop="api"
       >
         <el-input
-            v-model.trim="state.settingForm.url"
+            v-model.trim="state.settingForm.api"
             autocomplete="off"
         />
 
@@ -77,7 +83,93 @@
         </el-button>
       </div>
     </template>
+  </el-dialog>
 
+  <el-dialog
+      v-model="state.forgetFormVisible"
+      title="找回密码"
+      width="500"
+      center
+  >
+
+    <el-form :model="state.forgetForm" :rules="state.rules" ref="myForgetForm" label-position="top" status-icon>
+
+      <el-form-item
+          label="账号"
+          prop="account"
+      >
+        <el-input
+            v-model.trim="state.forgetForm.account"
+            autocomplete="off"
+        />
+      </el-form-item>
+
+      <el-form-item
+          label="邮箱"
+          prop="email"
+      >
+        <el-input
+            v-model.trim="state.forgetForm.email"
+            autocomplete="off"
+        />
+      </el-form-item>
+
+      <el-form-item
+          label="验证码"
+          prop="code"
+      >
+      <div
+          class="login-verification-input"
+      >
+        <el-input
+            v-model.trim="state.forgetForm.code"
+            autocomplete="off"
+        />
+        <el-button
+            type="primary"
+            style="margin-left: 30px"
+            :loading="state.isVerificationBtnLoading"
+            :disabled="state.countDown > 0"
+            @click="sendVerificationCode(myForgetForm)"
+            plain
+        >
+          发送验证码
+          {{state.countDown > 0 ? state.countDown : ''}}
+        </el-button>
+      </div>
+      </el-form-item>
+
+      <el-form-item
+          label="新密码"
+          prop="new_password"
+      >
+        <el-input
+            type="password"
+            v-model.trim="state.forgetForm.new_password"
+            autocomplete="off"
+        />
+      </el-form-item>
+
+      <el-form-item
+          label="确认密码"
+          prop="confirm"
+      >
+        <el-input
+            type="password"
+            v-model.trim="state.forgetForm.confirm"
+            autocomplete="off"
+        />
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="state.forgetFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitForgetForm">
+          确定
+        </el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 
@@ -85,12 +177,13 @@
 import {ref, reactive, inject, onMounted} from "vue";
 import {router} from "@/router/index.js";
 import { ElMessage } from 'element-plus'
+import {Lock, User} from "@element-plus/icons-vue";
+import {axiosPost} from "@/utils/axiosUtil.js";
+import {isPasswordValid, isSame} from "@/utils/validator.js";
 
 const axios = inject("axios")
 const loginForm = ref(null)
-import {Lock, User} from "@element-plus/icons-vue";
-import {axiosPost} from "@/utils/axiosUtil.js";
-import {isPasswordValid} from "@/utils/validator.js";
+const myForgetForm = ref(null)
 
 onMounted(initialize)
 const state = reactive({
@@ -99,11 +192,21 @@ const state = reactive({
     password: ''
   },
   settingForm:{
-    url: axios.defaults.baseURL
+    api: axios.defaults.baseURL
   },
+  forgetForm:{
+    account: '',
+    email: '',
+    code: '',
+    new_password: '',
+    confirm: ''
+  },
+  countDown: 0,
   remember: false,
   loading: false,
+  isVerificationBtnLoading: false,
   settingFormVisible: false,
+  forgetFormVisible: false,
   rules: {
     account: [
       { required: 'true', message: '账户不能为空', trigger: 'blur' }
@@ -112,9 +215,19 @@ const state = reactive({
       { required: 'true', message: '密码不能为空', trigger: 'blur' },
       { validator: isPasswordValid, trigger: 'blur' }
     ],
-    url: [
-      { required: 'true', message: 'url不能为空', trigger: 'blur' }
-    ]
+    api: [
+      { required: 'true', message: 'API不能为空', trigger: 'blur' }
+    ],
+    email: [
+      { required: 'true', message: '邮箱不能为空', trigger: 'blur' }
+    ],
+    new_password: [
+      { required: 'true', message: '密码不能为空', trigger: 'blur' },
+      { validator: isPasswordValid, trigger: 'blur' }
+    ],
+    confirm: [
+      { validator: (rule, value, callback) => isSame(rule, value, callback, state.forgetForm.new_password), trigger: 'blur' }
+    ],
   }
 })
 
@@ -134,9 +247,48 @@ function initialize(){
 
 function submitSettingForm(){
   state.settingFormVisible = false
-  axios.defaults.baseURL = state.settingForm.url
-  localStorage.setItem("url", state.settingForm.url)
-  ElMessage.success("url设置成功!")
+  axios.defaults.baseURL = state.settingForm.api
+  localStorage.setItem("url", state.settingForm.api)
+  ElMessage.success("API设置成功!")
+}
+
+async function sendVerificationCode(form){
+  if (!form) return
+  await form.validateField(['account', 'email'], async (valid) => {
+    if (valid) {
+      state.isVerificationBtnLoading = true
+      const result = await axiosPost({
+        url: '/user/psw/reset',
+        data: state.forgetForm,
+        name: 'login-sendVerification'
+      })
+      state.isVerificationBtnLoading = false
+      if(result){
+        ElMessage.success("验证码已发送")
+        state.countDown = 60
+        let intervalId = null
+        intervalId = setInterval(() => {
+          if (state.countDown > 0) {
+            state.countDown--
+          } else {
+            clearInterval(intervalId)
+          }
+        }, 1000);
+      }
+    }
+  })
+}
+
+async function submitForgetForm() {
+  state.forgetFormVisible = false
+  const result = await axiosPost({
+    url: '/user/psw/verify',
+    data: state.forgetForm,
+    name: 'login-resetPassword'
+  })
+  if(result){
+    ElMessage.success("密码重置成功")
+  }
 }
 
 const submitForm = async (form) => {
@@ -221,5 +373,10 @@ const submitForm = async (form) => {
 .login-form {
   width: 70%;
   margin: 0 auto;
+}
+.login-verification-input{
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
