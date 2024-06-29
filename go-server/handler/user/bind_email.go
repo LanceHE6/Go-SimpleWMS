@@ -46,7 +46,6 @@ func BindEmail(context *gin.Context) {
 	}()
 
 	var verification = model.VerificationCode{
-		Id:        uid,
 		Email:     email,
 		Code:      code,
 		CreatedAt: time.Now(),
@@ -54,7 +53,7 @@ func BindEmail(context *gin.Context) {
 	}
 	// 判断是否有关于该用户的记录
 	var verificationCode model.VerificationCode
-	notExist = db.Model(model.VerificationCode{}).Where("id = ?", uid).First(&verificationCode).RecordNotFound()
+	notExist = db.Model(model.VerificationCode{}).Where("email = ?", email).First(&verificationCode).RecordNotFound()
 	if !notExist {
 		var updateData = map[string]interface{}{
 			"code":       code,
@@ -62,7 +61,7 @@ func BindEmail(context *gin.Context) {
 			"used":       false,
 			"email":      email,
 		}
-		db.Model(model.VerificationCode{}).Where("id = ?", uid).Updates(updateData)
+		db.Model(model.VerificationCode{}).Where("email = ?", email).Updates(updateData)
 	} else {
 		db.Create(&verification)
 	}
@@ -98,7 +97,7 @@ func VerifyEmail(context *gin.Context) {
 	var verification model.VerificationCode
 
 	// 查询数据库中是否存在该验证码
-	notExist := db.Model(&model.VerificationCode{}).Where("id = ? AND email = ? AND code = ? AND used = ?", uid, email, code, false).First(&verification).RecordNotFound()
+	notExist := db.Model(&model.VerificationCode{}).Where("email = ? AND code = ? AND used = ?", email, code, false).First(&verification).RecordNotFound()
 	if notExist {
 		context.JSON(http.StatusOK, response.Response(202, "The verification code is invalid", nil))
 		return

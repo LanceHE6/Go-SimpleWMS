@@ -1,9 +1,9 @@
-package route
+package router
 
 import (
 	"Go_simpleWMS/handler"
 	"Go_simpleWMS/handler/auth"
-	"Go_simpleWMS/route/group"
+	"Go_simpleWMS/router/group"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/semaphore"

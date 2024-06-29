@@ -11,8 +11,7 @@ import (
 )
 
 type resetPswRequest struct {
-	Account string `json:"account" form:"account" binding:"required"`
-	Email   string `json:"email" form:"email" binding:"required"`
+	Email string `json:"email" form:"email" binding:"required"`
 }
 
 // ResetPassword 发送重置密码验证码
@@ -23,16 +22,15 @@ func ResetPassword(context *gin.Context) {
 		return
 	}
 
-	account := data.Account
 	email := data.Email
 
 	db := my_db.GetMyDbConnection()
 	var user model.User
 
 	// 查询用户是否存在
-	notExist := db.Model(model.User{}).Where("account = ? AND email = ?", account, email).First(&user).RecordNotFound()
+	notExist := db.Model(model.User{}).Where("email = ?", email).First(&user).RecordNotFound()
 	if notExist {
-		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
+		context.JSON(http.StatusOK, response.Response(402, "invalid email", nil))
 		return
 	}
 
@@ -46,7 +44,6 @@ func ResetPassword(context *gin.Context) {
 	}()
 
 	var verification = model.VerificationCode{
-		Id:        account,
 		Email:     email,
 		Code:      code,
 		CreatedAt: time.Now(),
@@ -54,7 +51,7 @@ func ResetPassword(context *gin.Context) {
 	}
 	// 判断是否有关于该用户的记录
 	var verificationCode model.VerificationCode
-	notExist = db.Model(model.VerificationCode{}).Where("id = ?", account).First(&verificationCode).RecordNotFound()
+	notExist = db.Model(model.VerificationCode{}).Where("email = ?", email).First(&verificationCode).RecordNotFound()
 	if !notExist {
 		var updateData = map[string]interface{}{
 			"code":       code,
@@ -62,7 +59,7 @@ func ResetPassword(context *gin.Context) {
 			"used":       false,
 			"email":      email,
 		}
-		db.Model(model.VerificationCode{}).Where("id = ?", account).Updates(updateData)
+		db.Model(model.VerificationCode{}).Where("email = ?", email).Updates(updateData)
 	} else {
 		db.Create(&verification)
 	}
@@ -77,7 +74,6 @@ func ResetPassword(context *gin.Context) {
 }
 
 type verifyResetPswRequest struct {
-	Account     string `json:"account" form:"account" binding:"required"`
 	Email       string `json:"email" form:"email" binding:"required"`
 	Code        string `json:"code" form:"code" binding:"required"`
 	NewPassword string `json:"new_password" form:"new_password" binding:"required"`
@@ -90,7 +86,6 @@ func VerifyResetPasswordEmail(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, response.MissingParamsResponse(err))
 		return
 	}
-	account := data.Account
 	email := data.Email
 	code := data.Code
 	newPassword := data.NewPassword
@@ -100,7 +95,7 @@ func VerifyResetPasswordEmail(context *gin.Context) {
 	var verification model.VerificationCode
 
 	// 查询数据库中是否存在该验证码
-	notExist := db.Model(&model.VerificationCode{}).Where("id = ? AND email = ? AND code = ? AND used = ?", account, email, code, false).First(&verification).RecordNotFound()
+	notExist := db.Model(&model.VerificationCode{}).Where("email = ? AND code = ? AND used = ?", email, code, false).First(&verification).RecordNotFound()
 	if notExist {
 		context.JSON(http.StatusOK, response.Response(202, "The verification code is invalid", nil))
 		return
@@ -116,7 +111,7 @@ func VerifyResetPasswordEmail(context *gin.Context) {
 
 	// 更新用户密码
 	var user model.User
-	db.Model(&model.User{}).Where("account = ? AND email = ?", account, email).First(&user)
+	db.Model(&model.User{}).Where("email = ?", email).First(&user)
 	user.Password = newPassword
 	db.Save(&user)
 

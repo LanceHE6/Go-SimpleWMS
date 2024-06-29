@@ -169,6 +169,6 @@ func GetUserInfoByContext(context *gin.Context) (string, int, string, error) {
 	// 从token中获取载荷数据
 	uid := claims.Uid
 	permission := claims.Permission
-	CreatedAt := claims.CreatedAT
-	return uid, permission, CreatedAt, err
+	createdAt := claims.CreatedAT
+	return uid, permission, createdAt, err
 }

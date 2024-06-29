@@ -3,6 +3,7 @@ package goods
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
+	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -33,24 +34,15 @@ func UpdateGoods(context *gin.Context) {
 	GType := data.GoodsType
 	GManufacturer := data.Manufacturer
 	GUnit := data.Unit
+	GUnitPrice := data.UnitPrice
 
-	//if GName == "" && GModel == "" && GCode == "" && GType == "" && GWarehouse == "" && GManufacturer == "" && GUnit == "" && GQuantity == 0 {
-	//	context.JSON(http.StatusBadRequest, gin.H{
-	//		"message": "No data to update",
-	//		"code":    402,
-	//	})
-	//	return
-	//}
-
-	var goods = map[string]interface{}{
-		"name":         GName,
-		"model":        GModel,
-		"goods_code":   GCode,
-		"goods_type":   GType,
-		"manufacturer": GManufacturer,
-		"unit":         GUnit,
-		"unit_price":   data.UnitPrice,
-	}
+	var goods = utils.CreateUpdateData("name", GName,
+		"model", GModel,
+		"goods_code", GCode,
+		"goods_type", GType,
+		"manufacturer", GManufacturer,
+		"unit", GUnit,
+		"unit_price", GUnitPrice)
 
 	db := my_db.GetMyDbConnection()
 

@@ -3,6 +3,7 @@ package staff
 import (
 	"Go_simpleWMS/database/model"
 	"Go_simpleWMS/database/my_db"
+	"Go_simpleWMS/utils"
 	"Go_simpleWMS/utils/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -53,11 +54,7 @@ func UpdateStaff(context *gin.Context) {
 		}
 	}
 
-	var updateData = map[string]interface{}{
-		"name":       name,
-		"phone":      phone,
-		"department": deptId,
-	}
+	var updateData = utils.CreateUpdateData("name", name, "phone", phone, "department", deptId)
 	err := db.Model(&model.Staff{}).Where("sid=?", sid).Updates(updateData).Error
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, response.Response(501, "Update Error", nil))

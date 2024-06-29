@@ -17,7 +17,7 @@ const (
 	ResetPasswordEmail EmailType = 2
 )
 
-// SendEmail 发送绑定邮箱验证邮件
+// SendEmail 发送邮箱邮件
 func SendEmail(target string, account string, code string, emailType EmailType) error {
 	host := os.Getenv("SMTP_HOST")
 	if host == "" {

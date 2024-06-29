@@ -3,7 +3,7 @@ package main
 import (
 	"Go_simpleWMS/config"
 	"Go_simpleWMS/database/my_db"
-	"Go_simpleWMS/route"
+	"Go_simpleWMS/router"
 	"Go_simpleWMS/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/semaphore"
@@ -30,7 +30,7 @@ func main() {
 
 	sem := semaphore.NewWeighted(50) // 最大并发处理数为50
 
-	route.Route(ginServer, sem)
+	router.Route(ginServer, sem)
 
 	err := ginServer.Run(":" + config.ServerConfig.SERVER.PORT)
 	if err != nil {
