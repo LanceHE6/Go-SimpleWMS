@@ -45,7 +45,7 @@ ENV SMTP_PORT=465
 ENV SMTP_USERNAME=your-email@qq.com
 ENV SMTP_PASSWORD=your-email-password
 
-VOLUME [ "/static" ]
+VOLUME [ "/app/static" ]
 
 # Command to run the executable
 CMD ["./server"]
