@@ -32,7 +32,7 @@ func AddUnit(context *gin.Context) {
 		context.JSON(http.StatusOK, response.Response(402, "Unit already exists", nil))
 		return
 	}
-	newUnid := "un" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	newUnid := "un" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	unit = model.Unit{
 		Unid: newUnid,

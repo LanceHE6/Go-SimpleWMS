@@ -43,12 +43,12 @@ func AddTrans(context *gin.Context) {
 
 	db := my_db.GetMyDbConnection()
 
-	Tid := "t" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	Tid := "t" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	// 单号为空时构建单号
 	if Number == "" {
 		nowTime := time.Now().Format("200601021504")
-		Number = "DB" + nowTime + utils.GenerateUuid(4)
+		Number = "DB" + nowTime + utils.GenerateUUID(4)
 	}
 
 	var parsedDate time.Time

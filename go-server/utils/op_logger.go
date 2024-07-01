@@ -12,7 +12,7 @@ import (
 func OPLoggerMiddleware(resource string, operation string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户ID，这里假设从请求头中获取
-		uid, _, _, _ := GetUserInfoByContext(c)
+		myClaims, _ := GetUserInfoByContext(c)
 
 		// 处理请求
 		c.Next()
@@ -25,7 +25,7 @@ func OPLoggerMiddleware(resource string, operation string) gin.HandlerFunc {
 
 		// 记录日志
 		opLog := model.OPLog{
-			Uid:       uid,
+			Uid:       myClaims.Uid,
 			Resource:  resource,
 			Operation: operation,
 			Status:    status,

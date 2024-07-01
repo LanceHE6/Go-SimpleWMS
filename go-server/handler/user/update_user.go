@@ -42,8 +42,10 @@ func UpdateUser(context *gin.Context) {
 		context.JSON(http.StatusOK, response.Response(402, "User not found", nil))
 		return
 	}
+	myClaims, _ := utils.GetUserInfoByContext(context)
 	// 获取当前操作人的信息
-	myUid, myPermission, _, _ := utils.GetUserInfoByContext(context)
+	myUid := myClaims.Uid
+	myPermission := myClaims.Permission
 	var updateData = make(map[string]interface{})
 	if nickname != "" {
 		updateData["nickname"] = nickname

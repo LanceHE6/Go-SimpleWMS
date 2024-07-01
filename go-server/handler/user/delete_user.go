@@ -21,11 +21,12 @@ func DeleteUser(context *gin.Context) {
 	}
 	uid := data.Uid
 
-	targetUid, _, _, err := utils.GetUserInfoByContext(context)
+	myClaims, err := utils.GetUserInfoByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, response.Response(101, "Unauthorized", nil))
 		return
 	}
+	targetUid := myClaims.Uid
 	if targetUid == uid {
 		context.JSON(http.StatusOK, response.Response(102, "You cannot delete yourself", nil))
 		return

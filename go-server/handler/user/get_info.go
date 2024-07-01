@@ -10,7 +10,8 @@ import (
 )
 
 func GetUserInfo(context *gin.Context) {
-	uid, _, _, _ := utils.GetUserInfoByContext(context)
+	myClaims, _ := utils.GetUserInfoByContext(context)
+	uid := myClaims.Uid
 	db := my_db.GetMyDbConnection()
 	var user model.User
 	if err := db.Model(model.User{}).Where("uid = ?", uid).First(&user).RecordNotFound(); err {

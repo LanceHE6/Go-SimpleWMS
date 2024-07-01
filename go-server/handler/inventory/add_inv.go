@@ -63,15 +63,15 @@ func DoAddInv(context *gin.Context, data AddInvRequest, submit bool) (string, in
 		return "", http.StatusOK, response.Response(403, "The inventory type does not exist", nil)
 	}
 
-	Iid := "i" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	Iid := "i" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	// 单号为空时构建单号
 	if Number == "" {
 		nowTime := time.Now().Format("200601021504")
 		if iType.Type == 1 {
-			Number = "RK" + nowTime + utils.GenerateUuid(4)
+			Number = "RK" + nowTime + utils.GenerateUUID(4)
 		} else {
-			Number = "CK" + nowTime + utils.GenerateUuid(4)
+			Number = "CK" + nowTime + utils.GenerateUUID(4)
 		}
 	}
 

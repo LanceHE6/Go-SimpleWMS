@@ -25,7 +25,8 @@ func AuditTrans(context *gin.Context) {
 	}
 
 	tid := data.Tid
-	uid, _, _, _ := utils.GetUserInfoByContext(context)
+	myClaims, _ := utils.GetUserInfoByContext(context)
+	uid := myClaims.Uid
 	passed := *data.Passed
 	auditComment := data.AuditComment
 
