@@ -47,7 +47,7 @@ func AddGoods(context *gin.Context) {
 		}
 	}
 
-	newGid := "g" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	newGid := "g" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	// 增加货品
 	goods = model.Goods{

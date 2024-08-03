@@ -49,7 +49,7 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	}
 
 	// 插入新用户
-	newUid := "u" + utils.GenerateUuid(8)
+	newUid := "u" + utils.GenerateUUID(8)
 	user = model.User{
 		Uid:        newUid,
 		Account:    account,

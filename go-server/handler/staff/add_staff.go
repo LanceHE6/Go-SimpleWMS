@@ -36,7 +36,7 @@ func DoAddStaff(staffData addStaffRequest) (int, gin.H) {
 	db := my_db.GetMyDbConnection()
 
 	// 插入新用户
-	newSid := "s" + utils.GenerateUuid(8)
+	newSid := "s" + utils.GenerateUUID(8)
 	staff := model.Staff{
 		Sid:        newSid,
 		Name:       name,

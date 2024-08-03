@@ -35,7 +35,7 @@ func AddInventoryType(context *gin.Context) {
 		return
 	}
 
-	newITid := "it" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	newITid := "it" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	invt = model.InventoryType{
 		Name:     typeName,

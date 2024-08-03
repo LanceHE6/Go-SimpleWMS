@@ -32,16 +32,17 @@ func Login(context *gin.Context) {
 		context.JSON(http.StatusOK, response.Response(202, "Account or password is incorrect", nil))
 		return
 	} else {
-		token, err := utils.GenerateToken(user.Uid, user.Permission, user.CreatedAt.String())
+		sessionID := utils.GenerateUUID(-1)
+		token, err := utils.GenerateToken(user.Uid, user.Permission, user.CreatedAt.String(), sessionID)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse(501, "Cannot generate token", err.Error()))
 			return
 		}
 
 		// token写入数据库
-		err = db.Model(&user).Update("token", token).Error
+		err = db.Model(&user).Update("session_id", sessionID).Error
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Cannot update token", err.Error()))
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Cannot update session id", err.Error()))
 			return
 		}
 

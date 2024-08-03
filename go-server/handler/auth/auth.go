@@ -11,7 +11,7 @@ import (
 
 func Auth(context *gin.Context) {
 
-	uid, _, createdAt, err := utils.GetUserInfoByContext(context)
+	myClaims, err := utils.GetUserInfoByContext(context)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, response.Response(401, "Invalid token", nil))
 		return
@@ -19,13 +19,13 @@ func Auth(context *gin.Context) {
 	// 判断是否在数据库中
 	db := my_db.GetMyDbConnection()
 	var user model.User
-	err = db.Where("uid=? and created_at=?", uid, createdAt).First(&user).Error
+	err = db.Where("uid=? and session_id=?", myClaims.Uid, myClaims.SessionID).First(&user).Error
 
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, response.Response(402, "Invalid token", nil))
 		return
 	}
 	context.JSON(http.StatusOK, response.Response(201, "Hello", gin.H{
-		"uid": uid,
+		"uid": myClaims.Uid,
 	}))
 }

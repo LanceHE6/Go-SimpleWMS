@@ -40,7 +40,7 @@ func AddWarehouse(context *gin.Context) {
 		return
 	}
 
-	newWid := "w" + utils.GenerateUuid(8)
+	newWid := "w" + utils.GenerateUUID(8)
 	warehouse = model.Warehouse{
 		Wid:     newWid,
 		Name:    warehouseName,

@@ -32,7 +32,7 @@ func AddDepartment(context *gin.Context) {
 		context.JSON(http.StatusOK, response.Response(402, "The department name already exists", nil))
 		return
 	}
-	newDid := "d" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	newDid := "d" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	dep = model.Department{
 		Did:  newDid,

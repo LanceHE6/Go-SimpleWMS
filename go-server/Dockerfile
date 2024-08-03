@@ -27,6 +27,9 @@ RUN rm -rf `ls | grep -v "server"`
 # 修改权限
 RUN chmod +x server
 
+# 新建用于存放静态资源的目录
+RUN mkdir -p static
+
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
@@ -42,7 +45,7 @@ ENV SMTP_PORT=465
 ENV SMTP_USERNAME=your-email@qq.com
 ENV SMTP_PASSWORD=your-email-password
 
-VOLUME [ "/static" ]
+VOLUME [ "/app/static" ]
 
 # Command to run the executable
 CMD ["./server"]

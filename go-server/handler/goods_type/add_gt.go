@@ -35,7 +35,7 @@ func AddGoodsType(context *gin.Context) {
 		return
 	}
 
-	newGTid := "gt" + utils.GenerateUuid(8) // 转换为 8 位字符串
+	newGTid := "gt" + utils.GenerateUUID(8) // 转换为 8 位字符串
 
 	// 增加仓库
 	gt = model.GoodsType{
