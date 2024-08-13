@@ -1,4 +1,4 @@
-package emailTemplate
+package email_template
 
 import (
 	"strings"

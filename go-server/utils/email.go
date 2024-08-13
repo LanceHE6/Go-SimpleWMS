@@ -2,7 +2,7 @@ package utils
 
 import (
 	"Go_simpleWMS/config"
-	"Go_simpleWMS/utils/emailTemplate"
+	"Go_simpleWMS/utils/email_template"
 	"crypto/tls"
 	"fmt"
 	"gopkg.in/gomail.v2"
@@ -41,7 +41,7 @@ func SendEmail(target string, account string, code string, emailType EmailType) 
 	m.SetHeader("To", target)
 
 	if emailType == BindEmail {
-		message := emailTemplate.GetVerifyEmailHTML(target, account, code)
+		message := email_template.GetVerifyEmailHTML(target, account, code)
 
 		m.SetHeader("Subject", "绑定邮箱验证码："+code)
 		m.SetBody("text/html", message)
@@ -63,7 +63,7 @@ func SendEmail(target string, account string, code string, emailType EmailType) 
 		}
 	}
 	if emailType == ResetPasswordEmail {
-		message := emailTemplate.GetResetPasswordEmailHTML(account, code)
+		message := email_template.GetResetPasswordEmailHTML(account, code)
 
 		m.SetHeader("Subject", "重置账号密码验证码："+code)
 		m.SetBody("text/html", message)
