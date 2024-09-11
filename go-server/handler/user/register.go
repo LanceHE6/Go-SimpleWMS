@@ -53,7 +53,7 @@ func DoRegister(userData registerRequest) (int, gin.H) {
 	user = model.User{
 		Uid:        newUid,
 		Account:    account,
-		Password:   password,
+		Password:   utils.HashPsw(password),
 		Nickname:   nickName,
 		Permission: permission,
 		Phone:      phone,

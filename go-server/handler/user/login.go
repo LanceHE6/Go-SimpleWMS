@@ -26,7 +26,7 @@ func Login(context *gin.Context) {
 	db := my_db.GetMyDbConnection()
 	var user model.User
 
-	err := db.Where("(account=? and password=?) OR (email=? and password=?)", account, password, account, password).First(&user).Error
+	err := db.Where("(account=? and password=?) OR (email=? and password=?)", account, utils.HashPsw(password), account, utils.HashPsw(password)).First(&user).Error
 
 	if err != nil {
 		context.JSON(http.StatusOK, response.Response(202, "Account or password is incorrect", nil))
@@ -39,7 +39,7 @@ func Login(context *gin.Context) {
 			return
 		}
 
-		// token写入数据库
+		// sessionID写入数据库
 		err = db.Model(&user).Update("session_id", sessionID).Error
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse(502, "Cannot update session id", err.Error()))
